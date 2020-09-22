@@ -13,7 +13,7 @@ class StatBlock():
             "speed": 0,
             "currentHP": 0,
             "maxHP": 0,
-            "hitDice": (0, 0),
+            "hitDice": [0, 0],
 
             # Ability Scores
             "strength": 0,
@@ -47,9 +47,14 @@ class StatBlock():
 
     def modify_stat(self, stat, num, faces=None):
         if faces is None:
-            self.stats[stat] = num
-        elif stat == "hitDice":   # in case the stat is the Hit Dice
-            self.stats[stat] = (num, faces)
+            if stat == "hitDice":
+                self.stats[stat][0] = num
+            else:
+                self.stats[stat] = num
+
+        # in case the stat is the Hit Dice
+        elif stat == "hitDice":
+            self.stats[stat][0:2] = [num, faces]
         else:
             print("invalid operation: modify_stat")
 
