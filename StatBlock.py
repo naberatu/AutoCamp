@@ -2,7 +2,8 @@
 class StatBlock():
 
     def __init__(self):
-        self.stats = {      # dictionary of all stats
+        # dictionary of all stats
+        self.stats = {
             # Misc Stats
             "initiative": 0,
             "inspiration": 0,
@@ -51,8 +52,6 @@ class StatBlock():
                 self.stats[stat][0] = num
             else:
                 self.stats[stat] = num
-
-        # in case the stat is the Hit Dice
         elif stat == "hitDice":
             self.stats[stat][0:2] = [num, faces]
         else:

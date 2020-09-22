@@ -2,8 +2,8 @@ class Entity():
 
     def __init__(self, name, weight=None, tileSize=None, stackSize=None):
 
-        self.name = name
-        self.coors = [-1, -1, -1]
+        self.name = name                # must have a name to be created
+        self.coors = [-1, -1, -1]       # done separately, since this refers to on-screen appearance
 
         if weight is not None:
             self.weight = weight
@@ -50,7 +50,14 @@ class Entity():
 
     def set_coors(self, x=None, y=None, z=None):
         if x is not None:
-            self.coors = (x)
+            self.coors[0] = x
+        if y is not None:
+            self.coors[1] = y
+        if z is not None:
+            self.coors[2] = z
+
+
+
 
 
 
