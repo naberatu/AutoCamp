@@ -1,16 +1,16 @@
-class Entity():
+class Entity:
 
-    def __init__(self, name, weight=None, tileSize=None, stackSize=None):
+    def __init__(self, name, weight=None, tile_size=None, stack_size=None):
 
         self.name = name                # must have a name to be created
         self.coors = [-1, -1, -1]       # done separately, since this refers to on-screen appearance
 
         if weight is not None:
             self.weight = weight
-        if tileSize is not None:
-            self.tileSize = tileSize
-        if stackSize is not None:
-            self.stackSize = stackSize
+        if tile_size is not None:
+            self.tileSize = tile_size
+        if stack_size is not None:
+            self.stackSize = stack_size
 
         # Code about storing images
             # with open("null.png", "rb") as imageFile:
@@ -55,9 +55,3 @@ class Entity():
             self.coors[1] = y
         if z is not None:
             self.coors[2] = z
-
-
-
-
-
-

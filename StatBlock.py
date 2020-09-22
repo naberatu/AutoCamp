@@ -1,5 +1,5 @@
 
-class StatBlock():
+class StatBlock:
 
     def __init__(self):
         # dictionary of all stats
@@ -45,7 +45,6 @@ class StatBlock():
             "survival": 0
         }
 
-
     def modify_stat(self, stat, num, faces=None):
         if faces is None:
             if stat == "hitDice":
@@ -59,5 +58,3 @@ class StatBlock():
 
     def get_stat(self, stat):
         return self.stats[stat]
-
-
