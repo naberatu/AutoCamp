@@ -1,6 +1,6 @@
 import base64
 
-class Entity:
+class Entity():
 
     def __init__(self, name, weight, tileSize, stackSize):
         self.name = name
