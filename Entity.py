@@ -1,32 +1,31 @@
 import base64
-from PIL import Image
-import io
 
-class Entity():
+class Entity:
 
     def __init__(self, name, weight, tileSize, stackSize):
         self.name = name
         self.weight = weight
         self.tileSize = tileSize
         self.stackSize = stackSize
+        coors = (0, 0, 0)
 
-        with open("")
-        thumbnail = Image
+        # Code about storing images
+            # with open("null.png", "rb") as imageFile:
+            #     thumbnail = base64.b64encode(file.read())
+            #
+            # thumbnail = Image.open(io.BytesIO(thumbnail))
+            # thumbnail.show()
 
-    def getName(self):
+    def get_name(self):
         return self.name
 
-    def getImage(self):
-        return self.
-
-    def getWeight(self):
+    def get_weight(self):
         return self.weight
 
-    def getTileSize(self):
+    def get_tile_size(self):
         return self.tileSize
 
-    def getStackSize(self):
+    def get_stack_size(self):
         return self.stackSize
-
 
 
