@@ -1,5 +1,7 @@
-class Entity:
+import pygame
 
+
+class Entity:
     def __init__(self, name, weight=None, tile_size=None, stack_size=None):
 
         self.name = name                # must have a name to be created
