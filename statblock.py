@@ -8,6 +8,8 @@ class StatBlock:
             "initiative": 0,
             "inspiration": 0,
             "profBonus": 0,
+            "weight": 0,
+            "tileSize": 0,
 
             # Character Stats
             "armorClass": 0,
