@@ -16,6 +16,13 @@ class Player(Animate):
         self.maxInvWeight = 200         # Arbitrary value
         self.companion = None           # We can add functionality to adjust later
 
+    weapon = None       # a player is either wielding a weapon, or isn't
+    armor = None        # a player either is wearing armor, or ain't.
+    inventory = []      # an array of X items?
+    feats = []
+    # spells = spells()     # could be a class that stores spells in a dictionary??
+    spellSlots = []         # Make cell 1 hold number of Lvl 1 Spell Slots, cell 2 for lvl 2, etc.
+
     # Accessors
     # ==================================
     def get_level(self):
