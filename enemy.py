@@ -14,7 +14,6 @@ class Enemy(Animate):
         self.maxInvSize = 10         # Arbitrary value
 
     weapon = None
-    inventory = []
 
     # Accessors
     # ==================================

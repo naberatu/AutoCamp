@@ -10,7 +10,6 @@ class NCC(Animate):
         self.role = role               # Distinct just in case we add multi-classing.
         self.race = race
         # self.gender = gender
-        self.maxInvSize = 20
 
     # Accessors
     # ==================================

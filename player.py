@@ -16,13 +16,11 @@ class Player(Animate):
         self.maxInvWeight = 200         # Arbitrary value
         self.companion = None           # We can add functionality to adjust later
 
-    weapon = None       # a player is either wielding a weapon, or isn't
-    armor = None        # a player either is wearing armor, or ain't.
-    inventory = []      # an array of X items?
+    weapon = None           # a player is either wielding a weapon, or isn't
+    armor = None            # a player either is wearing armor, or ain't.
     feats = []
     # spells = spells()     # could be a class that stores spells in a dictionary??
     spellSlots = []         # Make cell 1 hold number of Lvl 1 Spell Slots, cell 2 for lvl 2, etc.
-
 
     # Accessors
     # ==================================
@@ -40,6 +38,9 @@ class Player(Animate):
 
     def get_race(self):
         return self.race
+
+    def get_weapon(self):
+        return self.weapon
 
     # Mutators
     # ==================================
@@ -60,3 +61,14 @@ class Player(Animate):
 
     def add_multiclass(self, multiclass):
         self.role2 = multiclass
+
+    def swap_weapon(self, id):
+        for i in self.inventory:
+            if self.inventory[i].id == id:
+                temp = self.weapon
+                self.weapon = self.inventory[i]
+                self.inventory[i] = temp
+                return 0                        # meaning successful swap
+        return -1                               # weapon not found
+
+
