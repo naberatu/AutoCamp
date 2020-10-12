@@ -23,6 +23,7 @@ class Player(Animate):
     # spells = spells()     # could be a class that stores spells in a dictionary??
     spellSlots = []         # Make cell 1 hold number of Lvl 1 Spell Slots, cell 2 for lvl 2, etc.
 
+
     # Accessors
     # ==================================
     def get_level(self):

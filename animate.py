@@ -35,3 +35,4 @@ class Animate(Entity):
             if self.inventory[i].name == name:
                 return self.inventory[name]
         return -1
+

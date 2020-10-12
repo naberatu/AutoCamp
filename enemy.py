@@ -16,7 +16,6 @@ class Enemy(Animate):
     weapon = None
     inventory = []
 
-
     # Accessors
     # ==================================
     def get_level(self):
