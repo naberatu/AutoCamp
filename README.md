@@ -6,8 +6,11 @@ The AutoCamp is a hand-held device featuring a touchscreen display and kickstand
 
 This project was made by: 
 > Nader Atout
+
 > Adrian Gavrila
+
 > Diana Penalba
+
 
 Under the mentorship and advisory of: 
 > Professor Salma Elmalaki
