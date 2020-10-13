@@ -11,7 +11,7 @@ class Enemy(Animate):
         self.race = race
         self.level = level
         self.expYield = 0
-        self.maxInvSize = 10         # Arbitrary value
+        self.maxInvSize = 10            # Arbitrary value
 
     weapon = None
 

@@ -9,7 +9,6 @@ class NCC(Animate):
         self.statBlock = StatBlock()    # empty stat block
         self.role = role               # Distinct just in case we add multi-classing.
         self.race = race
-        # self.gender = gender
 
     # Accessors
     # ==================================

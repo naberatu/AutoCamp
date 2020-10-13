@@ -7,8 +7,8 @@ class Player(Animate):
     def __init__(self, name, id, role, race, gender, level):
         super().__init__(name, id)      # should inherit everything this way
         self.statBlock = StatBlock()    # empty stat block
-        self.role1 = role               # Distinct just in case we add multi-classing.
-        self.role2 = None               # We can adjust this later on
+        self.role = role                # Distinct just in case we add multi-classing.
+        # self.role2 = None             # We can adjust this later on
         self.race = race
         self.gender = gender
         self.level = level
@@ -19,7 +19,6 @@ class Player(Animate):
     weapon = None           # a player is either wielding a weapon, or isn't
     armor = None            # a player either is wearing armor, or ain't.
     feats = []
-    # spells = spells()     # could be a class that stores spells in a dictionary??
     spellSlots = []         # Make cell 1 hold number of Lvl 1 Spell Slots, cell 2 for lvl 2, etc.
 
     # Accessors
@@ -31,10 +30,10 @@ class Player(Animate):
         return self.exp
 
     def get_role(self):
-        if self.role2 is not None:
-            return self.role1, self.role2
-        else:
-            return self.role1
+        # if self.role2 is not None:
+        #     return self.role1, self.role2
+        # else:
+        return self.role
 
     def get_race(self):
         return self.race
@@ -54,13 +53,13 @@ class Player(Animate):
         self.exp += amount
 
     def mod_role(self, role):
-        self.role1 = role
+        self.role = role
 
     def mod_race(self, race):
         self.race = race
 
-    def add_multiclass(self, multiclass):
-        self.role2 = multiclass
+    # def add_multiclass(self, multiclass):
+    #     self.role2 = multiclass
 
     def swap_weapon(self, id):
         for i in self.inventory:
