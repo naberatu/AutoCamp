@@ -1,35 +1,54 @@
+import pygame
+
 
 class Entity:
-    def __init__(self, name, id):
+    def __init__(self, name, weight=None, tile_size=None, stack_size=None):
+
         self.name = name                # must have a name to be created
-        self.id = id                    # internal id
-        self.coors = [-1, -1, -1]       # coordinates that do not appear on screen
-        self.thumbnail = 0              # eventually replaced by actual file
+        self.coors = [-1, -1, -1]       # done separately, since this refers to on-screen appearance
+
+        if weight is not None:
+            self.weight = weight
+        if tile_size is not None:
+            self.tileSize = tile_size
+        if stack_size is not None:
+            self.stackSize = stack_size
+
+        # Code about storing images
+            # with open("null.png", "rb") as imageFile:
+            #     thumbnail = base64.b64encode(file.read())
+            #
+            # thumbnail = Image.open(io.BytesIO(thumbnail))
+            # thumbnail.show()
 
     # Accessors
-    # ==================================
     def get_name(self):
         return self.name
 
-    def get_id(self):
-        return self.id
+    def get_weight(self):
+        return self.weight
+
+    def get_tile_size(self):
+        return self.tileSize
+
+    def get_stack_size(self):
+        return self.stackSize
 
     def get_coors(self):
         return self.coors
 
-    def get_thumbnail(self):
-        return self.thumbnail
-
     # Mutators
-    # ==================================
     def set_name(self, value):
         self.name = value
 
-    def set_id(self, value):
-        self.id = value
+    def set_weight(self, value):
+        self.weight = value
 
-    def set_thumbnail(self, image):
-        self.thumbnail = image
+    def set_tile_size(self, value):
+        self.tileSize = value
+
+    def set_stack_size(self, value):
+        self.stackSize = value
 
     def set_coors(self, x=None, y=None, z=None):
         if x is not None:
@@ -38,4 +57,3 @@ class Entity:
             self.coors[1] = y
         if z is not None:
             self.coors[2] = z
-
