@@ -3,8 +3,8 @@ import random
 import time
 
 pygame.init()
-display_width = 1400
-display_height = 700
+display_width = 800
+display_height = 480
 black = (0, 0, 0)
 white = (255, 255, 255)
 red = (255, 0, 0)
@@ -27,7 +27,7 @@ def game_intro():
                 quit()
 
         gameDisplay.fill(white)
-        largeText = pygame.font.Font('freesansbold.ttf',115)
+        largeText = pygame.font.Font('freesansbold.ttf', 60)
         TextSurf, TextRect = text_objects("Welcome to AutoCamp!", largeText)
         TextRect.center = ((display_width / 2), (display_height / 2))
         gameDisplay.blit(TextSurf, TextRect)
