@@ -38,7 +38,7 @@ class Animate(Entity):
 
     def inv_remove(self, id):
         for i in self.inventory:
-            if self.inventory[i].get_id == id:
+            if self.inventory[i].get_id() == id:
                 try:
                     temp = self.inventory[i].get_name()
                     self.inventory.remove(self.inventory[i])
