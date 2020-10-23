@@ -15,9 +15,14 @@ class Animate(Entity):
     def get_stat(self, stat):
         self.statBlock.get_stat(stat)
 
-    def inv_add(self, *args, **kwargs):
-        self.inventory.append(args)
-        self.inventory.append(kwargs)
+    def get_inv(self):
+        return self.inventory
+
+    def get_inv_item(self, name):
+        for i in self.inventory:
+            if self.inventory[i].name == name:
+                return self.inventory[name]
+        return -1
 
     # Mutators
     # ==================================
@@ -27,12 +32,23 @@ class Animate(Entity):
         else:
             self.statBlock.modify_stat(stat, num, faces)
 
-    def get_inv(self):
-        return self.inventory
+    def inv_add(self, *args, **kwargs):
+        self.inventory.append(args)
+        self.inventory.append(kwargs)
 
-    def get_inv_item(self, name):
+    def inv_remove(self, id):
         for i in self.inventory:
-            if self.inventory[i].name == name:
-                return self.inventory[name]
-        return -1
+            if self.inventory[i].get_id == id:
+                try:
+                    temp = self.inventory[i].get_name()
+                    self.inventory.remove(self.inventory[i])
+                    print("[OK] You have tossed away ", temp)
+                    return
+                except:
+                    print("[ER] Where is that blasted thing?")
+                    return
+
+
+
+
 
