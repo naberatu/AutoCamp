@@ -14,13 +14,6 @@ class Entity:
         if stack_size is not None:
             self.stackSize = stack_size
 
-        # Code about storing images
-            # with open("null.png", "rb") as imageFile:
-            #     thumbnail = base64.b64encode(file.read())
-            #
-            # thumbnail = Image.open(io.BytesIO(thumbnail))
-            # thumbnail.show()
-
     # Accessors
     def get_name(self):
         return self.name

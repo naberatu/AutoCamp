@@ -15,7 +15,7 @@ class Animate(Entity):
     def get_stat(self, stat):
         self.statBlock.get_stat(stat)
 
-    def add_to_inv(self, *args, **kwargs):
+    def inv_add(self, *args, **kwargs):
         self.inventory.append(args)
         self.inventory.append(kwargs)
 
