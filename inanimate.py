@@ -3,8 +3,8 @@ from entity import Entity
 
 
 class Inanimate(Entity):
-    def __init__(self, name, id, isItem, max_stack=None):
-        super().__init__(name, id)    # should inherit everything this way
+    def __init__(self, name, entity_id, isItem, max_stack=None):
+        super().__init__(name, entity_id)    # should inherit everything this way
         self.isItem = isItem
 
         if isItem:

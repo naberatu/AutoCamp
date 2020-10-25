@@ -4,8 +4,8 @@ from statblock import StatBlock
 
 
 class Player(Animate):
-    def __init__(self, name, id, role, race, gender, level):
-        super().__init__(name, id)      # should inherit everything this way
+    def __init__(self, name, entity_id, role, race, gender, level):
+        super().__init__(name, entity_id)      # should inherit everything this way
         self.statBlock = StatBlock()    # empty stat block
         self.role = role                # Distinct just in case we add multi-classing.
         # self.role2 = None             # We can adjust this later on
@@ -61,9 +61,9 @@ class Player(Animate):
     # def add_multiclass(self, multiclass):
     #     self.role2 = multiclass
 
-    def swap_weapon(self, id):
+    def swap_weapon(self, entity_id):
         for i in self.inventory:
-            if self.inventory[i].id == id:
+            if self.inventory[i].entity_id == entity_id:
                 temp = self.weapon
                 self.weapon = self.inventory[i]
                 self.inventory[i] = temp

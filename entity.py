@@ -6,6 +6,7 @@ class Entity:
 
         self.name = name                # must have a name to be created
         self.coors = [-1, -1, -1]       # done separately, since this refers to on-screen appearance
+        self.entity_id = 0
 
         if weight is not None:
             self.weight = weight
@@ -30,6 +31,9 @@ class Entity:
     def get_coors(self):
         return self.coors
 
+    def get_id(self):
+        return self.entity_id
+
     # Mutators
     def set_name(self, value):
         self.name = value
@@ -50,3 +54,6 @@ class Entity:
             self.coors[1] = y
         if z is not None:
             self.coors[2] = z
+
+    def set_id(self, new_id):
+        self.entity_id = new_id

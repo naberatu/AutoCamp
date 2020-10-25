@@ -4,8 +4,8 @@ from statblock import StatBlock
 
 
 class NCC(Animate):
-    def __init__(self, name, id, role, race):
-        super().__init__(name, id)      # should inherit everything this way
+    def __init__(self, name, entity_id, role, race):
+        super().__init__(name, entity_id)      # should inherit everything this way
         self.statBlock = StatBlock()    # empty stat block
         self.role = role               # Distinct just in case we add multi-classing.
         self.race = race

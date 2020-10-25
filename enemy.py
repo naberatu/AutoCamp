@@ -4,8 +4,8 @@ from statblock import StatBlock
 
 
 class Enemy(Animate):
-    def __init__(self, name, id, role, race, level):
-        super().__init__(name, id)      # should inherit everything this way
+    def __init__(self, name, entity_id, role, race, level):
+        super().__init__(name, entity_id)      # should inherit everything this way
         self.statBlock = StatBlock()    # empty stat block
         self.role = role
         self.race = race
