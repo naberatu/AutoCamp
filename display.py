@@ -2,6 +2,7 @@ import pygame
 import random
 import time
 
+# test comment
 pygame.init()
 display_width = 800
 display_height = 480
