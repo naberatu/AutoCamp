@@ -5,8 +5,8 @@ from statblock import StatBlock
 
 class Animate(Entity):
 
-    def __init__(self, name, id):
-        super().__init__(name, id)    # should inherit everything this way
+    def __init__(self, name, hero_id):
+        super().__init__(name, hero_id)    # should inherit everything this way
         self.statBlock = StatBlock()  # empty stat block
         self.inventory = list()
 
@@ -36,13 +36,14 @@ class Animate(Entity):
         self.inventory.append(args)
         self.inventory.append(kwargs)
 
-    def inv_remove(self, id):
+    def inv_remove(self, hero_id, discarding):
         for i in self.inventory:
-            if self.inventory[i].get_id() == id:
+            if self.inventory[i].get_id() == hero_id:
                 try:
                     temp = self.inventory[i].get_name()
                     self.inventory.remove(self.inventory[i])
-                    print("[OK] You have tossed away ", temp)
+                    if discarding:
+                        print("[OK] You have tossed away ", temp)
                     return
                 except:
                     print("[ER] Where is that blasted thing?")
