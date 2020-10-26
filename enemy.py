@@ -3,9 +3,10 @@ from animate import Animate
 
 
 class Enemy(Animate):
-    def __init__(self, name, entity_id, role, race, level):
+    def __init__(self, name, entity_id, race, role, level):
         super().__init__(name, entity_id, race, role, level)      # should inherit everything this way
         self.expYield = 0
+        self.is_enemy = True
         self.maxInvSize = 10            # Arbitrary value
         self.weapon = None
 

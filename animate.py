@@ -16,6 +16,7 @@ class Animate(Entity):
         self.role = role
         self.level = level
         self.inventory = dict()                 # Key is Item, Value is quantity.
+        self.is_enemy = None
 
     # Accessors
     # ==================================
@@ -34,18 +35,18 @@ class Animate(Entity):
     def get_inv(self):
         return self.inventory
 
-    def get_inv_item(self, name):
+    def get_inv_item(self, item_id):
         for i in self.inventory:
-            if i.name == name:
+            if i.get_id() == item_id:
                 print("[OK] Aha, found it!")
                 return i
-
         print("[ER] You don't have this item!")
+        return None
 
     def print_inv(self):
         print(self.name, "'s Inventory:\n")
-        for i in self.inventory:
-            print("\n| ", i.get_name(), "\t\t - x", i.get_quantity())
+        for i in self.inventory.items():
+            print("\n| ", i[0].get_name(), "\t\t - x", i[1])
 
     # Mutators
     # ==================================
@@ -75,24 +76,24 @@ class Animate(Entity):
         else:
             self.statBlock.modify_stat(stat, num, faces)
 
-    def inv_add(self, *args, **kwargs):
-        self.inventory.append(args)
-        self.inventory.append(kwargs)
+    def inv_add(self, item, amount):
+        self.inventory[item] = amount
 
-    def inv_remove(self, entity_id, discarding):
-        for i in self.inventory:
-            if i.get_id() == entity_id:
-                try:
-                    temp = i.get_name()
-                    i.remove(i)
-                    if discarding:
-                        print("[OK] You have tossed away ", temp)
-                    return
-                except:
-                    print("[ER] Where is that blasted thing?")
-                    return
+    def inv_remove(self, item_id, discarding):
+        if self.inventory == {}:
+            print("[ER] You have nothing to give!")
+            return None
 
+        item = self.get_inv_item(item_id)
 
-
-
+        if item is None:
+            print("[ER] You don't have that!")
+            return None
+        if item is not None:
+            self.inventory[item] -= 1
+            if self.inventory[item] == 0:
+                del self.inventory[item]
+            if discarding:
+                print("[OK] You have tossed away 1 ", item.get_name(), "!")
+            return item
 

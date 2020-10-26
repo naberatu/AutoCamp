@@ -4,7 +4,7 @@ import time
 
 # test comment
 pygame.init()
-display_width = 800
+display_width = 800             # Use 16x16 sprites & tiles. Makes 50x30 grid.
 display_height = 480
 black = (0, 0, 0)
 white = (255, 255, 255)

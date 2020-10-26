@@ -6,6 +6,7 @@ class Player(Animate):
     def __init__(self, name, entity_id, race, role, level):
         super().__init__(name, entity_id, race, role, level)      # should inherit everything this way
         self.exp = 0                    # This should be changed depending on the player's level?
+        self.is_enemy = False
         self.maxInvWeight = 200         # Arbitrary value
         self.companion = None           # We can add functionality to adjust later
 

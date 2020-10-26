@@ -16,7 +16,7 @@ class StatBlock:
             "speed": 0,
             "currentHP": 0,
             "maxHP": 0,
-            "hitDice": [0, 0],
+            "hitDice": 0,
 
             # Ability Scores
             "strength": 0,
@@ -47,16 +47,14 @@ class StatBlock:
             "survival": 0
         }
 
-    def modify_stat(self, stat, num, faces=None):
-        if faces is None:
-            if stat == "hitDice":
-                self.stats[stat][0] = num
-            else:
+    def modify_stat(self, stat, num):
+        if stat in self.stats.keys():
+            try:
                 self.stats[stat] = num
-        elif stat == "hitDice":
-            self.stats[stat][0:2] = [num, faces]
+            except:
+                print("[ER] Cannot modify ", stat, "...")
         else:
-            print("invalid operation: modify_stat")
+            print("[ER] ", stat, " does not exist!")
 
     def get_stat(self, stat):
         return self.stats[stat]
