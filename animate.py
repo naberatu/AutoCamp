@@ -16,6 +16,8 @@ class Animate(Entity):
         self.role = role
         self.level = level
         self.inventory = dict()                 # Key is Item, Value is quantity.
+        self.inv_max = 20                       # maximum inventory capacity possible
+        self.inv_scheme = "slot"                # whether the inventory stores by slot, item weight, or infinite
         self.is_enemy = None
 
     # Accessors
@@ -34,6 +36,47 @@ class Animate(Entity):
 
     def get_inv(self):
         return self.inventory
+
+    # New functions:
+    # =========================
+    def get_iff(self):
+        return self.is_enemy
+
+    def get_inv_max(self):
+        return self.inv_max
+
+    def get_inv_scheme(self):
+        return self.inv_scheme
+
+    def inv_is_full(self):
+        # -------------------------------------------------------
+        if self.inv_scheme == "slot":
+            if len(self.inventory) == self.inv_max:
+                return True
+            else:
+                return False
+        # -------------------------------------------------------
+        elif self.inv_scheme == "weight":
+            if self.get_inv_size() >= self.inv_max:
+                return True
+            else:
+                return False
+        # -------------------------------------------------------
+        elif self.inv_scheme is None:
+            return False
+
+    def get_inv_size(self):
+        if self.inv_scheme == "slot":
+            return len(self.inventory)
+        elif self.inv_scheme == "weight":
+            total_weight = 0
+            for i in self.inventory:
+                total_weight += i[0].get_weight * i[1]
+            return total_weight
+        else:
+            print("[OK] Your inventory is infinite!")
+            return -1
+    # =========================
 
     def get_inv_item(self, item_id):
         for i in self.inventory:
@@ -76,8 +119,32 @@ class Animate(Entity):
         else:
             self.statBlock.modify_stat(stat, num, faces)
 
+    # New functions:
+    # =========================
+    def set_iff(self, iff):
+        self.is_enemy = iff
+
+    def set_inv_scheme(self, scheme=None):
+        if scheme == "slot" or scheme == "weight" or scheme is None:
+            self.inv_scheme = scheme
+        else:
+            print("[ER] Invalid inventory scheme!")
+
+    def set_inv_max_size(self, size):
+        self.inv_max = size
+
     def inv_add(self, item, amount):
-        self.inventory[item] = amount
+        if self.inv_is_full():
+            print("[ER] Your inventory is full!")
+        elif self.inv_scheme == "weight":
+            added_weight = item.get_weight * amount
+            if self.get_inv_size() + added_weight <= self.inv_max:
+                self.inventory[item] = amount
+            else:
+                print("[ER] It's too much to carry!")
+        else:
+            self.inventory[item] = amount
+    # =========================
 
     def inv_remove(self, item_id, discarding):
         if self.inventory == {}:

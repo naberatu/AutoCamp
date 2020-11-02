@@ -6,11 +6,12 @@ from math import floor
 
 
 class Encounter:
-    def __init__(self):
+    def __init__(self, max_inventory):
         self.something = 0  # just a temporary value until we can establish this
         self.currentEntity = None
         self.entityList = list()
         self.mapList = list()
+        self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
 
     def map_display(self):
         for i in range(0, len(self.entityList)):
@@ -27,12 +28,27 @@ class Encounter:
                 entityToMove.set_coors(newXCoord, newYCoord, newZCoord)
                 print("[OK] " + entityToMove.get_name() + " successfully moved")
 
+    # New Function
+    # ==============================
+    def inv_pickup(self, item_id, inv, amount, hot_swap, is_armor):
+        if hot_swap:
+            inv.inv_add(item_id, amount)
+            self.inv_equip(is_armor, item_id, inv)
+        else:
+            inv.inv_add(item_id, amount)
+
+    def inv_discard(self, item_id, inv, amount):
+        for i in range(0, amount):
+            inv.inv_remove(item_id, True)
+
     def inv_use(self, item_id, inv):        # pass in self.currentEntity.get_inv()
         item = inv.inv_remove(item_id, False)
         if item is not None:
+            # run the actual effect
             print("[OK] You used ", item.get_name(), "!")
+    # ==============================
 
-    def inv_give(self, acceptor , item_id, inv):
+    def inv_give(self, acceptor, item_id, inv):
         item = inv.get_inv_item(item_id)
         if item is not None and not acceptor.is_enemy():
             inv.inv_remove(item_id, False)
