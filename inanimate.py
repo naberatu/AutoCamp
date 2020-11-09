@@ -54,9 +54,6 @@ class Inanimate(Entity):
     def acquire_one(self):
         self.quantity += 1
 
-    def mod_type(self, item_type):
-        self.itemType = item_type
-
     def set_weight(self, value):
         self.weight = value
 

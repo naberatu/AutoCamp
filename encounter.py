@@ -9,20 +9,21 @@ class Encounter:
     def __init__(self, max_inventory):
         self.something = 0  # just a temporary value until we can establish this
         self.currentEntity = None
-        self.entityList = list()
+        self.animateList = list()
+        self.inanimateList = list()
         self.mapList = list()
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
 
     def map_display(self):
         for i in range(0, len(self.entityList)):
-            print(self.entityList[i].get_name() + " is taking up " + self.entityList[i].get_size() + " of tile (" +
-                  self.entityList[i].get_coors()[0] + ", " + self.entityList[i].get_coors()[1] + ")")
+            print(self.animateList[i].get_name() + " is taking up " + self.animateList[i].get_size() + " of tile (" +
+                  self.animateList[i].get_coors()[0] + ", " + self.animateList[i].get_coors()[1] + ")")
 
     def enc_move(self, entityToMove, newXCoord, newYCoord, newZCoord):
-        for i in range(0, len(self.entityList)):
-            if self.entityList[i].get_coors()[0] == newXCoord and self.entityList[i].get_coors()[2] == newYCoord and \
-                    self.entityList[i].get_coors()[1] == newYCoord and \
-                    self.entityList[i].get_tile_size() + entityToMove.get_tile_size() > 1:
+        for i in range(0, len(self.animateList)):
+            if self.animateList[i].get_coors()[0] == newXCoord and self.animateList[i].get_coors()[2] == newYCoord and \
+                    self.animateList[i].get_coors()[1] == newYCoord and \
+                    self.animateList[i].get_tile_size() + entityToMove.get_tile_size() > 1:
                 print("[ER] Movement illegal, another entity is at target position")
             else:
                 entityToMove.set_coors(newXCoord, newYCoord, newZCoord)
@@ -97,7 +98,7 @@ class Encounter:
             print("Final total is... {}!!".format(total))
         return total
 
-    def performCheck(self, stat, advantage=False, disadvantage=False) -> None:
+    def performCheck(self, stat, advantage=False, disadvantage=False, print_results=True):
         roll = 0
         roll1 = self.rollDice(1, 20, False)
         roll2 = self.rollDice(1, 20, False)
@@ -110,10 +111,12 @@ class Encounter:
 
         stats_b = self.currentEntity.stat_block
         modifier = floor(((stats_b.get_stat(stat)) - 10) / 2)
-
-        print("You've rolled {} with {} modifier {}".format(roll, stat, modifier))
+        if print_results:
+            print("You've rolled {} with {} modifier {}".format(roll, stat, modifier))
         roll += modifier
-        print("Check result is... {}!!".format(roll))
+        if print_results:
+            print("Result is... {}!!".format(roll))
+        return roll
 
     def showStats(self) -> None:
         currEnt = self.currentEntity
@@ -156,3 +159,34 @@ class Encounter:
             print("{:22}{:22}{:22}".format(statKeys[14 + (x * 3)] + ': ' + str(statValues[14 + (x * 3)]),
                                            statKeys[15 + (x * 3)] + ': ' + str(statValues[15 + (x * 3)]),
                                            statKeys[16 + (x * 3)] + ': ' + str(statValues[16 + (x * 3)])))
+
+        def dealDMG(self, damage, target):
+            targetHealth = target.stat_block.get_stat("Current HP")
+            targetHealth -= damage
+            if targetHealth >= 0:
+                target.stat_block.modify_stat("Current HP", targetHealth)
+            else:
+                target.stat_block.modify_stat("Current HP", 0)
+
+            print(self.currentEntity.get_name(), "attacked", target.get_name(), "!!")
+            print(target.get_name(), "took", damage, "damage!!")
+            print(target.get_name(), "is now at", target.stat_block.get_stat("Current HP"), "/",
+                  target.stat_block.get_stat("Max HP"), "HP.")
+
+        def attack(self, target, adv, disadv) -> None:
+            toHit = target.stat_block.get_stat("Armor Class")
+            attempt = 0
+
+            if "melee" in self.currentEntity.get_weapon().get_use():
+                attempt = self.performCheck("Strength", adv, disadv)
+            elif "ranged" in self.currentEntity.get_weapon().get_use():
+                attempt = self.performCheck("Dexterity", adv, disadv)
+
+            if attempt >= toHit:
+                damage = self.rollDice(1, 20, False)
+                self.dealDMG(damage, target)
+            else:
+                print("Attack failed!")
+            # REPLACE PERFORM_CHECK, I made a couple adjustments
+
+
