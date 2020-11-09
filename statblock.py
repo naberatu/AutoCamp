@@ -54,5 +54,8 @@ class StatBlock:
             print("[ER] ", stat, " does not exist!")
 
     def get_stat(self, stat):
-        return self.stats[stat]
+        if self.stats.keys().__contains__(stat):
+            return self.stats[stat]
+        else:
+            print("[ER] That stat is unavailable!")
 
