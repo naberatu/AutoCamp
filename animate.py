@@ -37,8 +37,6 @@ class Animate(Entity):
     def get_inv(self):
         return self.inventory
 
-    # New functions:
-    # =========================
     def get_iff(self):
         return self.is_enemy
 
@@ -76,7 +74,6 @@ class Animate(Entity):
         else:
             print("[OK] Your inventory is infinite!")
             return -1
-    # =========================
 
     def get_inv_item(self, item_id):
         for i in self.inventory:
@@ -119,8 +116,6 @@ class Animate(Entity):
         else:
             self.statBlock.modify_stat(stat, num, faces)
 
-    # New functions:
-    # =========================
     def set_iff(self, iff):
         self.is_enemy = iff
 
@@ -144,9 +139,10 @@ class Animate(Entity):
                 print("[ER] It's too much to carry!")
         else:
             self.inventory[item] = amount
-    # =========================
 
-    def inv_remove(self, item_id, discarding):
+    # Modified functions:
+    # =========================
+    def inv_remove(self, item_id, amount, discarding, selling):
         if self.inventory == {}:
             print("[ER] You have nothing to give!")
             return None
@@ -156,11 +152,15 @@ class Animate(Entity):
         if item is None:
             print("[ER] You don't have that!")
             return None
-        if item is not None:
-            self.inventory[item] -= 1
-            if self.inventory[item] == 0:
+        else:
+            if selling:
+                earnings = item.get_cost() * amount
+
+            self.inventory[item] -= amount
+            if self.inventory[item] <= 0:
                 del self.inventory[item]
             if discarding:
-                print("[OK] You have tossed away 1 ", item.get_name(), "!")
-            return item
+                print("[OK] You have tossed away ", amount, " ", item.get_name(), "!")
 
+            return item
+    # =========================

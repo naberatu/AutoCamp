@@ -29,8 +29,6 @@ class Encounter:
                 entityToMove.set_coors(newXCoord, newYCoord, newZCoord)
                 print("[OK] " + entityToMove.get_name() + " successfully moved")
 
-    # New Function
-    # ==============================
     def inv_pickup(self, item_id, inv, amount, hot_swap, is_armor):
         if hot_swap:
             inv.inv_add(item_id, amount)
@@ -38,28 +36,30 @@ class Encounter:
         else:
             inv.inv_add(item_id, amount)
 
+    # New & Modified Methods
+    # ==============================
     def inv_discard(self, item_id, inv, amount):
-        for i in range(0, amount):
-            inv.inv_remove(item_id, True)
+        inv.inv_remove(item_id, amount, True, False)
+
+    def inv_sell(self, item_id, amount, inv):
+        inv.inv_remove(item_id, amount, False, True)
 
     def inv_use(self, item_id, inv):        # pass in self.currentEntity.get_inv()
-        item = inv.inv_remove(item_id, False)
+        item = inv.inv_remove(item_id, 1, False, False)
         if item is not None:
             # run the actual effect
             print("[OK] You used ", item.get_name(), "!")
-    # ==============================
 
-    def inv_give(self, acceptor, item_id, inv):
-        item = inv.get_inv_item(item_id)
-        if item is not None and not acceptor.is_enemy():
-            inv.inv_remove(item_id, False)
+    def inv_give(self, acceptor, item_id, amount, inv):
+        if not acceptor.is_enemy():
+            item = inv.inv_remove(item_id, amount, False, False)
             acceptor.inv_add(item)
             print("[OK] You gave", acceptor.get_name(), " ", item.get_name(), "!")
-        elif item is not None and acceptor.is_enemy():
+        else:
             print("[ER] You can’t give that to ", acceptor.get_name(), "!")
 
     def inv_equip(self, is_armor, item_id, inv):
-        item = inv.inv_remove(item_id, False)
+        item = inv.inv_remove(item_id, 1, False, False)
         if is_armor:
             armor = self.currentEntity.get_armor()
             self.currentEntity.inv_add(armor)
@@ -70,6 +70,7 @@ class Encounter:
             self.currentEntity.inv_add(weapon)
             self.currentEntity.set_armor(item)
             print("[OK]: You have swapped your weapon!")
+    # ==============================
 
     def setCurrentEntity(self, ent):
         self.currentEntity = ent
