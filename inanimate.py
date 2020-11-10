@@ -6,7 +6,6 @@ class Inanimate(Entity):
     def __init__(self, name, entity_id, item_code, cost=None, details=None, max_stack=None, weight=None, tile_size=None):
         super().__init__(name, entity_id)    # should inherit everything this way
 
-        self.item_type = item_code
         self.details = details
         self.weight = weight
         self.quantity = 1
@@ -16,19 +15,19 @@ class Inanimate(Entity):
 
         # Added Features:
         # =========================
-        if self.item_type == 0:
+        if item_code == 0:
             self.is_prop = True
-        elif self.item_type == 1:
+        elif item_code == 1:
             self.is_weapon = True
             self.properties = {"damage": 0,
                                "damage_type": None,
                                "modifier": None}
-        elif self.item_type == 2:
+        elif item_code == 2:
             self.is_armor = True
             self.properties = {"armor_class": 0,
                                "modifier": None,
                                "stealth": True}
-        elif self.item_type == 3:
+        elif item_code == 3:
             self.is_consumable = True
             self.properties = {"type": "healing",
                                "strength": None}
