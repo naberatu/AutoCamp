@@ -19,7 +19,10 @@ class Animate(Entity):
         self.inv_max = 20                       # maximum inventory capacity possible
         self.inv_scheme = "slot"                # whether the inventory stores by slot, item weight, or infinite
         self.is_enemy = None
+        self.is_stealthy = False
+        self.is_surprised = False
 
+    # ==================================
     # Accessors
     # ==================================
     def get_level(self):
@@ -32,7 +35,7 @@ class Animate(Entity):
         return self.race
 
     def get_stat(self, stat):
-        self.stat_block.get_stat(stat)
+        return self.stat_block.get_stat(stat)
 
     def get_inv(self):
         return self.inventory
@@ -88,6 +91,7 @@ class Animate(Entity):
         for i in self.inventory.items():
             print("\n| ", i[0].get_name(), "\t\t - x", i[1])
 
+    # ==================================
     # Mutators
     # ==================================
     def level_up(self):
@@ -110,11 +114,19 @@ class Animate(Entity):
     def mod_race(self, race):
         self.race = race
 
-    def set_stats(self, stat, num, faces=None):
-        if faces is None:
-            self.statBlock.modify_stat(stat, num)
-        else:
-            self.statBlock.modify_stat(stat, num, faces)
+    # def set_stats(self, stat, num, faces=None):
+    #     if faces is None:
+    #         self.statBlock.modify_stat(stat, num)
+    #     else:
+    #         self.statBlock.modify_stat(stat, num, faces)
+    def set_stats(self, stat, num):
+        self.stat_block.modify_stat(stat, num)
+
+    def set_surprise(self, surprise_status):
+        self.is_surprised = surprise_status
+
+    def set_stealth(self, stealth_status):
+        self.is_stealthy = stealth_status
 
     def set_iff(self, iff):
         self.is_enemy = iff
@@ -140,8 +152,6 @@ class Animate(Entity):
         else:
             self.inventory[item] = amount
 
-    # Modified functions:
-    # =========================
     def inv_remove(self, item_id, amount, discarding, selling):
         if self.inventory == {}:
             print("[ER] You have nothing to give!")
@@ -161,6 +171,4 @@ class Animate(Entity):
                 del self.inventory[item]
             if discarding:
                 print("[OK] You have tossed away ", amount, " ", item.get_name(), "!")
-
             return item
-    # =========================

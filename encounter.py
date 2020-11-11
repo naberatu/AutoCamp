@@ -13,13 +13,30 @@ class Encounter:
         self.inanimateList = list()
         self.mapList = list()
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
+        self.turnOrder = list()
 
+    # ===============================================================================
+    # Map & Movement Methods
+    # ===============================================================================
     def map_display(self):
         for i in range(0, len(self.entityList)):
             print(self.animateList[i].get_name() + " is taking up " + self.animateList[i].get_size() + " of tile (" +
                   self.animateList[i].get_coors()[0] + ", " + self.animateList[i].get_coors()[1] + ")")
 
     def enc_move(self, entityToMove, newXCoord, newYCoord, newZCoord):
+        attempted_distance = 0
+        possible_distance = 0
+
+        if entityToMove in self.animateList:
+            possible_distance = entityToMove.get_stat("speed")
+            if entityToMove.get_coors()[0] == newXCoord:
+                attempted_distance = abs(entityToMove.get_coors()[0] - newXCoord) * 5
+            elif entityToMove.get_coors()[1] == newYCoord:
+                attempted_distance = abs(entityToMove.get_coors()[1] - newYCoord) * 5
+
+        if attempted_distance > possible_distance:
+            print("[ER] Movement illegal, Not enough speed to achieve desired movment")
+
         for i in range(0, len(self.animateList)):
             if self.animateList[i].get_coors()[0] == newXCoord and self.animateList[i].get_coors()[2] == newYCoord and \
                     self.animateList[i].get_coors()[1] == newYCoord and \
@@ -29,6 +46,9 @@ class Encounter:
                 entityToMove.set_coors(newXCoord, newYCoord, newZCoord)
                 print("[OK] " + entityToMove.get_name() + " successfully moved")
 
+    # ===============================================================================
+    # Inventory Methods
+    # ===============================================================================
     def inv_pickup(self, item_id, inv, amount, hot_swap, is_armor):
         if hot_swap:
             inv.inv_add(item_id, amount)
@@ -36,8 +56,6 @@ class Encounter:
         else:
             inv.inv_add(item_id, amount)
 
-    # New & Modified Methods
-    # ==============================
     def inv_discard(self, item_id, inv, amount):
         inv.inv_remove(item_id, amount, True, False)
 
@@ -70,11 +88,13 @@ class Encounter:
             self.currentEntity.inv_add(weapon)
             self.currentEntity.set_armor(item)
             print("[OK]: You have swapped your weapon!")
-    # ==============================
 
     def setCurrentEntity(self, ent):
         self.currentEntity = ent
 
+    # ===============================================================================
+    # Dice & Check Methods
+    # ===============================================================================
     @staticmethod
     def rollDice(rolls, numOfFaces, print_results=True) -> int:
         total = 0
@@ -99,7 +119,10 @@ class Encounter:
             print("Final total is... {}!!".format(total))
         return total
 
-    def performCheck(self, stat, advantage=False, disadvantage=False, print_results=True):
+    def modifier(self, stat, ent):
+        return floor(((ent.get_stat(stat)) - 10) / 2)
+
+    def performCheck(self, stat, ent, advantage=False, disadvantage=False, print_results=True):
         roll = 0
         roll1 = self.rollDice(1, 20, False)
         roll2 = self.rollDice(1, 20, False)
@@ -110,14 +133,37 @@ class Encounter:
         elif disadvantage:
             roll = min(roll1, roll2)
 
-        stats_b = self.currentEntity.stat_block
-        modifier = floor(((stats_b.get_stat(stat)) - 10) / 2)
+        mod = self.modifier(stat, ent)
         if print_results:
-            print("You've rolled {} with {} modifier {}".format(roll, stat, modifier))
-        roll += modifier
+            print("{} rolled {} with {} modifier {}".format(ent.get_name(), roll, stat, mod))
+        roll += mod
         if print_results:
             print("Result is... {}!!".format(roll))
         return roll
+
+    def passiveCheck(self, stat, ent, advantage=False, disadvantage=False, print_results=True):
+        mod = self.modifier(stat, ent)
+        roll = 10 + mod
+        if advantage:
+            roll += 5
+        if disadvantage:
+            roll -= 5
+        if print_results:
+            print("Passive Check result w/", stat, "modifier of", mod, ":", roll)
+        return roll
+
+    def determineSurprise(self):
+        for ent in self.animateList:
+            if ent.is_stealthy:
+                stealth = self.performCheck("Stealth", ent)
+                for ent2 in self.animateList:
+                    if type(ent) != type(ent2) and stealth > self.passiveCheck("Perception", ent2, False, False, False):
+                        ent2.is_surprised = True
+
+    def resetSurprise(self):
+        for ent in self.animateList:
+            if ent.is_surprised:
+                ent.set_surprise(False)
 
     def showStats(self) -> None:
         currEnt = self.currentEntity
@@ -161,33 +207,46 @@ class Encounter:
                                            statKeys[15 + (x * 3)] + ': ' + str(statValues[15 + (x * 3)]),
                                            statKeys[16 + (x * 3)] + ': ' + str(statValues[16 + (x * 3)])))
 
-        def dealDMG(self, damage, target):
-            targetHealth = target.stat_block.get_stat("Current HP")
-            targetHealth -= damage
-            if targetHealth >= 0:
-                target.stat_block.modify_stat("Current HP", targetHealth)
-            else:
-                target.stat_block.modify_stat("Current HP", 0)
+    # ===============================================================================
+    # Combat Methods
+    # ===============================================================================
+    def determineInitiative(self):
+        order = []
+        for ent in self.animateList:
+            order.append((ent.get_name(), self.performCheck("Dexterity", ent)))
+        order = sorted(order, key=lambda x: - x[1])
 
-            print(self.currentEntity.get_name(), "attacked", target.get_name(), "!!")
-            print(target.get_name(), "took", damage, "damage!!")
-            print(target.get_name(), "is now at", target.stat_block.get_stat("Current HP"), "/",
-                  target.stat_block.get_stat("Max HP"), "HP.")
+        print("Determining initiative...")
+        print("Turn Order Is: ")
+        for ent in order:
+            print(ent[0])
 
-        def attack(self, target, adv, disadv) -> None:
-            toHit = target.stat_block.get_stat("Armor Class")
-            attempt = 0
+        self.turnOrder = order
 
-            if "melee" in self.currentEntity.get_weapon().get_use():
-                attempt = self.performCheck("Strength", adv, disadv)
-            elif "ranged" in self.currentEntity.get_weapon().get_use():
-                attempt = self.performCheck("Dexterity", adv, disadv)
+    def dealDMG(self, damage, target):
+        targetHealth = target.get_stat("Current HP")
+        targetHealth -= damage
+        if targetHealth >= 0:
+            target.set_stats("Current HP", targetHealth)
+        else:
+            target.set_stats("Current HP", 0)
 
-            if attempt >= toHit:
-                damage = self.rollDice(1, 20, False)
-                self.dealDMG(damage, target)
-            else:
-                print("Attack failed!")
-            # REPLACE PERFORM_CHECK, I made a couple adjustments
+        print(self.currentEntity.get_name(), "attacked", target.get_name(), "!!")
+        print(target.get_name(), "took", damage, "damage!!")
+        print(target.get_name(), "is now at", target.get_stat("Current HP"), "/",
+              target.get_stat("Max HP"), "HP.")
 
+    def attack(self, target, adv, disadv) -> None:
+        toHit = target.get_stat("Armor Class")
+        attempt = 0
 
+        if "melee" in self.currentEntity.get_weapon().get_use():
+            attempt = self.performCheck("Strength", self.currentEntity, adv, disadv)
+        elif "ranged" in self.currentEntity.get_weapon().get_use():
+            attempt = self.performCheck("Dexterity", self.currentEntity, adv, disadv)
+
+        if attempt >= toHit:
+            damage = self.rollDice(1, 20, False)
+            self.dealDMG(damage, target)
+        else:
+            print("Attack failed!")

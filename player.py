@@ -3,12 +3,13 @@ from animate import Animate
 
 
 class Player(Animate):
-    def __init__(self, name, entity_id, race, role, level):
-        super().__init__(name, entity_id, race, role, level)      # should inherit everything this way
+    def __init__(self, name, entity_id, race, role, level, stat_block):
+        super().__init__(name, entity_id, race, role, level, stat_block)      # should inherit everything this way
         self.exp = 0                    # This should be changed depending on the player's level?
         self.is_enemy = False
         self.maxInvWeight = 200         # Arbitrary value
         self.companion = None           # We can add functionality to adjust later
+        self.stat_block = stat_block
 
         self.weapon = None              # a player is either wielding a weapon, or isn't
         self.armor = None               # a player either is wearing armor, or ain't.
