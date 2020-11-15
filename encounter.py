@@ -13,8 +13,9 @@ class Encounter:
         self.inanimateList = list()
         self.mapList = list()
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
-        self.turnOrder = list()                 # The animateList put in order of initiative
+        # self.turnOrder = list()
         self.turnCounter = 0
+        self.live = False
 
     def get_entity(self, is_animate, index):
         if is_animate:
@@ -33,9 +34,14 @@ class Encounter:
             self.inanimateList.append(ent)
         else:
             self.animateList.append(ent)
-            if len(self.animateList) == 1:
-                self.currentEntity = self.animateList[0]
+            if self.live:
+                self.turnCounter = self.turnCounter % (len(self.animateList) - 1)
+                self.determineInitiative()
 
+    def start_encounter(self):
+        self.determineInitiative()
+        self.currentEntity = self.animateList[0]
+        self.live = True
 
     # ===============================================================================
     # Map & Movement Methods

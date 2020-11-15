@@ -18,6 +18,7 @@ for i in range(5):
 enc.determineInitiative()
 
 print("\nWelcome to the AutoCamp Demonstration v0.1")
+enc.start_encounter()
 while True:
     can_act = True
     actor = enc.get_actor()
