@@ -1,23 +1,48 @@
 
-import enemy
-import player
+from enemy import Enemy
+from player import Player
+from inanimate import Inanimate
 from random import randint
 from math import floor
 
 
 class Encounter:
     def __init__(self, max_inventory):
-        self.something = 0  # just a temporary value until we can establish this
         self.currentEntity = None
         self.animateList = list()
         self.inanimateList = list()
         self.mapList = list()
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
-        self.turnOrder = list()
+        self.turnOrder = list()                 # The animateList put in order of initiative
+        self.turnCounter = 0
+
+    def get_entity(self, is_animate, index):
+        if is_animate:
+            return self.animateList[index]
+        else:
+            return self.inanimateList[index]
+
+    def get_actor(self):
+        return self.currentEntity
+
+    def set_actor(self, ent):
+        self.currentEntity = ent
+
+    def add_entity(self, ent):
+        if isinstance(ent, Inanimate):
+            self.inanimateList.append(ent)
+        else:
+            self.animateList.append(ent)
+            if len(self.animateList) == 1:
+                self.currentEntity = self.animateList[0]
+
 
     # ===============================================================================
     # Map & Movement Methods
     # ===============================================================================
+    def get_map_tile_z(self, x_coor, y_coor):
+        return self.mapList[x_coor][y_coor].get_z_coor()
+
     def map_display(self):
         for i in range(0, len(self.entityList)):
             print(self.animateList[i].get_name() + " is taking up " + self.animateList[i].get_size() + " of tile (" +
@@ -49,6 +74,9 @@ class Encounter:
     # ===============================================================================
     # Inventory Methods
     # ===============================================================================
+    def inv_get(self):
+        return self.currentEntity.get_inv()
+
     def inv_pickup(self, item_id, inv, amount, hot_swap, is_armor):
         if hot_swap:
             inv.inv_add(item_id, amount)
@@ -88,9 +116,6 @@ class Encounter:
             self.currentEntity.inv_add(weapon)
             self.currentEntity.set_armor(item)
             print("[OK]: You have swapped your weapon!")
-
-    def setCurrentEntity(self, ent):
-        self.currentEntity = ent
 
     # ===============================================================================
     # Dice & Check Methods
@@ -172,19 +197,19 @@ class Encounter:
 
         print("{:^60}".format("*~*~* " + currEnt.get_name() + "'s stats!! *~*~*"))
 
-        if (type(currEnt) == player.Player) or (type(currEnt) == enemy.Enemy):
+        if (type(currEnt) == Player) or (type(currEnt) == Enemy):
             print("Level & Class: Lvl.", currEnt.get_level(), currEnt.get_role())
         else:
             print("Class:", currEnt.get_role())
 
         print("Race:", currEnt.get_race())
 
-        if type(currEnt) == player.Player:
+        if type(currEnt) == Player:
             print("Max Inventory Weight:", currEnt.maxInvWeight)
             print("Companion:", currEnt.companion)
             print("EXP:", currEnt.get_exp())
 
-        if type(currEnt) == enemy.Enemy:
+        if type(currEnt) == Enemy:
             print("EXP Yield:", currEnt.get_exp_yield())
 
         print("\n > ABILITY SCORES")
@@ -212,16 +237,24 @@ class Encounter:
     # ===============================================================================
     def determineInitiative(self):
         order = []
+        index = 0
         for ent in self.animateList:
-            order.append((ent.get_name(), self.performCheck("Dexterity", ent)))
+            # order.append((ent.get_name(), self.performCheck("Dexterity", ent)))
+            order.append((index, self.performCheck("Dexterity", ent)))
+            index += 1
         order = sorted(order, key=lambda x: - x[1])
 
         print("Determining initiative...")
         print("Turn Order Is: ")
-        for ent in order:
-            print(ent[0])
+        self.animateList[:] = [self.animateList[i[0]] for i in order]
+        for ent in self.animateList:
+            # print(ent[0])
+            print(ent.get_name())
+        # self.turnOrder = order
 
-        self.turnOrder = order
+    def next_turn(self):
+        self.turnCounter += 1
+        self.currentEntity = self.animateList[self.turnCounter % len(self.animateList)]
 
     def dealDMG(self, damage, target):
         targetHealth = target.get_stat("Current HP")
