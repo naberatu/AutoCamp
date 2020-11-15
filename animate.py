@@ -25,6 +25,9 @@ class Animate(Entity):
     # ==================================
     # Accessors
     # ==================================
+    def get_stat_block(self):
+        return self.stat_block
+
     def get_level(self):
         return self.level
 

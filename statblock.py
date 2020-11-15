@@ -59,3 +59,5 @@ class StatBlock:
         else:
             print("[ER] That stat is unavailable!")
 
+    def get_dict(self):
+        return self.stats

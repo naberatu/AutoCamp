@@ -24,6 +24,9 @@ class Player(Animate):
     def get_weapon(self):
         return self.weapon
 
+    def get_companion(self):
+        return self.companion
+
     # Mutators
     # ==================================
     def gain_exp(self, amount):
@@ -38,4 +41,5 @@ class Player(Animate):
                 return 0                        # meaning successful swap
         return -1                               # weapon not found
 
-
+    def set_companion(self, friend):
+        self.companion = friend
