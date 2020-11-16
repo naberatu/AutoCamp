@@ -24,13 +24,12 @@ enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogu
 
 for i in range(5):
     hero = enc.get_entity(True, i)
-    hero.set_coors(0, 0, 0)
+    hero.set_coors(1, 1, 0)
     hero.set_stats("Animal Handling", -3)
 enc.determineInitiative()
 
 print("\nWelcome to the AutoCamp Demonstration v0.1")
 enc.start_encounter()
-
 
 while True:
     can_act = True
@@ -51,7 +50,7 @@ while True:
         print("> attack", "\n> use item", "\n> hold action")
         ans = input("> ")
 
-        if ans.lower() == "back":
+        if ans.lower() == "cancel":
             continue
 
     elif ans.lower() == "move":
@@ -61,28 +60,30 @@ while True:
         else:
             print("You are currently at x = ", actor.get_coors()[0], ", y = ", actor.get_coors()[1])
             print("Where would you like to go?")
-            x = y = -1
+            x = y = 0
             cancel = False
             while True:
-                if x == -1:
-                    x = input("X: ")
+                if x == 0:
+                    x = int(input("X: "))
                     if x == "cancel":
                         cancel = True
                         break
-                    elif not isinstance(x, int):
+                    elif type(x) != int:
                         print("[ER] Invalid input. Please try again.")
                         continue
-                if y == -1:
-                    y = input("Y: ")
+                if y == 0:
+                    y = int(input("Y: "))
                     if y == "cancel":
                         cancel = True
                         break
-                    if not isinstance(y, int):
+                    elif type(y) != int:
                         print("[ER] Invalid input. Please try again.")
                         continue
+                if x != 0 and y != 0: break
 
             if not cancel:
-                enc.enc_move(actor, x, y, enc.get_map_tile_z(x, y))
+                enc.enc_move(actor, x, y, 0)
+                print(actor.get_coors())
 
     elif ans.lower() == "profile":
         enc.showStats()

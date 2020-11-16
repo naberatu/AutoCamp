@@ -48,9 +48,6 @@ class Encounter:
     # ===============================================================================
     # Map & Movement Methods
     # ===============================================================================
-    def get_map_tile_z(self, x_coor, y_coor):
-        return self.mapList[x_coor][y_coor].get_z_coor()
-
     def map_display(self):
         for i in range(0, len(self.entityList)):
             print(self.animateList[i].get_name() + " is taking up " + self.animateList[i].get_size() + " of tile (" +
@@ -61,14 +58,14 @@ class Encounter:
         possible_distance = 0
 
         if entityToMove in self.animateList:
-            possible_distance = entityToMove.get_stat("speed")
+            possible_distance = entityToMove.get_stat("Speed")
             if entityToMove.get_coors()[0] == newXCoord:
                 attempted_distance = abs(entityToMove.get_coors()[0] - newXCoord) * 5
             elif entityToMove.get_coors()[1] == newYCoord:
                 attempted_distance = abs(entityToMove.get_coors()[1] - newYCoord) * 5
 
         if attempted_distance > possible_distance:
-            print("[ER] Movement illegal, Not enough speed to achieve desired movment")
+            print("[ER] Movement illegal, Not enough speed to achieve desired movement")
 
         for i in range(0, len(self.animateList)):
             if self.animateList[i].get_coors()[0] == newXCoord and self.animateList[i].get_coors()[2] == newYCoord and \
@@ -258,7 +255,7 @@ class Encounter:
         order = []
         index = 0
         for ent in self.animateList:
-            order.append((index, self.performCheck("Dexterity", ent)))
+            order.append((index, self.performCheck("Dexterity", ent, False, False, False)))
             index += 1
         order = sorted(order, key=lambda x: - x[1])
 
