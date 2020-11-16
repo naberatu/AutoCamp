@@ -43,6 +43,38 @@ class Encounter:
         self.determineInitiative()
         self.currentEntity = self.animateList[0]
         self.live = True
+
+    def enemyInRange(self, max_x, max_y):
+        location = self.currentEntity.get_coors()
+        x, y, z = location[0], location[1], location[2]
+        nearbyCoors = []
+        inRange = []
+
+        if y > 1:  # N
+            nearbyCoors.append([x, y - 1, z])
+        if y > 1 and x < max_x:  # NE
+            nearbyCoors.append([x + 1, y - 1, z])
+        if x < max_x:  # E
+            nearbyCoors.append([x + 1, y, z])
+        if y < max_y and x < max_x:  # SE
+            nearbyCoors.append([x + 1, y + 1, z])
+        if y < max_y:  # S
+            nearbyCoors.append([x, y + 1, z])
+        if y < max_y and x > 1:  # SW
+            nearbyCoors.append([x - 1, y + 1, z])
+        if x > 1:  # W
+            nearbyCoors.append([x - 1, y, z])
+        if x > 1 and y > 1:  # NW
+            nearbyCoors.append([x - 1, y - 1, z])
+
+        for ent in self.animateList:
+            if ent.get_iff():
+                otherCoors = ent.get_coors()
+                if otherCoors in nearbyCoors:
+                    inRange.append(ent)
+
+        return inRange
+
     # ===============================================================================
 
     # ===============================================================================
@@ -54,27 +86,39 @@ class Encounter:
                   self.animateList[i].get_coors()[0] + ", " + self.animateList[i].get_coors()[1] + ")")
 
     def enc_move(self, entityToMove, newXCoord, newYCoord, newZCoord):
-        attempted_distance = 0
-        possible_distance = 0
-
-        if entityToMove in self.animateList:
-            possible_distance = entityToMove.get_stat("Speed")
-            if entityToMove.get_coors()[0] == newXCoord:
-                attempted_distance = abs(entityToMove.get_coors()[0] - newXCoord) * 5
-            elif entityToMove.get_coors()[1] == newYCoord:
-                attempted_distance = abs(entityToMove.get_coors()[1] - newYCoord) * 5
-
-        if attempted_distance > possible_distance:
-            print("[ER] Movement illegal, Not enough speed to achieve desired movement")
-
+        xCoord = entityToMove.get_coors()[0]
+        yCoord = entityToMove.get_coors()[1]
         for i in range(0, len(self.animateList)):
             if self.animateList[i].get_coors()[0] == newXCoord and self.animateList[i].get_coors()[2] == newYCoord and \
                     self.animateList[i].get_coors()[1] == newYCoord and \
                     self.animateList[i].get_tile_size() + entityToMove.get_tile_size() > 1:
                 print("[ER] Movement illegal, another entity is at target position")
-            else:
-                entityToMove.set_coors(newXCoord, newYCoord, newZCoord)
-                print("[OK] " + entityToMove.get_name() + " successfully moved")
+                return None
+        self.mapList[yCoord - 1][(xCoord + ((1 * xCoord) - 1))] = ' '
+        entityToMove.set_coors(newXCoord, newYCoord, newZCoord)
+        print("[OK] " + entityToMove.get_name() + " successfully moved")
+
+    def enc_fill_map(self, width, height):
+        for i in range(0, height):
+            newRow = list()
+            newRow.append('|')
+            for i in range(0, width):
+                newRow.append(' ')
+                newRow.append('|')
+            self.mapList.append(newRow)
+
+    def enc_update_map(self):
+        for i in range(0, len(self.animateList)):
+            xCoord = self.animateList[i].get_coors()[0]
+            yCoord = self.animateList[i].get_coors()[1]
+            self.mapList[yCoord - 1][(xCoord + ((1 * xCoord) - 1))] = self.animateList[i].get_name()[0]
+
+    def enc_print_map(self):
+        print()
+        for i in range(0, len(self.mapList)):
+            for j in range(0, len(self.mapList[i])):
+                print(self.mapList[i][j], end='')
+            print("")
 
     # ===============================================================================
     # Inventory Methods
@@ -292,10 +336,10 @@ class Encounter:
         toHit = target.get_stat("Armor Class")
         attempt = 0
 
-        if "melee" in self.currentEntity.get_weapon().get_use():
-            attempt = self.performCheck("Strength", self.currentEntity, adv, disadv)
-        elif "ranged" in self.currentEntity.get_weapon().get_use():
-            attempt = self.performCheck("Dexterity", self.currentEntity, adv, disadv)
+        # if "melee" in self.currentEntity.get_weapon().get_use():
+        attempt = self.performCheck("Strength", self.currentEntity, adv, disadv)
+        # elif "ranged" in self.currentEntity.get_weapon().get_use():
+        #     attempt = self.performCheck("Dexterity", self.currentEntity, adv, disadv)
 
         if attempt >= toHit:
             damage = self.rollDice(1, 20, False)

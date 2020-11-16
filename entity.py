@@ -5,7 +5,7 @@ class Entity:
     def __init__(self, name, entity_id):
         self.name = name                # must have a name to be created
         self.entity_id = entity_id
-        self.coors = [0, 0, 0]       # done separately, since this refers to on-screen appearance
+        self.coors = [1, 1, 1]       # done separately, since this refers to on-screen appearance
         self.tileSize = 1
 
     # Accessors

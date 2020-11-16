@@ -5,6 +5,7 @@ from encounter import Encounter
 from player import Player
 from statblock import StatBlock
 from inanimate import Inanimate
+from enemy import Enemy
 import random
 
 commands = {
@@ -33,32 +34,83 @@ def print_inv(self, full_inv, inv=None):
         print("Weapon: " + "{:<20}".format(actor.get_weapon().get_name())
               + "\tArmor: " + "{:<20}".format(actor.get_armor().get_name()))
         print("=============================================================================")
+
     for item, quantity in inv.items():
         print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
     print("=============================================================================")
 
+# Example Entities
+e1 = Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock())
+e2 = Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock())
 
-enc = Encounter("slot")
-enc.add_entity(Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 1, StatBlock()))
-enc.add_entity(Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock()))
-enc.add_entity(Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 1, StatBlock()))
-enc.add_entity(Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock()))
-enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 1, StatBlock()))
+e1.set_coors(2,1,0)
+e1.set_stats("Max HP", 30)
+e1.set_stats("Current HP", 30)
+
+e2.set_coors(2,2,0)
+e2.set_stats("Max HP", 30)
+e2.set_stats("Current HP", 30)
+
+h1 = Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 1, StatBlock())
+h2 = Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock())
+h3 = Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 1, StatBlock())
+h4 = Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock())
+h5 = Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 1, StatBlock())
+
+h1.set_coors(2, 3)
+h2.set_coors(4, 5)
+h3.set_coors(4, 3)
+h4.set_coors(3, 2)
+h5.set_coors(6, 6)
 
 sword = Inanimate("Iron Sword", 00000, 1, 20, "Deals +2 Damage", 1, 4)
 armor = Inanimate("Chainmail", 00000, 2, 20, "Provides +10 AC", 1, 6)
 potion = Inanimate("Mana Potion", 00000, 3, 30, "Restores Mana", 10, 0.5)
 
-enc.start_encounter()
+h1.inv_add(sword, 1)
+h2.inv_add(sword, 1)
+h3.inv_add(sword, 1)
+h4.inv_add(sword, 1)
+h5.inv_add(sword, 1)
 
-for i in range(5):
-    hero = enc.get_entity(True, i)
-    hero.set_coors(1, 1, 0)
-    hero.set_stats("Animal Handling", -3)
-    enc.inv_pickup(sword, 1, True, False, False)
-    enc.inv_pickup(armor, 1, True, True, False)
-    enc.inv_pickup(potion, 1, False, False, False)
+h1.set_weapon(sword)
+h2.set_weapon(sword)
+h3.set_weapon(sword)
+h4.set_weapon(sword)
+h5.set_weapon(sword)
+
+h1.inv_add(armor, 1)
+h2.inv_add(armor, 1)
+h3.inv_add(armor, 1)
+h4.inv_add(armor, 1)
+h5.inv_add(armor, 1)
+
+h1.set_armor(armor)
+h2.set_armor(armor)
+h3.set_armor(armor)
+h4.set_armor(armor)
+h5.set_armor(armor)
+
+h1.inv_add(potion, 3)
+h2.inv_add(potion, 3)
+h3.inv_add(potion, 3)
+h4.inv_add(potion, 3)
+h5.inv_add(potion, 3)
+
+enc = Encounter("slot")
+enc.add_entity(e1)
+enc.add_entity(e2)
+enc.add_entity(h1)
+enc.add_entity(h2)
+enc.add_entity(h3)
+enc.add_entity(h4)
+enc.add_entity(h5)
+
+enc.start_encounter()
 enc.determineInitiative()
+enc.enc_fill_map(7, 7)
+enc.enc_update_map()
+enc.enc_print_map()
 
 print("\nWelcome to the AutoCamp Demonstration v0.1")
 
@@ -66,7 +118,6 @@ while True:
     can_act = True
     action = True
     actor = enc.get_actor()
-    speed = actor.get_stat("Speed")
 
     print("\n[", actor.get_name(), "] what would you like to do?")
     ans = input("> ")
@@ -92,36 +143,33 @@ while True:
         print("[ER] You cannot act this turn!")
 
     elif ans.lower() == "move":
-        if speed <= 0:
-            print("You've exhausted all your movement!")
-            continue
-        else:
-            print("You are currently at x = ", actor.get_coors()[0], ", y = ", actor.get_coors()[1])
-            print("Where would you like to go?")
-            x = y = 0
-            cancel = False
-            while True:
-                if x == 0:
-                    x = int(input("X: "))
-                    if x == "cancel":
-                        cancel = True
-                        break
-                    elif type(x) != int:
-                        print("[ER] Invalid input. Please try again.")
-                        continue
-                if y == 0:
-                    y = int(input("Y: "))
-                    if y == "cancel":
-                        cancel = True
-                        break
-                    elif type(y) != int:
-                        print("[ER] Invalid input. Please try again.")
-                        continue
-                if x != 0 and y != 0: break
+        print("You are currently at x = ", actor.get_coors()[0], ", y = ", actor.get_coors()[1])
+        print("Where would you like to go?")
+        x = y = 0
+        cancel = False
+        while True:
+            if x == 0:
+                x = int(input("X: "))
+                if x == "cancel":
+                    cancel = True
+                    break
+                elif type(x) != int:
+                    print("[ER] Invalid input. Please try again.")
+                    continue
+            if y == 0:
+                y = int(input("Y: "))
+                if y == "cancel":
+                    cancel = True
+                    break
+                elif type(y) != int:
+                    print("[ER] Invalid input. Please try again.")
+                    continue
+            if x != 0 and y != 0: break
 
-            if not cancel:
-                enc.enc_move(actor, x, y, 0)
-                print(actor.get_coors())
+        if not cancel:
+            enc.enc_move(actor, x, y, 0)
+            enc.enc_update_map()
+            enc.enc_print_map()
 
     elif ans.lower() == "profile":
         enc.showStats()
@@ -131,6 +179,7 @@ while True:
 
     elif ans.lower() == "end":
         print("Your turn has ended.")
+        enc.enc_print_map()
         enc.next_turn()
         continue
 
@@ -142,7 +191,21 @@ while True:
     # ===============================================================================
     if action:
         if ans.lower() == "attack":
-            print("Attack!")
+            enemiesInRange = enc.enemyInRange(4, 4)  # max map x and y are 4's for testing purposes only
+            if not enemiesInRange:
+                print("Sorry! No enemies in range of attack.")
+            else:
+                print("Which enemy would you like to attack?")
+                alpha = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+                for e in range(len(enemiesInRange)):
+                    print(alpha[e], "-", enemiesInRange[e].get_name(), "@", enemiesInRange[e].get_coors())
+
+                ans = input("> ")
+                if ans.lower() == "cancel":
+                    continue
+
+                elif ans.lower() in alpha:
+                    enc.attack(enemiesInRange[alpha.index(ans.lower())], False, False)
 
         elif ans.lower() == "use item":
             inv = enc.inv_get()
