@@ -82,10 +82,10 @@ class Encounter:
     def inv_get(self):
         return self.currentEntity.get_inv()
 
-    def inv_pickup(self, item, amount, hot_swap, is_armor):
+    def inv_pickup(self, item, amount, hot_swap, is_armor, notify=True):
         if hot_swap:
             self.currentEntity.inv_add(item, amount)
-            self.inv_equip(is_armor, item)
+            self.inv_equip(is_armor, item, notify)
         else:
             self.currentEntity.inv_add(item, amount)
 
@@ -95,11 +95,12 @@ class Encounter:
     def inv_sell(self, item_name, amount):
         self.currentEntity.inv_remove(item_name, amount, False, True)
 
-    def inv_use(self, item):
+    def inv_use(self, item, notify=True):
         if not item.get_is_weapon() and not item.get_is_armor():
             item = self.currentEntity.inv_remove(item, 1, False, False)
             if item is not None:
-                print("[OK] You used ", item.get_name(), "!")
+                if notify:
+                    print("[OK] You used ", item.get_name(), "!")
                 return True
         else:
             print("[ER] Item is not consumable!")
@@ -113,20 +114,22 @@ class Encounter:
         else:
             print("[ER] You can’t give that to ", acceptor.get_name(), "!")
 
-    def inv_equip(self, is_armor, item):
-        item = self.currentEntity.inv_remove(item, 1, False, False)
+    def inv_equip(self, is_armor, item, notify=True):
+        item = self.currentEntity.inv_remove(item, 1, False, False, notify)
         if is_armor:
             armor = self.currentEntity.get_armor()
             if armor is not None:
                 self.currentEntity.inv_add(armor, 1)
             self.currentEntity.set_armor(item)
-            print("[OK]: You have swapped your armor!")
+            if notify:
+                print("[OK]: You have swapped your armor!")
         else:
             weapon = self.currentEntity.get_weapon()
             if weapon is not None:
                 self.currentEntity.inv_add(weapon, 1)
             self.currentEntity.set_weapon(item)
-            print("[OK]: You have swapped your weapon!")
+            if notify:
+                print("[OK]: You have swapped your weapon!")
 
     # ===============================================================================
     # Dice & Check Methods

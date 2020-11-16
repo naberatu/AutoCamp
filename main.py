@@ -25,9 +25,9 @@ def print_inv(self, full_inv, inv=None):
         print("[ER] Your inventory is empty!")
         return
 
-    print("-----------------------------------------------------------------------------")
-    print(actor.get_name() + "\'s Inventory")
     print("=============================================================================")
+    print(actor.get_name() + "\'s Inventory")
+    print("-----------------------------------------------------------------------------")
 
     if full_inv:
         print("Weapon: " + "{:<20}".format(actor.get_weapon().get_name())
@@ -55,9 +55,9 @@ for i in range(5):
     hero = enc.get_entity(True, i)
     hero.set_coors(1, 1, 0)
     hero.set_stats("Animal Handling", -3)
-    enc.inv_pickup(sword, 1, True, False)
-    enc.inv_pickup(armor, 1, True, True)
-    enc.inv_pickup(potion, 4, False, False)
+    enc.inv_pickup(sword, 1, True, False, False)
+    enc.inv_pickup(armor, 1, True, True, False)
+    enc.inv_pickup(potion, 1, False, False, False)
 enc.determineInitiative()
 
 print("\nWelcome to the AutoCamp Demonstration v0.1")
@@ -154,7 +154,7 @@ while True:
                     break
                 for i in list(inv.keys()):
                     if i.get_name() == item_name:
-                        success = enc.inv_use(i)
+                        success = enc.inv_use(i, True)
 
         action = False
         can_act = False
