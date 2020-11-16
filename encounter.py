@@ -15,9 +15,9 @@ class Encounter:
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
         self.turnCounter = 0
         self.live = False
+        self.map_max_x = 0
+        self.map_max_y = 0
 
-    # New Methods
-    # ===============================================================================
     def get_entity(self, is_animate, index):
         if is_animate:
             return self.animateList[index]
@@ -44,7 +44,7 @@ class Encounter:
         self.currentEntity = self.animateList[0]
         self.live = True
 
-    def enemyInRange(self, max_x, max_y):
+    def enemyInRange(self):
         location = self.currentEntity.get_coors()
         x, y, z = location[0], location[1], location[2]
         nearbyCoors = []
@@ -52,15 +52,15 @@ class Encounter:
 
         if y > 1:  # N
             nearbyCoors.append([x, y - 1, z])
-        if y > 1 and x < max_x:  # NE
+        if y > 1 and x < self.map_max_x:  # NE
             nearbyCoors.append([x + 1, y - 1, z])
-        if x < max_x:  # E
+        if x < self.map_max_x:  # E
             nearbyCoors.append([x + 1, y, z])
-        if y < max_y and x < max_x:  # SE
+        if y < self.map_max_y and x < self.map_max_x:  # SE
             nearbyCoors.append([x + 1, y + 1, z])
-        if y < max_y:  # S
+        if y < self.map_max_y:  # S
             nearbyCoors.append([x, y + 1, z])
-        if y < max_y and x > 1:  # SW
+        if y < self.map_max_y and x > 1:  # SW
             nearbyCoors.append([x - 1, y + 1, z])
         if x > 1:  # W
             nearbyCoors.append([x - 1, y, z])
@@ -76,8 +76,6 @@ class Encounter:
         return inRange
 
     # ===============================================================================
-
-    # ===============================================================================
     # Map & Movement Methods
     # ===============================================================================
     def map_display(self):
@@ -88,17 +86,31 @@ class Encounter:
     def enc_move(self, entityToMove, newXCoord, newYCoord, newZCoord):
         xCoord = entityToMove.get_coors()[0]
         yCoord = entityToMove.get_coors()[1]
+        if newXCoord > self.map_max_x or newYCoord > self.map_max_y:
+            print("[ER] Movement illegal, attempting to move outside of map")
+            return None
         for i in range(0, len(self.animateList)):
-            if self.animateList[i].get_coors()[0] == newXCoord and self.animateList[i].get_coors()[2] == newYCoord and \
-                    self.animateList[i].get_coors()[1] == newYCoord and \
-                    self.animateList[i].get_tile_size() + entityToMove.get_tile_size() > 1:
+            if self.animateList[i].get_coors()[0] == newXCoord and self.animateList[i].get_coors()[2] == newYCoord:
                 print("[ER] Movement illegal, another entity is at target position")
                 return None
+        requestedDistance = 0
+        if entityToMove.get_coors()[0] == newXCoord:
+            requestedDistance = abs(entityToMove.get_coors()[0] - newXCoord) * 5
+        elif entityToMove.get_coors()[1] == newYCoord:
+            requestedDistance = abs(entityToMove.get_coors()[1] - newYCoord) * 5
+        else:
+            requestedDistance = (abs(entityToMove.get_coors()[0] - newXCoord) * 5) + (
+                        abs(entityToMove.get_coors()[1] - newYCoord) * 5)
+        if requestedDistance > entityToMove.get_stat("Speed"):
+            print("[ER] Movement illegal, not enough speed to make requested move")
+            return None
         self.mapList[yCoord - 1][(xCoord + ((1 * xCoord) - 1))] = ' '
         entityToMove.set_coors(newXCoord, newYCoord, newZCoord)
         print("[OK] " + entityToMove.get_name() + " successfully moved")
 
     def enc_fill_map(self, width, height):
+        self.map_max_x = width
+        self.map_max_y = height
         for i in range(0, height):
             newRow = list()
             newRow.append('|')

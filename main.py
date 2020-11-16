@@ -191,7 +191,7 @@ while True:
     # ===============================================================================
     if action:
         if ans.lower() == "attack":
-            enemiesInRange = enc.enemyInRange(4, 4)  # max map x and y are 4's for testing purposes only
+            enemiesInRange = enc.enemyInRange()  # max map x and y are 4's for testing purposes only
             if not enemiesInRange:
                 print("Sorry! No enemies in range of attack.")
             else:
