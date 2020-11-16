@@ -12,9 +12,11 @@ class Inanimate(Entity):
         self.cost = cost
         self.properties = None
         self.visible = True
+        self.is_prop = False
+        self.is_weapon = False
+        self.is_armor = False
+        self.is_consumable = False
 
-        # Added Features:
-        # =========================
         if item_code == 0:
             self.is_prop = True
         elif item_code == 1:
@@ -31,10 +33,6 @@ class Inanimate(Entity):
             self.is_consumable = True
             self.properties = {"type": "healing",
                                "strength": None}
-        else:
-            self.is_prop, self.is_weapon, self.is_armor, self.is_consumable = False
-            # this means it's a standard item, like a ring, or book, or something.
-        # =========================
 
         if tile_size is None:
             self.tile_size = 1
@@ -62,6 +60,12 @@ class Inanimate(Entity):
 
     def get_use(self):
         return self.details
+
+    def get_is_weapon(self):
+        return self.is_weapon
+
+    def get_is_armor(self):
+        return self.is_armor
 
     def get_property(self, name):
         if self.properties.keys().__contains__(name):

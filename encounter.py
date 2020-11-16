@@ -95,11 +95,14 @@ class Encounter:
     def inv_sell(self, item_name, amount):
         self.currentEntity.inv_remove(item_name, amount, False, True)
 
-    def inv_use(self, item):        # pass in self.currentEntity.get_inv()
-        item = self.currentEntity.inv_remove(item, 1, False, False)
-        if item is not None:
-            print("[OK] You used ", item.get_name(), "!")
-            return True
+    def inv_use(self, item):
+        if not item.get_is_weapon() and not item.get_is_armor():
+            item = self.currentEntity.inv_remove(item, 1, False, False)
+            if item is not None:
+                print("[OK] You used ", item.get_name(), "!")
+                return True
+        else:
+            print("[ER] Item is not consumable!")
         return False
 
     def inv_give(self, acceptor, item_name, amount):

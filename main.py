@@ -12,20 +12,27 @@ commands = {
             "end": "Ends the current turn",
             "exit": "Ends the program.",
             "help": "Displays list of commands.",
+            "inventory": "Displays inventory.",
             "move": "Changes your current position.",
             "profile": "Displays your stats."
 }
 
-def print_inv(self, inv=None):
+
+def print_inv(self, full_inv, inv=None):
     if inv is None:
         inv = enc.inv_get()
     if inv == {}:
         print("[ER] Your inventory is empty!")
         return
 
-    print("=============================================================================")
+    print("-----------------------------------------------------------------------------")
     print(actor.get_name() + "\'s Inventory")
     print("=============================================================================")
+
+    if full_inv:
+        print("Weapon: " + "{:<20}".format(actor.get_weapon().get_name())
+              + "\tArmor: " + "{:<20}".format(actor.get_armor().get_name()))
+        print("=============================================================================")
     for item, quantity in inv.items():
         print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
     print("=============================================================================")
@@ -119,6 +126,9 @@ while True:
     elif ans.lower() == "profile":
         enc.showStats()
 
+    elif ans.lower() == "inventory":
+        print_inv(True, enc.inv_get())
+
     elif ans.lower() == "end":
         print("Your turn has ended.")
         enc.next_turn()
@@ -137,7 +147,7 @@ while True:
         elif ans.lower() == "use item":
             inv = enc.inv_get()
             success = False
-            print_inv(inv)
+            print_inv(False, inv)
             while not success:
                 item_name = input("Item: ")
                 if item_name.lower() == "cancel":
