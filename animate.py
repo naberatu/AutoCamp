@@ -1,6 +1,7 @@
 
 from entity import Entity
 from statblock import StatBlock
+import random
 
 
 class Animate(Entity):
@@ -100,6 +101,13 @@ class Animate(Entity):
     def level_up(self):
         if self.level < 20:
             self.level += 1
+            # Updates
+            # ===============================================================================
+            new_hp = random.randint(1, self.stat_block.get_stat("Hit Dice"))
+            old_hp = self.stat_block.get_stat("Max HP")
+            self.stat_block.modify_stat("Max HP", old_hp + new_hp)
+            self.stat_block.modify_stat("Current HP", old_hp + new_hp)
+            # ===============================================================================
             print("[OK] Level Updated to ", self.level, "!")
         else:
             print("[ER] Already at max level!")
@@ -117,11 +125,6 @@ class Animate(Entity):
     def mod_race(self, race):
         self.race = race
 
-    # def set_stats(self, stat, num, faces=None):
-    #     if faces is None:
-    #         self.statBlock.modify_stat(stat, num)
-    #     else:
-    #         self.statBlock.modify_stat(stat, num, faces)
     def set_stats(self, stat, num):
         self.stat_block.modify_stat(stat, num)
 

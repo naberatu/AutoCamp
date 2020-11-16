@@ -13,10 +13,11 @@ class Encounter:
         self.inanimateList = list()
         self.mapList = list()
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
-        # self.turnOrder = list()
         self.turnCounter = 0
         self.live = False
 
+    # New Methods
+    # ===============================================================================
     def get_entity(self, is_animate, index):
         if is_animate:
             return self.animateList[index]
@@ -42,6 +43,7 @@ class Encounter:
         self.determineInitiative()
         self.currentEntity = self.animateList[0]
         self.live = True
+    # ===============================================================================
 
     # ===============================================================================
     # Map & Movement Methods
@@ -196,6 +198,8 @@ class Encounter:
             if ent.is_surprised:
                 ent.set_surprise(False)
 
+    # Updated Method
+    # ===============================================================================
     def showStats(self) -> None:
         actor = self.currentEntity
         stat = actor.get_stat_block().get_dict()
@@ -247,26 +251,23 @@ class Encounter:
     # ===============================================================================
     # Combat Methods
     # ===============================================================================
+
+    # Updated Methods
+    # ===============================================================================
     def determineInitiative(self):
         order = []
         index = 0
         for ent in self.animateList:
-            # order.append((ent.get_name(), self.performCheck("Dexterity", ent)))
             order.append((index, self.performCheck("Dexterity", ent)))
             index += 1
         order = sorted(order, key=lambda x: - x[1])
 
-        # print("Determining initiative...")
-        # print("Turn Order Is: ")
         self.animateList[:] = [self.animateList[i[0]] for i in order]
-        # for ent in self.animateList:
-            # print(ent[0])
-            # print(ent.get_name())
-        # self.turnOrder = order
 
     def next_turn(self):
         self.turnCounter += 1
         self.currentEntity = self.animateList[self.turnCounter % len(self.animateList)]
+    # ===============================================================================
 
     def dealDMG(self, damage, target):
         targetHealth = target.get_stat("Current HP")

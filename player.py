@@ -19,6 +19,7 @@ role_dict = {
     "Blood Hunter": 10
 }
 
+
 class Player(Animate):
     def __init__(self, name, entity_id, race, role, level, stat_block):
         super().__init__(name, entity_id, race, role, level, stat_block)      # should inherit everything this way
@@ -29,6 +30,8 @@ class Player(Animate):
         self.stat_block = stat_block
         self.stat_block.modify_stat("Proficiency Bonus", 2)
 
+        # Updates
+        # ===============================================================================
         if race == ("Dwarf" or "Gnome" or "Halfling"):
             self.stat_block.modify_stat("Speed", 20)
         else:
@@ -36,15 +39,10 @@ class Player(Animate):
 
         self.stat_block.modify_stat("Hit Dice", role_dict[role])
         if self.level == 1:
-            base_hp = random.randint(1, role_dict[role])
-            self.stat_block.modify_stat("Max HP", base_hp)
-            self.stat_block.modify_stat("Current HP", base_hp)
+            self.stat_block.modify_stat("Max HP", role_dict[role])
+            self.stat_block.modify_stat("Current HP", role_dict[role])
+        # ===============================================================================
 
-        # if role == "Barbarian":
-        #     self.stat_block.modify_stat("Hit Dice", 12)
-        # elif role == "Fighter" or "Paladin" or "Ranger" or "Blood Hunter":
-        #     self.stat_block.modify_stat("Hit Dice", 10)
-        # elif role == ""
         self.weapon = None              # a player is either wielding a weapon, or isn't
         self.armor = None               # a player either is wearing armor, or ain't.
         self.feats = list()
