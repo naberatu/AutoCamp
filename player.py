@@ -1,6 +1,23 @@
 
 from animate import Animate
+import random
 
+role_dict = {
+    "Barbarian": 12,
+    "Bard": 8,
+    "Cleric": 8,
+    "Druid": 8,
+    "Fighter": 10,
+    "Monk": 8,
+    "Paladin": 10,
+    "Ranger": 10,
+    "Rogue": 8,
+    "Sorcerer": 6,
+    "Warlock": 8,
+    "Wizard": 6,
+    "Artificer": 8,
+    "Blood Hunter": 10
+}
 
 class Player(Animate):
     def __init__(self, name, entity_id, race, role, level, stat_block):
@@ -10,7 +27,24 @@ class Player(Animate):
         self.maxInvWeight = 200         # Arbitrary value
         self.companion = None           # We can add functionality to adjust later
         self.stat_block = stat_block
+        self.stat_block.modify_stat("Proficiency Bonus", 2)
 
+        if race == ("Dwarf" or "Gnome" or "Halfling"):
+            self.stat_block.modify_stat("Speed", 20)
+        else:
+            self.stat_block.modify_stat("Speed", 30)
+
+        self.stat_block.modify_stat("Hit Dice", role_dict[role])
+        if self.level == 1:
+            base_hp = random.randint(1, role_dict[role])
+            self.stat_block.modify_stat("Max HP", base_hp)
+            self.stat_block.modify_stat("Current HP", base_hp)
+
+        # if role == "Barbarian":
+        #     self.stat_block.modify_stat("Hit Dice", 12)
+        # elif role == "Fighter" or "Paladin" or "Ranger" or "Blood Hunter":
+        #     self.stat_block.modify_stat("Hit Dice", 10)
+        # elif role == ""
         self.weapon = None              # a player is either wielding a weapon, or isn't
         self.armor = None               # a player either is wearing armor, or ain't.
         self.feats = list()

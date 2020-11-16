@@ -6,25 +6,25 @@ from player import Player
 from statblock import StatBlock
 import random
 
-commands = {"act": "Opens action menu.",
+commands = {
+            "act": "Opens action menu.",
             "end": "Ends the current turn",
             "exit": "Ends the program.",
             "help": "Displays list of commands.",
             "move": "Changes your current position.",
-            "profile": "Displays your stats."}
+            "profile": "Displays your stats."
+}
 
 enc = Encounter("slot")
-enc.add_entity(Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 10, StatBlock()))
-enc.add_entity(Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 10, StatBlock()))
-enc.add_entity(Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 10, StatBlock()))
-enc.add_entity(Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 10, StatBlock()))
-enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 10, StatBlock()))
+enc.add_entity(Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 1, StatBlock()))
+enc.add_entity(Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock()))
+enc.add_entity(Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 1, StatBlock()))
+enc.add_entity(Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock()))
+enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 1, StatBlock()))
 
 for i in range(5):
     hero = enc.get_entity(True, i)
     hero.set_coors(0, 0, 0)
-    hero.set_stats("Current HP", 125)
-    hero.set_stats("Max HP", 125)
     hero.set_stats("Animal Handling", -3)
 enc.determineInitiative()
 
