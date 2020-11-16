@@ -197,46 +197,52 @@ class Encounter:
                 ent.set_surprise(False)
 
     def showStats(self) -> None:
-        currEnt = self.currentEntity
-        statKeys = list(self.currentEntity.stat_block.stats.keys())
-        statValues = list(self.currentEntity.stat_block.stats.values())
+        actor = self.currentEntity
+        stat = actor.get_stat_block().get_dict()
 
-        print("{:^60}".format("*~*~* " + currEnt.get_name() + "'s stats!! *~*~*"))
+        print("=============================================================================")
+        text = "{:20}".format(actor.get_name())
 
-        if (type(currEnt) == Player) or (type(currEnt) == Enemy):
-            print("Level & Class: Lvl.", currEnt.get_level(), currEnt.get_role())
+        if (type(actor) == Player) or (type(actor) == Enemy):
+            text += "{:^30}".format(actor.get_race() + " " + actor.get_role()) + "\t[Lv. {:<2}]".format(actor.get_level())
         else:
-            print("Class:", currEnt.get_role())
+            text += "{:^30}".format(actor.get_race() + " " + actor.get_role())
 
-        print("Race:", currEnt.get_race())
+        print(text, "\n-----------------------------------------------------------------------------")
+        text = "HP: " + "{:12}".format(("{:3} /{}".rjust(12).format(stat["Current HP"], stat["Max HP"])))
+        text += "\t" + "{:^30}".format("[AC: {:<2}]".format(stat["Armor Class"]))
+        text += "\tSpeed: {:<2}".format(stat["Speed"])
+        print(text, "\n=============================================================================")
 
-        if type(currEnt) == Player:
-            print("Max Inventory Weight:", currEnt.maxInvWeight)
-            print("Companion:", currEnt.companion)
-            print("EXP:", currEnt.get_exp())
+        if type(actor) == Player and actor.get_companion() is not None:
+            print("Companion:", actor.companion)
+        elif type(actor) == Enemy:
+            print("EXP Yield:", actor.get_exp_yield())
 
-        if type(currEnt) == Enemy:
-            print("EXP Yield:", currEnt.get_exp_yield())
+        text = "{:19}".format("Inspiration:") + " {:<2}".format(stat["Inspiration"])
+        text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"]) + "\n"
+        print(text)
 
-        print("\n > ABILITY SCORES")
+        tracer, text = 0, ""
+        for name, value in list(stat.items())[7:30]:
+            if tracer < 6:
+                if tracer % 2 == 0:
+                    text = "{:19}".format(name + ": ") + "{:2}".format(value)
+                else:
+                    text += "\t\t{:19}".format(name + ": ") + "{:2}".format(value)
+                    print(text)
+            elif tracer >= 6:
+                if tracer == 6:
+                    print()
+                if tracer % 3 == 0:
+                    text = "{:19}".format(name + ": ") + "{:+2}".format(value)
+                else:
+                    text += "\t\t{:19}".format(name + ": ") + "{:+2}".format(value)
+                    if (tracer + 1) % 3 == 0:
+                        print(text)
+            tracer += 1
 
-        for x in range(3):
-            print('{:20}{:20}'.format(statKeys[x * 2] + ": " + str(statValues[x * 2]),
-                                      statKeys[(x * 2) + 1] + ": " + str(statValues[(x * 2) + 1])))
-
-        print("\n > MISC STATS")
-        print('Inspiration: {:<7}Proficiency Bonus: {}'.format(statValues[6], statValues[7]))
-
-        print("\n > CHARACTER STATS")
-        for x in range(2):
-            print("{:17}{:17}{:17}".format(statKeys[8 + (x * 3)] + ': ' + str(statValues[8 + (x * 3)]),
-                                           statKeys[9 + (x * 3)] + ': ' + str(statValues[9 + (x * 3)]),
-                                           statKeys[10 + (x * 3)] + ': ' + str(statValues[10 + (x * 3)])))
-        print("\n > SKILLS")
-        for x in range(6):
-            print("{:22}{:22}{:22}".format(statKeys[14 + (x * 3)] + ': ' + str(statValues[14 + (x * 3)]),
-                                           statKeys[15 + (x * 3)] + ': ' + str(statValues[15 + (x * 3)]),
-                                           statKeys[16 + (x * 3)] + ': ' + str(statValues[16 + (x * 3)])))
+        print("=============================================================================")
 
     # ===============================================================================
     # Combat Methods
@@ -250,12 +256,12 @@ class Encounter:
             index += 1
         order = sorted(order, key=lambda x: - x[1])
 
-        print("Determining initiative...")
-        print("Turn Order Is: ")
+        # print("Determining initiative...")
+        # print("Turn Order Is: ")
         self.animateList[:] = [self.animateList[i[0]] for i in order]
-        for ent in self.animateList:
+        # for ent in self.animateList:
             # print(ent[0])
-            print(ent.get_name())
+            # print(ent.get_name())
         # self.turnOrder = order
 
     def next_turn(self):

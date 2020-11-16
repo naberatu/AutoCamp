@@ -6,32 +6,44 @@ from player import Player
 from statblock import StatBlock
 import random
 
+commands = {"act": "Opens action menu.",
+            "end": "Ends the current turn",
+            "exit": "Ends the program.",
+            "help": "Displays list of commands.",
+            "move": "Changes your current position.",
+            "profile": "Displays your stats."}
 
 enc = Encounter("slot")
 enc.add_entity(Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 10, StatBlock()))
-enc.add_entity(Player("Jester", random.randint(1, 10000), "Tiefling", "Cleric", 10, StatBlock()))
-enc.add_entity(Player("Caleb", random.randint(1, 10000), "Human", "Wizard", 10, StatBlock()))
-enc.add_entity(Player("Yasha", random.randint(1, 10000), "Aasimar", "Barbarian", 10, StatBlock()))
-enc.add_entity(Player("Nott", random.randint(1, 10000), "Goblin", "Rogue", 10, StatBlock()))
+enc.add_entity(Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 10, StatBlock()))
+enc.add_entity(Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 10, StatBlock()))
+enc.add_entity(Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 10, StatBlock()))
+enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 10, StatBlock()))
+
 for i in range(5):
-    enc.get_entity(True, i).set_coors(0, 0, 0)
+    hero = enc.get_entity(True, i)
+    hero.set_coors(0, 0, 0)
+    hero.set_stats("Current HP", 125)
+    hero.set_stats("Max HP", 125)
+    hero.set_stats("Animal Handling", -3)
 enc.determineInitiative()
 
 print("\nWelcome to the AutoCamp Demonstration v0.1")
 enc.start_encounter()
+
+
 while True:
     can_act = True
     actor = enc.get_actor()
     speed = actor.get_stat("Speed")
 
-    print("\nWhat would you like to do?")
+    print("\n[", actor.get_name(), "] what would you like to do?")
     ans = input("> ")
 
     if ans.lower() == "help":
         print("\nList of Commands:")
-        print("> act \t\t\tOpens action menu.", "\n> end \t\t\tEnds the current turn",
-              "\n> help \t\t\tDisplays list of commands.", "\n> move \t\t\tAllows you to change your position.",
-              "\n> profile \t\tDisplays your stats.")
+        for com, desc in commands.items():
+            print("> ", com.ljust(7), "\t", desc)
         ans = input("> ")
 
     if ans.lower() == "act":

@@ -3,6 +3,17 @@ class StatBlock:
     def __init__(self):
         # dictionary of all stats
         self.stats = {
+            # Character Stats
+            "Armor Class": 0,
+            "Speed": 0,
+            "Current HP": 0,
+            "Max HP": 0,
+            "Hit Dice": 0,
+
+            # Misc Stats
+            "Inspiration": 0,
+            "Proficiency Bonus": 0,
+
             # Ability Scores
             "Strength": 0,
             "Dexterity": 0,
@@ -10,18 +21,6 @@ class StatBlock:
             "Wisdom": 0,
             "Intellect": 0,
             "Charisma": 0,
-
-            # Misc Stats
-            "Inspiration": 0,
-            "Proficiency Bonus": 0,
-
-            # Character Stats
-            "Armor Class": 0,
-            "Initiative": 0,
-            "Speed": 0,
-            "Current HP": 0,
-            "Max HP": 0,
-            "Hit Dice": 0,
 
             # Skills
             "Acrobatics": 0,
