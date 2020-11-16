@@ -82,44 +82,47 @@ class Encounter:
     def inv_get(self):
         return self.currentEntity.get_inv()
 
-    def inv_pickup(self, item_id, inv, amount, hot_swap, is_armor):
+    def inv_pickup(self, item, amount, hot_swap, is_armor):
         if hot_swap:
-            inv.inv_add(item_id, amount)
-            self.inv_equip(is_armor, item_id, inv)
+            self.currentEntity.inv_add(item, amount)
+            self.inv_equip(is_armor, item)
         else:
-            inv.inv_add(item_id, amount)
+            self.currentEntity.inv_add(item, amount)
 
-    def inv_discard(self, item_id, inv, amount):
-        inv.inv_remove(item_id, amount, True, False)
+    def inv_discard(self, item_name, amount):
+        self.currentEntity.inv_remove(item_name, amount, True, False)
 
-    def inv_sell(self, item_id, amount, inv):
-        inv.inv_remove(item_id, amount, False, True)
+    def inv_sell(self, item_name, amount):
+        self.currentEntity.inv_remove(item_name, amount, False, True)
 
-    def inv_use(self, item_id, inv):        # pass in self.currentEntity.get_inv()
-        item = inv.inv_remove(item_id, 1, False, False)
+    def inv_use(self, item):        # pass in self.currentEntity.get_inv()
+        item = self.currentEntity.inv_remove(item, 1, False, False)
         if item is not None:
-            # run the actual effect
             print("[OK] You used ", item.get_name(), "!")
+            return True
+        return False
 
-    def inv_give(self, acceptor, item_id, amount, inv):
+    def inv_give(self, acceptor, item_name, amount):
         if not acceptor.is_enemy():
-            item = inv.inv_remove(item_id, amount, False, False)
+            item = self.currentEntity.inv_remove(item_name, amount, False, False)
             acceptor.inv_add(item)
-            print("[OK] You gave", acceptor.get_name(), " ", item.get_name(), "!")
+            print("[OK] You gave", acceptor.get_name(), " ", item_name, "!")
         else:
             print("[ER] You can’t give that to ", acceptor.get_name(), "!")
 
-    def inv_equip(self, is_armor, item_id, inv):
-        item = inv.inv_remove(item_id, 1, False, False)
+    def inv_equip(self, is_armor, item):
+        item = self.currentEntity.inv_remove(item, 1, False, False)
         if is_armor:
             armor = self.currentEntity.get_armor()
-            self.currentEntity.inv_add(armor)
+            if armor is not None:
+                self.currentEntity.inv_add(armor, 1)
             self.currentEntity.set_armor(item)
             print("[OK]: You have swapped your armor!")
         else:
             weapon = self.currentEntity.get_weapon()
-            self.currentEntity.inv_add(weapon)
-            self.currentEntity.set_armor(item)
+            if weapon is not None:
+                self.currentEntity.inv_add(weapon, 1)
+            self.currentEntity.set_weapon(item)
             print("[OK]: You have swapped your weapon!")
 
     # ===============================================================================

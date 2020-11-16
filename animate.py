@@ -82,11 +82,10 @@ class Animate(Entity):
             print("[OK] Your inventory is infinite!")
             return -1
 
-    def get_inv_item(self, item_id):
-        for i in self.inventory:
-            if i.get_id() == item_id:
-                print("[OK] Aha, found it!")
-                return i
+    def get_inv_item(self, item):
+        if item in self.inventory.keys():
+            print("[OK] Aha, found it!")
+            return item
         print("[ER] You don't have this item!")
         return None
 
@@ -158,12 +157,12 @@ class Animate(Entity):
         else:
             self.inventory[item] = amount
 
-    def inv_remove(self, item_id, amount, discarding, selling):
+    def inv_remove(self, item, amount, discarding, selling):
         if self.inventory == {}:
             print("[ER] You have nothing to give!")
             return None
 
-        item = self.get_inv_item(item_id)
+        item = self.get_inv_item(item)
 
         if item is None:
             print("[ER] You don't have that!")

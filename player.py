@@ -56,6 +56,9 @@ class Player(Animate):
     def get_weapon(self):
         return self.weapon
 
+    def get_armor(self):
+        return self.armor
+
     def get_companion(self):
         return self.companion
 
@@ -64,14 +67,20 @@ class Player(Animate):
     def gain_exp(self, amount):
         self.exp += amount
 
-    def swap_weapon(self, entity_id):
-        for i in self.inventory:
-            if self.inventory[i].entity_id == entity_id:
-                temp = self.weapon
-                self.weapon = self.inventory[i]
-                self.inventory[i] = temp
-                return 0                        # meaning successful swap
-        return -1                               # weapon not found
+    # def swap_weapon(self, item):
+    #     for i in self.inventory:
+    #         if self.inventory[i].entity_id == item:
+    #             temp = self.weapon
+    #             self.weapon = self.inventory[i]
+    #             self.inventory[i] = temp
+    #             return 0                        # meaning successful swap
+    #     return -1                               # weapon not found
+
+    def set_armor(self, item):
+        self.armor = item
+
+    def set_weapon(self, item):
+        self.weapon = item
 
     def set_companion(self, friend):
         self.companion = friend
