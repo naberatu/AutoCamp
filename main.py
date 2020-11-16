@@ -108,7 +108,7 @@ enc.add_entity(h5)
 
 enc.start_encounter()
 enc.determineInitiative()
-enc.enc_fill_map(7, 7)
+enc.enc_fill_map(15, 10)
 enc.enc_update_map()
 enc.enc_print_map()
 
