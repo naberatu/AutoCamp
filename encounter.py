@@ -27,8 +27,8 @@ class Encounter:
     def get_actor(self):
         return self.currentEntity
 
-    def set_actor(self, ent):
-        self.currentEntity = ent
+    def get_al_size(self):
+        return len(self.animateList)
 
     def add_entity(self, ent):
         if isinstance(ent, Inanimate):
@@ -78,10 +78,10 @@ class Encounter:
     # ===============================================================================
     # Map & Movement Methods
     # ===============================================================================
-    def map_display(self):
-        for i in range(0, len(self.entityList)):
-            print(self.animateList[i].get_name() + " is taking up " + self.animateList[i].get_size() + " of tile (" +
-                  self.animateList[i].get_coors()[0] + ", " + self.animateList[i].get_coors()[1] + ")")
+    # def map_display(self):
+    #     for i in range(0, len(self.entityList)):
+    #         print(self.animateList[i].get_name() + " is taking up " + self.animateList[i].get_size() + " of tile (" +
+    #               self.animateList[i].get_coors()[0] + ", " + self.animateList[i].get_coors()[1] + ")")
 
     def enc_move(self, actor, new_x_coord, new_y_coord, new_z_coord=1):
         x_coord = actor.get_coors()[0]
@@ -108,7 +108,7 @@ class Encounter:
 
         self.mapList[y_coord - 1][(x_coord + ((1 * x_coord) - 1))] = ' '
         actor.set_coors(new_x_coord, new_y_coord, new_z_coord)
-        return None
+        return False
 
     def enc_fill_map(self, width, height):
         self.map_max_x = width

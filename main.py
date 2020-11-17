@@ -39,79 +39,44 @@ def print_inv(self, full_inv, inv=None):
         print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
     print("=============================================================================")
 
-# Example Entities
-e1 = Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock())
-e2 = Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock())
-
-e1.set_coors(2, 1)
-e1.set_stats("Max HP", 30)
-e1.set_stats("Current HP", 30)
-
-e2.set_coors(2, 2)
-e2.set_stats("Max HP", 30)
-e2.set_stats("Current HP", 30)
-
-h1 = Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 1, StatBlock())
-h2 = Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock())
-h3 = Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 1, StatBlock())
-h4 = Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock())
-h5 = Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 1, StatBlock())
-
-h1.set_coors(2, 3)
-h2.set_coors(4, 5)
-h3.set_coors(4, 3)
-h4.set_coors(3, 2)
-h5.set_coors(6, 6)
-
-sword = Inanimate("Iron Sword", 00000, 1, 20, "Deals +2 Damage", 1, 4)
-armor = Inanimate("Chainmail", 00000, 2, 20, "Provides +10 AC", 1, 6)
-potion = Inanimate("Mana Potion", 00000, 3, 30, "Restores Mana", 10, 0.5)
-
-h1.inv_add(sword, 1)
-h2.inv_add(sword, 1)
-h3.inv_add(sword, 1)
-h4.inv_add(sword, 1)
-h5.inv_add(sword, 1)
-
-h1.set_weapon(sword)
-h2.set_weapon(sword)
-h3.set_weapon(sword)
-h4.set_weapon(sword)
-h5.set_weapon(sword)
-
-h1.inv_add(armor, 1)
-h2.inv_add(armor, 1)
-h3.inv_add(armor, 1)
-h4.inv_add(armor, 1)
-h5.inv_add(armor, 1)
-
-h1.set_armor(armor)
-h2.set_armor(armor)
-h3.set_armor(armor)
-h4.set_armor(armor)
-h5.set_armor(armor)
-
-h1.inv_add(potion, 3)
-h2.inv_add(potion, 3)
-h3.inv_add(potion, 3)
-h4.inv_add(potion, 3)
-h5.inv_add(potion, 3)
 
 enc = Encounter("slot")
-enc.add_entity(e1)
-enc.add_entity(e2)
-enc.add_entity(h1)
-enc.add_entity(h2)
-enc.add_entity(h3)
-enc.add_entity(h4)
-enc.add_entity(h5)
+MAP_MAX_X = 15
+MAP_MAX_Y = 10
 
+# Example Entities
+enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
+enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
+enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
+enc.add_entity(Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 1, StatBlock()))
+enc.add_entity(Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock()))
+enc.add_entity(Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 1, StatBlock()))
+enc.add_entity(Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock()))
+enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 1, StatBlock()))
 enc.start_encounter()
-enc.determineInitiative()
+enc.enc_fill_map(MAP_MAX_X, MAP_MAX_Y)
+
+sword = Inanimate("Iron Sword", 0, 1, 20, "Deals +2 Damage", 1, 4)
+armor = Inanimate("Chainmail", 1, 2, 20, "Provides +10 AC", 1, 6)
+potion = Inanimate("Mana Potion", 2, 3, 30, "Restores Mana", 6, 0.5)
+
+for index in range(enc.get_al_size()):
+    actor = enc.get_entity(True, index)
+
+    if type(actor) == Enemy:
+        actor.set_stats("Max HP", 25)
+
+    if type(actor) == Player:
+        actor.inv_add(sword, 1)
+        actor.inv_add(armor, 1)
+        actor.inv_add(potion, random.randint(1, 6))
+        actor.set_weapon(sword)
+        actor.set_armor(armor)
+
+    while enc.enc_move(actor, random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y)):
+        pass
 
 print("\nWelcome to the AutoCamp Demonstration v0.2")
-
-enc.enc_fill_map(15, 10)
 enc.enc_update_map()
 enc.enc_print_map()
 
@@ -173,7 +138,7 @@ while True:
             if new_x and new_y: break
 
         response = enc.enc_move(actor, new_x, new_y)
-        if not cancel and response is None:
+        if not cancel and not response:
             enc.enc_update_map()
             enc.enc_print_map()
             print(actor.get_name(), "moved to", actor.get_coors())
@@ -231,6 +196,3 @@ while True:
 
         action = False
         can_act = False
-
-
-
