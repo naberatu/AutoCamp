@@ -39,7 +39,7 @@ def print_inv(self, full_inv, inv=None):
         print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
     print("=============================================================================")
 
-
+# Parameters & Encounter init.
 enc = Encounter("slot")
 MAP_MAX_X = 15
 MAP_MAX_Y = 10
@@ -88,13 +88,13 @@ while True:
     print("\n[", actor.get_name(), "] what would you like to do?")
     ans = input("> ")
 
-    if ans.lower() == "help":
+    if ans.lower().strip() == "help":
         print("\nList of Commands:")
         for com, desc in commands.items():
             print("> ", com.ljust(7), "\t", desc)
         ans = input("> ")
 
-    if ans.lower() == "act" and can_act:
+    if ans.lower().strip() == "act" and can_act:
         print("\nPlease select an action to take:")
         print("> attack", "\n> use item", "\n> hold action")
         ans = input("> ")
@@ -105,10 +105,10 @@ while True:
         if ans.lower() == ("attack" or "use item" or "hold action"):
             action = True
 
-    elif ans.lower() == "act" and not can_act:
+    elif ans.lower().strip() == "act" and not can_act:
         print("[ER] You cannot act this turn!")
 
-    elif ans.lower() == "move":
+    elif ans.lower().strip() == "move":
         print("\nWhere to?  (from " + str(actor.get_coors()[0]) + ", " + str(actor.get_coors()[1]) + ")")
 
         cancel = False
@@ -146,26 +146,26 @@ while True:
             enc.enc_print_map()
             print(response)
 
-    elif ans.lower() == "profile":
+    elif ans.lower().strip() == "profile":
         enc.showStats()
 
-    elif ans.lower() == "inventory":
+    elif ans.lower().strip() == "inventory":
         print_inv(True, enc.inv_get())
 
-    elif ans.lower() == "end":
+    elif ans.lower().strip() == "end":
         print("Your turn has ended.")
         enc.enc_print_map()
         enc.next_turn()
         continue
 
-    elif ans.lower() == "exit":
+    elif ans.lower().strip() == "exit":
         print("Game Over! Thanks for playing!")
         break
 
     # Action Menus:
     # ===============================================================================
     if action:
-        if ans.lower() == "attack":
+        if ans.lower().strip() == "attack":
             enemiesInRange = enc.enemyInRange()  # max map x and y are 4's for testing purposes only
             if not enemiesInRange:
                 print("Sorry! No enemies in range of attack.")
@@ -182,7 +182,7 @@ while True:
                 elif ans.lower() in alpha:
                     enc.attack(enemiesInRange[alpha.index(ans.lower())], False, False)
 
-        elif ans.lower() == "use item":
+        elif ans.lower().strip() == "use item":
             inv = enc.inv_get()
             success = False
             print_inv(False, inv)
@@ -196,3 +196,5 @@ while True:
 
         action = False
         can_act = False
+
+
