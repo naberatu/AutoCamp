@@ -47,6 +47,8 @@ class StatBlock:
         if stat in self.stats.keys():
             try:
                 self.stats[stat] = num
+                if stat == "Max HP":
+                    self.stats["Current HP"] = num
             except:
                 print("[ER] Cannot modify ", stat, "...")
         else:

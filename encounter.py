@@ -83,30 +83,32 @@ class Encounter:
             print(self.animateList[i].get_name() + " is taking up " + self.animateList[i].get_size() + " of tile (" +
                   self.animateList[i].get_coors()[0] + ", " + self.animateList[i].get_coors()[1] + ")")
 
-    def enc_move(self, entityToMove, newXCoord, newYCoord, newZCoord):
-        xCoord = entityToMove.get_coors()[0]
-        yCoord = entityToMove.get_coors()[1]
-        if newXCoord > self.map_max_x or newYCoord > self.map_max_y:
-            print("[ER] Movement illegal, attempting to move outside of map")
-            return None
-        for i in range(0, len(self.animateList)):
-            if self.animateList[i].get_coors()[0] == newXCoord and self.animateList[i].get_coors()[2] == newYCoord:
-                print("[ER] Movement illegal, another entity is at target position")
-                return None
-        requestedDistance = 0
-        if entityToMove.get_coors()[0] == newXCoord:
-            requestedDistance = abs(entityToMove.get_coors()[0] - newXCoord) * 5
-        elif entityToMove.get_coors()[1] == newYCoord:
-            requestedDistance = abs(entityToMove.get_coors()[1] - newYCoord) * 5
+    def enc_move(self, actor, new_x_coord, new_y_coord, new_z_coord=1):
+        x_coord = actor.get_coors()[0]
+        y_coord = actor.get_coors()[1]
+        testing = [new_x_coord, new_y_coord, new_z_coord]
+
+        if new_x_coord > self.map_max_x or new_y_coord > self.map_max_y:
+            return "[ER] Out of bounds!"
+
+        for ent in self.animateList:
+            if ent.get_coors() == testing and ent != actor:
+                return "[ER] That space is occupied!"
+
+        requested_distance = 0
+        if actor.get_coors()[0] == new_x_coord:
+            requested_distance = abs(actor.get_coors()[0] - new_x_coord) * 5
+        elif actor.get_coors()[1] == new_y_coord:
+            requested_distance = abs(actor.get_coors()[1] - new_y_coord) * 5
         else:
-            requestedDistance = (abs(entityToMove.get_coors()[0] - newXCoord) * 5) + (
-                        abs(entityToMove.get_coors()[1] - newYCoord) * 5)
-        if requestedDistance > entityToMove.get_stat("Speed"):
-            print("[ER] Movement illegal, not enough speed to make requested move")
-            return None
-        self.mapList[yCoord - 1][(xCoord + ((1 * xCoord) - 1))] = ' '
-        entityToMove.set_coors(newXCoord, newYCoord, newZCoord)
-        print("[OK] " + entityToMove.get_name() + " successfully moved")
+            requested_distance = (abs(actor.get_coors()[0] - new_x_coord) * 5) + (
+                    abs(actor.get_coors()[1] - new_y_coord) * 5)
+        if requested_distance > actor.get_stat("Speed"):
+            return "[ER] You're not fast enough! (Speed {})".format(actor.get_stat("Speed"))
+
+        self.mapList[y_coord - 1][(x_coord + ((1 * x_coord) - 1))] = ' '
+        actor.set_coors(new_x_coord, new_y_coord, new_z_coord)
+        return None
 
     def enc_fill_map(self, width, height):
         self.map_max_x = width

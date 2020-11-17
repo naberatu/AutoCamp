@@ -43,11 +43,11 @@ def print_inv(self, full_inv, inv=None):
 e1 = Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock())
 e2 = Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock())
 
-e1.set_coors(2,1,0)
+e1.set_coors(2, 1)
 e1.set_stats("Max HP", 30)
 e1.set_stats("Current HP", 30)
 
-e2.set_coors(2,2,0)
+e2.set_coors(2, 2)
 e2.set_stats("Max HP", 30)
 e2.set_stats("Current HP", 30)
 
@@ -108,11 +108,12 @@ enc.add_entity(h5)
 
 enc.start_encounter()
 enc.determineInitiative()
+
+print("\nWelcome to the AutoCamp Demonstration v0.2")
+
 enc.enc_fill_map(15, 10)
 enc.enc_update_map()
 enc.enc_print_map()
-
-print("\nWelcome to the AutoCamp Demonstration v0.1")
 
 while True:
     can_act = True
@@ -143,33 +144,42 @@ while True:
         print("[ER] You cannot act this turn!")
 
     elif ans.lower() == "move":
-        print("You are currently at x = ", actor.get_coors()[0], ", y = ", actor.get_coors()[1])
-        print("Where would you like to go?")
-        x = y = 0
+        print("\nWhere to?  (from " + str(actor.get_coors()[0]) + ", " + str(actor.get_coors()[1]) + ")")
+
         cancel = False
+        new_x = new_y = 0
+
         while True:
-            if x == 0:
-                x = int(input("X: "))
+            if not new_x:
+                x = input("X: ")
                 if x == "cancel":
                     cancel = True
                     break
-                elif type(x) != int:
+                try:
+                    new_x = int(x)
+                except:
                     print("[ER] Invalid input. Please try again.")
                     continue
-            if y == 0:
-                y = int(input("Y: "))
+            if not new_y:
+                y = input("Y: ")
                 if y == "cancel":
                     cancel = True
                     break
-                elif type(y) != int:
+                try:
+                    new_y = int(y)
+                except:
                     print("[ER] Invalid input. Please try again.")
                     continue
-            if x != 0 and y != 0: break
+            if new_x and new_y: break
 
-        if not cancel:
-            enc.enc_move(actor, x, y, 0)
+        response = enc.enc_move(actor, new_x, new_y)
+        if not cancel and response is None:
             enc.enc_update_map()
             enc.enc_print_map()
+            print(actor.get_name(), "moved to", actor.get_coors())
+        else:
+            enc.enc_print_map()
+            print(response)
 
     elif ans.lower() == "profile":
         enc.showStats()

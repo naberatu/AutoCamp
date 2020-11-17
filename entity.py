@@ -30,13 +30,10 @@ class Entity:
     def set_tile_size(self, value):
         self.tileSize = value
 
-    def set_coors(self, x=None, y=None, z=None):
-        if x is not None:
-            self.coors[0] = x
-        if y is not None:
-            self.coors[1] = y
-        if z is not None:
-            self.coors[2] = z
+    def set_coors(self, x=1, y=1, z=1):
+        self.coors[0] = x
+        self.coors[1] = y
+        self.coors[2] = z
 
     def set_id(self, new_id):
         self.entity_id = new_id
