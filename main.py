@@ -154,7 +154,7 @@ while True:
                         continue
                 if new_x and new_y: break
 
-            response = enc.enc_move(actor, new_x, new_y)
+            response = enc.enc_move(actor, speed_remaining, new_x, new_y)
             if not cancel and not response[1]:
                 enc.enc_update_map()
                 enc.enc_print_map()
