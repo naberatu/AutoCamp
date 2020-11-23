@@ -17,6 +17,7 @@ class Encounter:
         self.live = False
         self.map_max_x = 0
         self.map_max_y = 0
+        self.death_saves = 0
 
     def get_entity(self, is_animate, index):
         if is_animate:
@@ -67,48 +68,53 @@ class Encounter:
         if x > 1 and y > 1:  # NW
             nearbyCoors.append([x - 1, y - 1, z])
 
-        for ent in self.animateList:
-            if ent.get_iff():
-                otherCoors = ent.get_coors()
-                if otherCoors in nearbyCoors:
-                    inRange.append(ent)
+        if not self.currentEntity.get_iff():  # if attacker is a player
+            for ent in self.animateList:
+                if ent.get_iff():
+                    otherCoors = ent.get_coors()
+                    if otherCoors in nearbyCoors:
+                        inRange.append(ent)
+
+        else:  # if attacker is an enemy
+            for ent in self.animateList:
+                if not ent.get_iff():
+                    otherCoors = ent.get_coors()
+                    if otherCoors in nearbyCoors:
+                        inRange.append(ent)
 
         return inRange
 
     # ===============================================================================
     # Map & Movement Methods
     # ===============================================================================
-    # def map_display(self):
-    #     for i in range(0, len(self.entityList)):
-    #         print(self.animateList[i].get_name() + " is taking up " + self.animateList[i].get_size() + " of tile (" +
-    #               self.animateList[i].get_coors()[0] + ", " + self.animateList[i].get_coors()[1] + ")")
-
-    def enc_move(self, actor, new_x_coord, new_y_coord, new_z_coord=1):
+    def enc_move(self, actor, speed_remaining, new_x_coord, new_y_coord, new_z_coord=1):
         x_coord = actor.get_coors()[0]
         y_coord = actor.get_coors()[1]
         testing = [new_x_coord, new_y_coord, new_z_coord]
 
         if new_x_coord > self.map_max_x or new_y_coord > self.map_max_y:
-            return "[ER] Out of bounds!"
+            return [0, "[ER] Out of bounds!"]
 
         for ent in self.animateList:
             if ent.get_coors() == testing and ent != actor:
-                return "[ER] That space is occupied!"
+                return [0, "[ER] That space is occupied!"]
 
         requested_distance = 0
+        # vertical
         if actor.get_coors()[0] == new_x_coord:
-            requested_distance = abs(actor.get_coors()[0] - new_x_coord) * 5
-        elif actor.get_coors()[1] == new_y_coord:
             requested_distance = abs(actor.get_coors()[1] - new_y_coord) * 5
+        # horizontal
+        elif actor.get_coors()[1] == new_y_coord:
+            requested_distance = abs(actor.get_coors()[0] - new_x_coord) * 5
         else:
             requested_distance = (abs(actor.get_coors()[0] - new_x_coord) * 5) + (
                     abs(actor.get_coors()[1] - new_y_coord) * 5)
-        if requested_distance > actor.get_stat("Speed"):
-            return "[ER] You're not fast enough! (Speed {})".format(actor.get_stat("Speed"))
+        if requested_distance > speed_remaining:
+            return [0, "[ER] You're not fast enough! (Speed {})".format(actor.get_stat("Speed"))]
 
         self.mapList[y_coord - 1][(x_coord + ((1 * x_coord) - 1))] = ' '
         actor.set_coors(new_x_coord, new_y_coord, new_z_coord)
-        return False
+        return [requested_distance, False]
 
     def enc_fill_map(self, width, height):
         self.map_max_x = width
@@ -333,15 +339,36 @@ class Encounter:
     def dealDMG(self, damage, target):
         targetHealth = target.get_stat("Current HP")
         targetHealth -= damage
-        if targetHealth >= 0:
-            target.set_stats("Current HP", targetHealth)
-        else:
-            target.set_stats("Current HP", 0)
 
         print(self.currentEntity.get_name(), "attacked", target.get_name(), "!!")
         print(target.get_name(), "took", damage, "damage!!")
-        print(target.get_name(), "is now at", target.get_stat("Current HP"), "/",
-              target.get_stat("Max HP"), "HP.")
+
+        if type(target) == Enemy and targetHealth <= 0:  # HP is -/0, enemy -> INSTANT DEATH
+            target.set_stats("Current HP", 0)
+            print(target.get_name(), "has died!!")
+            self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
+            self.animateList.remove(target)
+
+        elif targetHealth >= 0:  # HP is +/0, player -> DMG
+            target.set_stats("Current HP", targetHealth)
+            print(target.get_name(), "is now at", target.get_stat("Current HP"), "/",
+                  target.get_stat("Max HP"), "HP.")
+
+        elif (targetHealth * -1) >= target.get_stat("Max HP"):  # HP is -, exceeds max HP-> INSTANT DEATH
+            target.set_stats("Current HP", 0)
+            print(target.get_name(), "has died!!")
+            self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
+            self.animateList.remove(target)
+            self.enc_update_map()
+
+        elif (targetHealth * -1) <= target.get_stat("Max HP"):  # HP is negative, doesn't exceed max HP -> UNCONSCIOUS
+            target.set_stats("Current HP", 0)
+            if type(target) == Player:
+                target.set_stability(False)
+            if "unconscious" in target.get_conditions():  # if already unconscious when hit
+                target.set_death_strikes(target.get_death_strikes() + 1)
+            print(target.get_name(), "is unconscious!!")
+            target.mod_conditions(True, "Unconscious")
 
     def attack(self, target, adv, disadv) -> None:
         toHit = target.get_stat("Armor Class")

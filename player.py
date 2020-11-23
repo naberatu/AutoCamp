@@ -47,6 +47,9 @@ class Player(Animate):
         self.armor = None               # a player either is wearing armor, or ain't.
         self.feats = list()
         self.spellSlots = list()        # Make cell 1 hold number of Lvl 1 Spell Slots, cell 2 for lvl 2, etc.
+        self.death_strikes = 0
+        self.death_evasions = 0
+        self.is_stable = True
 
     # Accessors
     # ==================================
@@ -61,6 +64,12 @@ class Player(Animate):
 
     def get_companion(self):
         return self.companion
+
+    def get_death_strikes(self):
+        return self.death_strikes
+
+    def get_death_evasions(self):
+        return self.death_evasions
 
     def print_inv(self, list_equipped):
         if self.inventory == {}:
@@ -103,3 +112,12 @@ class Player(Animate):
 
     def set_companion(self, friend):
         self.companion = friend
+
+    def set_death_strikes(self, strikes):
+       self.death_strikes = strikes
+
+    def set_death_evasions(self, evasions):
+       self.death_evasions = evasions
+
+    def set_stability(self, stability_status):
+       self.is_stable = stability_status

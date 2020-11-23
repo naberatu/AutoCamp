@@ -52,17 +52,53 @@ for index in range(enc.get_al_size()):
         actor.set_weapon(sword)
         actor.set_armor(armor)
 
-    while enc.enc_move(actor, random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y)):
+    while enc.enc_move(actor, max(MAP_MAX_X, MAP_MAX_Y) * 5,
+                       random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
         pass
 
-print("\nWelcome to the AutoCamp Demonstration v0.2")
+print("\nWelcome to the AutoCamp Demonstration v0.3")
 enc.enc_update_map()
 enc.enc_print_map()
+actor = enc.get_actor()
+speed_remaining = actor.get_stat("Speed")
+can_act = True
+action = True
 
 while True:
-    can_act = True
-    action = True
-    actor = enc.get_actor()
+
+
+    if "unconscious" in actor.get_conditions() and type(actor) == Player:
+        if not actor.is_stable and enc.death_saves == 0:
+            death_save = enc.rollDice(1, 20, False)
+            enc.death_saves += 1
+            if death_save >= 10:
+                actor.set_death_evasions(actor.get_death_evasions() + 1)
+                print("Death save succeeded!")
+
+            else:
+                if death_save == 1:  # +2 strikes if 1
+                    actor.set_death_strikes(actor.get_death_strikes() + 1)
+                actor.set_death_strikes(actor.get_death_strikes() + 1)
+                print("Death save failed")
+
+            if actor.get_death_evasions() >= 3 or death_save == 20:
+                actor.mod_conditions(False, "unconscious")
+                print(actor.get_name(), "is no longer unconscious!!")
+                actor.set_stability(True)
+                actor.set_death_evasions(0)
+                actor.set_death_strikes(0)
+                if death_save == 20:
+                    actor.set_stats("Current HP", 1)
+
+            elif actor.get_death_strikes() >= 3:
+                print(actor.get_name(), "has died!!")
+                actor.set_death_evasions(0)
+                actor.set_death_strikes(0)
+                enc.animateList.remove(actor)
+                print("Your turn has ended.")
+                enc.enc_print_map()
+                enc.next_turn()
+                continue
 
     print("\n[", actor.get_name(), "] what would you like to do?")
     ans = input("> ")
@@ -88,42 +124,45 @@ while True:
         print("[ER] You cannot act this turn!")
 
     elif ans.lower().strip() == "move":
-        print("\nWhere to?  (from " + str(actor.get_coors()[0]) + ", " + str(actor.get_coors()[1]) + ")")
-
-        cancel = False
-        new_x = new_y = 0
-
-        while True:
-            if not new_x:
-                x = input("X: ")
-                if x == "cancel":
-                    cancel = True
-                    break
-                try:
-                    new_x = int(x)
-                except:
-                    print("[ER] Invalid input. Please try again.")
-                    continue
-            if not new_y:
-                y = input("Y: ")
-                if y == "cancel":
-                    cancel = True
-                    break
-                try:
-                    new_y = int(y)
-                except:
-                    print("[ER] Invalid input. Please try again.")
-                    continue
-            if new_x and new_y: break
-
-        response = enc.enc_move(actor, new_x, new_y)
-        if not cancel and not response:
-            enc.enc_update_map()
-            enc.enc_print_map()
-            print(actor.get_name(), "moved to", actor.get_coors())
+        if "unconscious" in actor.get_conditions():
+            print(actor.get_name(), "can't move! They're unconscious!")
         else:
-            enc.enc_print_map()
-            print(response)
+            print("\nWhere to?  (from " + str(actor.get_coors()[0]) + ", " + str(actor.get_coors()[1]) + ")")
+            cancel = False
+            new_x = new_y = 0
+
+            while True:
+                if not new_x:
+                    x = input("X: ")
+                    if x == "cancel":
+                        cancel = True
+                        break
+                    try:
+                        new_x = int(x)
+                    except:
+                        print("[ER] Invalid input. Please try again.")
+                        continue
+                if not new_y:
+                    y = input("Y: ")
+                    if y == "cancel":
+                        cancel = True
+                        break
+                    try:
+                        new_y = int(y)
+                    except:
+                        print("[ER] Invalid input. Please try again.")
+                        continue
+                if new_x and new_y: break
+
+            response = enc.enc_move(actor, new_x, new_y)
+            if not cancel and not response[1]:
+                enc.enc_update_map()
+                enc.enc_print_map()
+                print(actor.get_name(), "moved to", actor.get_coors())
+                speed_remaining -= response[0]
+            else:
+                enc.enc_print_map()
+                print(response[1])
 
     elif ans.lower().strip() == "profile":
         enc.showStats()
@@ -135,6 +174,10 @@ while True:
         print("Your turn has ended.")
         enc.enc_print_map()
         enc.next_turn()
+        actor = enc.get_actor()
+        speed_remaining = actor.get_stat("Speed")
+        can_act = True
+        action = True
         continue
 
     elif ans.lower().strip() == "exit":
@@ -145,30 +188,36 @@ while True:
     # ===============================================================================
     if action:
         if ans.lower().strip() == "attack":
-            enemiesInRange = enc.enemyInRange()  # max map x and y are 4's for testing purposes only
-            if not enemiesInRange:
-                print("Sorry! No enemies in range of attack.")
+            if "unconscious" in actor.get_conditions():
+                print(actor.get_name(), "can't attack! They're unconscious!")
             else:
-                print("Which enemy would you like to attack?")
-                alpha = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-                for e in range(len(enemiesInRange)):
-                    print(alpha[e], "-", enemiesInRange[e].get_name(), "@", enemiesInRange[e].get_coors())
+                enemiesInRange = enc.enemyInRange()
+                if not enemiesInRange:
+                    print("Sorry! No enemies in range of attack.")
+                else:
+                    print("Which enemy would you like to attack?")
+                    alpha = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+                    for e in range(len(enemiesInRange)):
+                        print(alpha[e], "-", enemiesInRange[e].get_name(), "@", enemiesInRange[e].get_coors())
 
-                ans = input("> ")
-                if ans.lower() == "cancel":
-                    continue
+                    ans = input("> ")
+                    if ans.lower() == "cancel":
+                        continue
 
-                elif ans.lower() in alpha:
-                    enc.attack(enemiesInRange[alpha.index(ans.lower())], False, False)
+                    elif ans.lower() in alpha[:len(enemiesInRange)]:
+                        enc.attack(enemiesInRange[alpha.index(ans.lower())], False, False)
 
         elif ans.lower().strip() == "use item":
-            success = False
-            active = actor.print_inv(False)
-            while active and not success:
-                item_name = input("Item: ")
-                if item_name.lower() == "cancel":
-                    break
-                success = enc.inv_use(item_name, True)
+            if "unconscious" in actor.get_conditions():
+                print(actor.get_name(), "can't use an item! They're unconscious!")
+            else:
+                success = False
+                active = actor.print_inv(False)
+                while active and not success:
+                    item_name = input("Item: ")
+                    if item_name.lower() == "cancel":
+                        break
+                    success = enc.inv_use(item_name, True)
 
         action = False
         can_act = False

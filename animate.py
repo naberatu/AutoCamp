@@ -7,6 +7,7 @@ import random
 class Animate(Entity):
     def __init__(self, name, entity_id, race, role, level, stat_block=None):
         super().__init__(name, entity_id)       # should inherit everything this way
+        self.conditions = set()
 
         if stat_block is not None:
             self.stat_block = stat_block
@@ -40,6 +41,9 @@ class Animate(Entity):
 
     def get_stat(self, stat):
         return self.stat_block.get_stat(stat)
+
+    def get_conditions(self):
+        return self.conditions
 
     def get_inv(self):
         return self.inventory
@@ -125,6 +129,17 @@ class Animate(Entity):
 
     def set_stats(self, stat, num):
         self.stat_block.modify_stat(stat, num)
+
+    def mod_conditions(self, add, cond):  # True if adding, False if removing
+        validCond = ("blinded", "charmed", "deafened", "frightened", "grappled", "incapacitated", "invisible",
+                     "paralyzed", "petrified", "poisoned", "prone", "restrained", "stunned", "unconscious")
+        if cond.lower() in validCond:
+            if add:
+                self.conditions.add(cond.lower())
+            else:
+                self.conditions.remove(cond)
+        else:
+            print(cond + " is not a valid condition!!")
 
     def set_surprise(self, surprise_status):
         self.is_surprised = surprise_status
