@@ -168,9 +168,10 @@ while True:
                 item_name = input("Item: ")
                 if item_name.lower() == "cancel":
                     break
-                for i in list(enc.inv_get().keys()):
-                    if i.get_name() == item_name:
-                        success = enc.inv_use(i, True)
+                # for i in list(enc.inv_get().keys()):
+                # actor.get
+                #     if i.get_name() == item_name:
+                success = enc.inv_use(item_name, True)
 
         action = False
         can_act = False

@@ -16,6 +16,24 @@ class Enemy(Animate):
     def get_exp_yield(self):
         return self.expYield
 
+    def print_inv(self, list_equipped):
+        if self.inventory == {}:
+            print("[ER] Your inventory is empty!")
+            return
+
+        print("=============================================================================")
+        print(self.name + "\'s Inventory")
+        print("-----------------------------------------------------------------------------")
+
+        if list_equipped:
+            print("Weapon: " + "{:<20}".format(self.get_weapon().get_name())
+                  + "\tArmor: " + "{:<20}".format(self.get_armor().get_name()))
+            print("=============================================================================")
+
+        for item, quantity in self.inventory.items():
+            print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
+        print("=============================================================================")
+
     # Mutators
     # ==================================
     def mod_exp_yield(self, amount):

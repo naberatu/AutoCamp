@@ -87,8 +87,17 @@ class Animate(Entity):
             if notify:
                 print("[OK] Aha, found it!")
             return item
-        print("[ER] You don't have this item!")
+        if notify:
+            print("[ER] You don't have this item!")
         return None
+
+    def find_item(self, item_name, notify=True):
+        for item in self.inventory:
+            if item.get_name() == item_name:
+                return self.get_inv_item(item, notify)
+        if notify:
+            print("[ER] You don't have this item!")
+        return False
 
     # ==================================
     # Mutators
@@ -158,14 +167,12 @@ class Animate(Entity):
 
     def inv_remove(self, item, amount, discarding, selling, notify=True):
         if self.inventory == {}:
-            print("[ER] You have nothing to give!")
-            return None
-
-        item = self.get_inv_item(item, notify)
-
-        if item is None:
+            print("[ER] Your inventory is empty!")
+            return False
+        # item = self.get_inv_item(item, notify)
+        if not item:
             print("[ER] You don't have that!")
-            return None
+            return False
         else:
             if selling:
                 earnings = item.get_cost() * amount
@@ -175,4 +182,4 @@ class Animate(Entity):
                 del self.inventory[item]
             if discarding:
                 print("[OK] You have tossed away ", amount, " ", item.get_name(), "!")
-            return item
+            return True

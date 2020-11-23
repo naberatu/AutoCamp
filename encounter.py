@@ -137,8 +137,8 @@ class Encounter:
     # ===============================================================================
     # Inventory Methods
     # ===============================================================================
-    def inv_get(self):
-        return self.currentEntity.get_inv()
+    # def inv_get(self):
+    #     return self.currentEntity.get_inv()
 
     def inv_pickup(self, item, amount, hot_swap, is_armor, notify=True):
         if hot_swap:
@@ -153,15 +153,18 @@ class Encounter:
     def inv_sell(self, item_name, amount):
         self.currentEntity.inv_remove(item_name, amount, False, True)
 
-    def inv_use(self, item, notify=True):
-        if not item.get_is_weapon() and not item.get_is_armor():
-            item = self.currentEntity.inv_remove(item, 1, False, False)
-            if item is not None:
+    def inv_use(self, item_name, notify=True):
+        item = self.currentEntity.find_item(item_name, False)
+        if item and not item.get_is_weapon() and not item.get_is_armor():
+            if self.currentEntity.inv_remove(item, 1, False, False, False):
                 if notify:
                     print("[OK] You used ", item.get_name(), "!")
                 return True
-        else:
+        elif item:
             print("[ER] Item is not consumable!")
+        else:
+            print("[ER] You don't have that item!")
+
         return False
 
     def inv_give(self, acceptor, item_name, amount):
@@ -316,8 +319,6 @@ class Encounter:
     # Combat Methods
     # ===============================================================================
 
-    # Updated Methods
-    # ===============================================================================
     def determineInitiative(self):
         order = []
         index = 0
@@ -331,7 +332,6 @@ class Encounter:
     def next_turn(self):
         self.turnCounter += 1
         self.currentEntity = self.animateList[self.turnCounter % len(self.animateList)]
-    # ===============================================================================
 
     def dealDMG(self, damage, target):
         targetHealth = target.get_stat("Current HP")
