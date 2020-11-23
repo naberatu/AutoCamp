@@ -19,7 +19,7 @@ class Enemy(Animate):
     def print_inv(self, list_equipped):
         if self.inventory == {}:
             print("[ER] Your inventory is empty!")
-            return
+            return False
 
         print("=============================================================================")
         print(self.name + "\'s Inventory")
@@ -33,6 +33,7 @@ class Enemy(Animate):
         for item, quantity in self.inventory.items():
             print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
         print("=============================================================================")
+        return True
 
     # Mutators
     # ==================================

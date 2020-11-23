@@ -163,14 +163,11 @@ while True:
 
         elif ans.lower().strip() == "use item":
             success = False
-            actor.print_inv(False)
-            while not success:
+            active = actor.print_inv(False)
+            while active and not success:
                 item_name = input("Item: ")
                 if item_name.lower() == "cancel":
                     break
-                # for i in list(enc.inv_get().keys()):
-                # actor.get
-                #     if i.get_name() == item_name:
                 success = enc.inv_use(item_name, True)
 
         action = False
