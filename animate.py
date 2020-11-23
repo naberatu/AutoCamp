@@ -53,18 +53,20 @@ class Animate(Entity):
     def get_inv_scheme(self):
         return self.inv_scheme
 
-    def inv_is_full(self):
+    def inv_is_full(self, notify=True):
         # -------------------------------------------------------
         if self.inv_scheme == "slot":
             if len(self.inventory) == self.inv_max:
-                print("[ER] Your inventory is full!")
+                if notify:
+                    print("[ER] Your inventory is full!")
                 return True
             else:
                 return False
         # -------------------------------------------------------
         elif self.inv_scheme == "weight":
             if self.get_inv_size() >= self.inv_max:
-                print("[ER] Your inventory is full!")
+                if notify:
+                    print("[ER] Your inventory is full!")
                 return True
             else:
                 return False

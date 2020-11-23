@@ -137,9 +137,6 @@ class Encounter:
     # ===============================================================================
     # Inventory Methods
     # ===============================================================================
-    # def inv_get(self):
-    #     return self.currentEntity.get_inv()
-
     def inv_pickup(self, item, amount, hot_swap, is_armor, notify=True):
         if hot_swap:
             self.currentEntity.inv_add(item, amount)
@@ -168,12 +165,12 @@ class Encounter:
         return False
 
     def inv_give(self, acceptor, item_name, amount):
-        if not acceptor.is_enemy():
+        if not acceptor.is_enemy() and not acceptor.inv_is_full(False):
             item = self.currentEntity.inv_remove(item_name, amount, False, False)
             acceptor.inv_add(item)
             print("[OK] You gave", acceptor.get_name(), " ", item_name, "!")
-        else:
-            print("[ER] You can’t give that to ", acceptor.get_name(), "!")
+        elif acceptor.inv_is_full(False):
+            print("[ER] ", acceptor.get_name(), "'s inventory is full!")
 
     def inv_equip(self, is_armor, item, notify=True):
         item = self.currentEntity.inv_remove(item, 1, False, False, notify)
