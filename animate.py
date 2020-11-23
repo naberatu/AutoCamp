@@ -82,7 +82,7 @@ class Animate(Entity):
             print("[OK] Your inventory is infinite!")
             return -1
 
-    def get_inv_item(self, item, notify):
+    def get_inv_item(self, item, notify=True):
         if item in self.inventory.keys():
             if notify:
                 print("[OK] Aha, found it!")
@@ -90,24 +90,16 @@ class Animate(Entity):
         print("[ER] You don't have this item!")
         return None
 
-    def print_inv(self):
-        print(self.name, "'s Inventory:\n")
-        for i in self.inventory.items():
-            print("\n| ", i[0].get_name(), "\t\t - x", i[1])
-
     # ==================================
     # Mutators
     # ==================================
     def level_up(self):
         if self.level < 20:
             self.level += 1
-            # Updates
-            # ===============================================================================
             new_hp = random.randint(1, self.stat_block.get_stat("Hit Dice"))
             old_hp = self.stat_block.get_stat("Max HP")
             self.stat_block.modify_stat("Max HP", old_hp + new_hp)
             self.stat_block.modify_stat("Current HP", old_hp + new_hp)
-            # ===============================================================================
             print("[OK] Level Updated to ", self.level, "!")
         else:
             print("[ER] Already at max level!")
@@ -150,7 +142,7 @@ class Animate(Entity):
         if self.inv_is_full():
             print("[ER] Your inventory is full!")
         elif self.inv_scheme == "weight":
-            added_weight = item.get_weight * amount
+            added_weight = item.get_weight() * amount
             if self.get_inv_size() + added_weight <= self.inv_max:
                 self.inventory[item] = amount
             else:

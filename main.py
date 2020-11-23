@@ -19,25 +19,26 @@ commands = {
 }
 
 
-def print_inv(self, full_inv, inv=None):
-    if inv is None:
-        inv = enc.inv_get()
-    if inv == {}:
-        print("[ER] Your inventory is empty!")
-        return
+# def print_inv(self, full_inv, inv=None):
+#     if inv is None:
+#         inv = enc.inv_get()
+#     if inv == {}:
+#         print("[ER] Your inventory is empty!")
+#         return
+#
+#     print("=============================================================================")
+#     print(actor.get_name() + "\'s Inventory")
+#     print("-----------------------------------------------------------------------------")
+#
+#     if full_inv:
+#         print("Weapon: " + "{:<20}".format(actor.get_weapon().get_name())
+#               + "\tArmor: " + "{:<20}".format(actor.get_armor().get_name()))
+#         print("=============================================================================")
+#
+#     for item, quantity in inv.items():
+#         print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
+#     print("=============================================================================")
 
-    print("=============================================================================")
-    print(actor.get_name() + "\'s Inventory")
-    print("-----------------------------------------------------------------------------")
-
-    if full_inv:
-        print("Weapon: " + "{:<20}".format(actor.get_weapon().get_name())
-              + "\tArmor: " + "{:<20}".format(actor.get_armor().get_name()))
-        print("=============================================================================")
-
-    for item, quantity in inv.items():
-        print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
-    print("=============================================================================")
 
 # Parameters & Encounter init.
 enc = Encounter("slot")
@@ -150,7 +151,7 @@ while True:
         enc.showStats()
 
     elif ans.lower().strip() == "inventory":
-        print_inv(True, enc.inv_get())
+        actor.print_inv(True)
 
     elif ans.lower().strip() == "end":
         print("Your turn has ended.")
@@ -183,14 +184,13 @@ while True:
                     enc.attack(enemiesInRange[alpha.index(ans.lower())], False, False)
 
         elif ans.lower().strip() == "use item":
-            inv = enc.inv_get()
             success = False
-            print_inv(False, inv)
+            actor.print_inv(False)
             while not success:
                 item_name = input("Item: ")
                 if item_name.lower() == "cancel":
                     break
-                for i in list(inv.keys()):
+                for i in list(enc.inv_get().keys()):
                     if i.get_name() == item_name:
                         success = enc.inv_use(i, True)
 
