@@ -18,28 +18,6 @@ commands = {
             "profile": "Displays your stats."
 }
 
-
-# def print_inv(self, full_inv, inv=None):
-#     if inv is None:
-#         inv = enc.inv_get()
-#     if inv == {}:
-#         print("[ER] Your inventory is empty!")
-#         return
-#
-#     print("=============================================================================")
-#     print(actor.get_name() + "\'s Inventory")
-#     print("-----------------------------------------------------------------------------")
-#
-#     if full_inv:
-#         print("Weapon: " + "{:<20}".format(actor.get_weapon().get_name())
-#               + "\tArmor: " + "{:<20}".format(actor.get_armor().get_name()))
-#         print("=============================================================================")
-#
-#     for item, quantity in inv.items():
-#         print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
-#     print("=============================================================================")
-
-
 # Parameters & Encounter init.
 enc = Encounter("slot")
 MAP_MAX_X = 15

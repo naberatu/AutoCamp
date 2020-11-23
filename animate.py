@@ -144,11 +144,17 @@ class Animate(Entity):
         elif self.inv_scheme == "weight":
             added_weight = item.get_weight() * amount
             if self.get_inv_size() + added_weight <= self.inv_max:
-                self.inventory[item] = amount
+                if item in self.inventory:
+                    self.inventory[item] += amount
+                else:
+                    self.inventory[item] = amount
             else:
                 print("[ER] It's too much to carry!")
         else:
-            self.inventory[item] = amount
+            if item in self.inventory:
+                self.inventory[item] += amount
+            else:
+                self.inventory[item] = amount
 
     def inv_remove(self, item, amount, discarding, selling, notify=True):
         if self.inventory == {}:
