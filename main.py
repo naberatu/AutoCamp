@@ -1,6 +1,5 @@
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
-import pygame
 from encounter import Encounter
 from player import Player
 from statblock import StatBlock
