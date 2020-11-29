@@ -64,8 +64,6 @@ can_act = True
 action = True
 
 while True:
-
-
     if "unconscious" in actor.get_conditions() and type(actor) == Player:
         if not actor.is_stable and enc.death_saves == 0:
             death_save = enc.rollDice(1, 20, False)
