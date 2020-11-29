@@ -1,6 +1,5 @@
 
 from animate import Animate
-import random
 
 role_dict = {
     "Barbarian": 12,
