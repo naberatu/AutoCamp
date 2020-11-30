@@ -85,7 +85,7 @@ class Encounter:
         return inRange
 
     # ===============================================================================
-    # Map & Movement Methods
+    # Map, Movement, and Hint Methods
     # ===============================================================================
     def enc_move(self, actor, speed_remaining, new_x_coord, new_y_coord, new_z_coord=1):
         x_coord = actor.get_coors()[0]
@@ -139,6 +139,39 @@ class Encounter:
             for j in range(0, len(self.mapList[i])):
                 print(self.mapList[i][j], end='')
             print("")
+
+    def get_hint(self):
+        response = ""
+        actor = self.currentEntity
+        enemies_in_attack_range = list()
+        enemies_in_range = list()
+        if type(actor) == Enemy:
+            response = "No hints for DM controlled entities."
+            return response
+        elif type(actor) == Player:
+            for i in range(0, len(self.animateList)):
+                if (type(self.animateList[i]) == Enemy) and self.distance_between(actor, self.animateList[i]) <= 5:
+                    enemies_in_attack_range.append(self.animateList[i])
+                if (type(self.animateList[i]) == Enemy) and self.distance_between(actor,
+                                                                                  self.animateList[i]) > actor.get_stat(
+                        "Speed"):
+                    enemies_in_range.append(self.animateList[i])
+            if len(enemies_in_attack_range) != 0:
+                min_health_remaining = float('inf')
+                min_health_remaining_index = -1
+                for i in range(0, len(enemies_in_attack_range)):
+                    if enemies_in_attack_range[i].get_stat("Current HP") < min_health_remaining:
+                        min_health_remaining = enemies_in_attack_range[i].get_stat("Current HP")
+                        min_health_remaining_index = i
+                response = "Attack " + str(
+                    enemies_in_attack_range[min_health_remaining_index].get_name()) + " at (" + str(
+                    enemies_in_attack_range[min_health_remaining_index].get_coors()[0]) + ", " + str(
+                    enemies_in_attack_range[min_health_remaining_index].get_coors()[1]) + ")";
+                return response
+
+    def distance_between(self, actor_one, actor_two):
+        return (abs(actor_one.get_coors()[0] - actor_two.get_coors()[0]) * 5) + (
+                    abs(actor_one.get_coors()[1] - actor_one.get_coors()[1]) * 5)
 
     # ===============================================================================
     # Inventory Methods
@@ -194,6 +227,54 @@ class Encounter:
             self.currentEntity.set_weapon(item)
             if notify:
                 print("[OK]: You have swapped your weapon!")
+
+    def showStats(self) -> None:
+        actor = self.currentEntity
+        stat = actor.get_stat_block().get_dict()
+
+        print("\n==============================================================================")
+        text = "{:20}".format(actor.get_name())
+
+        if (type(actor) == Player) or (type(actor) == Enemy):
+            text += "{:^30}".format(actor.get_race() + " " + actor.get_role()) + "\t[Lv. {:<2}]".format(actor.get_level())
+        else:
+            text += "{:^30}".format(actor.get_race() + " " + actor.get_role())
+
+        print(text, "\n------------------------------------------------------------------------------")
+        text = "HP: " + "{:12}".format(("{:3} /{}".rjust(12).format(stat["Current HP"], stat["Max HP"])))
+        text += "\t" + "{:^30}".format("[AC: {:<2}]".format(stat["Armor Class"]))
+        text += "\tSpeed: {:<2}".format(stat["Speed"])
+        print(text, "\n==============================================================================")
+
+        if type(actor) == Player and actor.get_companion() is not None:
+            print("Companion:", actor.companion)
+        elif type(actor) == Enemy:
+            print("EXP Yield:", actor.get_exp_yield())
+
+        text = "{:19}".format("Inspiration:") + " {:<2}".format(stat["Inspiration"])
+        text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"]) + "\n"
+        print(text)
+
+        tracer, text = 0, ""
+        for name, value in list(stat.items())[7:30]:
+            if tracer < 6:
+                if tracer % 2 == 0:
+                    text = "{:19}".format(name + ": ") + "{:2}".format(value)
+                else:
+                    text += "\t\t{:19}".format(name + ": ") + "{:2}".format(value)
+                    print(text)
+            elif tracer >= 6:
+                if tracer == 6:
+                    print()
+                if tracer % 3 == 0:
+                    text = "{:19}".format(name + ": ") + "{:+2}".format(value)
+                else:
+                    text += "\t\t{:19}".format(name + ": ") + "{:+2}".format(value)
+                    if (tracer + 1) % 3 == 0:
+                        print(text)
+            tracer += 1
+
+        print("==============================================================================")
 
     # ===============================================================================
     # Dice & Check Methods
@@ -267,56 +348,6 @@ class Encounter:
         for ent in self.animateList:
             if ent.is_surprised:
                 ent.set_surprise(False)
-
-    # Updated Method
-    # ===============================================================================
-    def showStats(self) -> None:
-        actor = self.currentEntity
-        stat = actor.get_stat_block().get_dict()
-
-        print("\n==============================================================================")
-        text = "{:20}".format(actor.get_name())
-
-        if (type(actor) == Player) or (type(actor) == Enemy):
-            text += "{:^30}".format(actor.get_race() + " " + actor.get_role()) + "\t[Lv. {:<2}]".format(actor.get_level())
-        else:
-            text += "{:^30}".format(actor.get_race() + " " + actor.get_role())
-
-        print(text, "\n------------------------------------------------------------------------------")
-        text = "HP: " + "{:12}".format(("{:3} /{}".rjust(12).format(stat["Current HP"], stat["Max HP"])))
-        text += "\t" + "{:^30}".format("[AC: {:<2}]".format(stat["Armor Class"]))
-        text += "\tSpeed: {:<2}".format(stat["Speed"])
-        print(text, "\n==============================================================================")
-
-        if type(actor) == Player and actor.get_companion() is not None:
-            print("Companion:", actor.companion)
-        elif type(actor) == Enemy:
-            print("EXP Yield:", actor.get_exp_yield())
-
-        text = "{:19}".format("Inspiration:") + " {:<2}".format(stat["Inspiration"])
-        text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"]) + "\n"
-        print(text)
-
-        tracer, text = 0, ""
-        for name, value in list(stat.items())[7:30]:
-            if tracer < 6:
-                if tracer % 2 == 0:
-                    text = "{:19}".format(name + ": ") + "{:2}".format(value)
-                else:
-                    text += "\t\t{:19}".format(name + ": ") + "{:2}".format(value)
-                    print(text)
-            elif tracer >= 6:
-                if tracer == 6:
-                    print()
-                if tracer % 3 == 0:
-                    text = "{:19}".format(name + ": ") + "{:+2}".format(value)
-                else:
-                    text += "\t\t{:19}".format(name + ": ") + "{:+2}".format(value)
-                    if (tracer + 1) % 3 == 0:
-                        print(text)
-            tracer += 1
-
-        print("==============================================================================")
 
     # ===============================================================================
     # Combat Methods

@@ -17,6 +17,7 @@ commands = {
             "inv": "Displays inventory.",
             "move": "Changes your current position.",
             "hero": "Displays your stats.",
+            "hint": "Provides a hint.",
             "use": "Uses an item from inventory."
 }
 
@@ -183,6 +184,9 @@ while True:
     elif ans.lower().strip() == "exit":
         print("Game Over! Thanks for playing!")
         break
+
+    elif ans.lower().strip() == "hint":
+        print(enc.get_hint())
 
     # Action Menus:
     # ===============================================================================

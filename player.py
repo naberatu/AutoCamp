@@ -30,7 +30,7 @@ class Player(Animate):
         self.stat_block.modify_stat("Proficiency Bonus", 2)
 
         if race == ("Dwarf" or "Gnome" or "Halfling"):
-            self.stat_block.modify_stat("Speed", 20)
+            self.stat_block.modify_stat("Speed", 25)
         else:
             self.stat_block.modify_stat("Speed", 30)
 
