@@ -12,9 +12,9 @@ commands = {
             "end": "Ends the current turn",
             "exit": "Ends the program.",
             "help": "Displays list of commands.",
-            "inventory": "Displays inventory.",
+            "inv": "Displays inventory.",
             "move": "Changes your current position.",
-            "profile": "Displays your stats.",
+            "hero": "Displays your stats.",
             "use": "Uses an item from inventory."
 }
 
@@ -109,13 +109,13 @@ while True:
 
     if ans.lower().strip() == "act" and can_act:
         print("\nPlease select an action to take:")
-        print("> attack", "\n> use item", "\n> hold action")
+        print("> attack", "\n> use", "\n> end")
         ans = input("> ")
 
         if ans.lower() == "cancel":
             continue
 
-        if ans.lower() == ("attack" or "use item" or "hold action"):
+        if ans.lower() == ("attack" or "use" or "end"):
             action = True
 
     elif ans.lower().strip() == "act" and not can_act:
@@ -162,10 +162,10 @@ while True:
                 enc.enc_print_map()
                 print(response[1])
 
-    elif ans.lower().strip() == "profile":
+    elif ans.lower().strip() == "hero":
         enc.showStats()
 
-    elif ans.lower().strip() == "inventory":
+    elif ans.lower().strip() == "inv":
         actor.print_inv(True)
 
     elif ans.lower().strip() == "end":
@@ -185,6 +185,7 @@ while True:
     # Action Menus:
     # ===============================================================================
     if action:
+        success = False
         if ans.lower().strip() == "attack":
             if "unconscious" in actor.get_conditions():
                 print(actor.get_name(), "can't attack! They're unconscious!")
@@ -209,15 +210,14 @@ while True:
             if "unconscious" in actor.get_conditions():
                 print(actor.get_name(), "can't use an item! They're unconscious!")
             else:
-                success = False
                 active = actor.print_inv(False)
                 while active and not success:
                     item_name = input("Item: ")
                     if item_name.lower() == "cancel":
                         break
                     success = enc.inv_use(item_name, True)
-
-        action = False
-        can_act = False
+        if success:
+            action = False
+            can_act = False
 
 

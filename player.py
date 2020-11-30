@@ -29,8 +29,6 @@ class Player(Animate):
         self.stat_block = stat_block
         self.stat_block.modify_stat("Proficiency Bonus", 2)
 
-        # Updates
-        # ===============================================================================
         if race == ("Dwarf" or "Gnome" or "Halfling"):
             self.stat_block.modify_stat("Speed", 20)
         else:
@@ -40,7 +38,6 @@ class Player(Animate):
         if self.level == 1:
             self.stat_block.modify_stat("Max HP", role_dict[role])
             self.stat_block.modify_stat("Current HP", role_dict[role])
-        # ===============================================================================
 
         self.weapon = None              # a player is either wielding a weapon, or isn't
         self.armor = None               # a player either is wearing armor, or ain't.

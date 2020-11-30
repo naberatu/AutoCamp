@@ -274,7 +274,7 @@ class Encounter:
         actor = self.currentEntity
         stat = actor.get_stat_block().get_dict()
 
-        print("=============================================================================")
+        print("\n==============================================================================")
         text = "{:20}".format(actor.get_name())
 
         if (type(actor) == Player) or (type(actor) == Enemy):
@@ -282,11 +282,11 @@ class Encounter:
         else:
             text += "{:^30}".format(actor.get_race() + " " + actor.get_role())
 
-        print(text, "\n-----------------------------------------------------------------------------")
+        print(text, "\n------------------------------------------------------------------------------")
         text = "HP: " + "{:12}".format(("{:3} /{}".rjust(12).format(stat["Current HP"], stat["Max HP"])))
         text += "\t" + "{:^30}".format("[AC: {:<2}]".format(stat["Armor Class"]))
         text += "\tSpeed: {:<2}".format(stat["Speed"])
-        print(text, "\n=============================================================================")
+        print(text, "\n==============================================================================")
 
         if type(actor) == Player and actor.get_companion() is not None:
             print("Companion:", actor.companion)
@@ -316,7 +316,7 @@ class Encounter:
                         print(text)
             tracer += 1
 
-        print("=============================================================================")
+        print("==============================================================================")
 
     # ===============================================================================
     # Combat Methods
