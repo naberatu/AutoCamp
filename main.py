@@ -14,7 +14,8 @@ commands = {
             "help": "Displays list of commands.",
             "inventory": "Displays inventory.",
             "move": "Changes your current position.",
-            "profile": "Displays your stats."
+            "profile": "Displays your stats.",
+            "use": "Uses an item from inventory."
 }
 
 # Parameters & Encounter init.
@@ -204,7 +205,7 @@ while True:
                     elif ans.lower() in alpha[:len(enemiesInRange)]:
                         enc.attack(enemiesInRange[alpha.index(ans.lower())], False, False)
 
-        elif ans.lower().strip() == "use item":
+        elif ans.lower().strip() == "use":
             if "unconscious" in actor.get_conditions():
                 print(actor.get_name(), "can't use an item! They're unconscious!")
             else:
