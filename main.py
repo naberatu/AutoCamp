@@ -15,9 +15,10 @@ commands = {
             "exit": "Ends the program.",
             "help": "Displays list of commands.",
             "inv": "Displays inventory.",
-            "move": "Changes your current position.",
+            "map": "Displays map once again.",
+            "move": "Change current position (\'move x y\' or \'move\').",
             "hero": "Displays your stats.",
-            "hint": "Provides a hint.",
+            "hint": "Provides a hint if possible.",
             "use": "Uses an item from inventory."
 }
 
@@ -124,46 +125,43 @@ while True:
     elif ans.lower().strip() == "act" and not can_act:
         print("[ER] You cannot act this turn!")
 
-    elif ans.lower().strip() == "move":
+    elif "move" in ans.lower().strip():
         if "unconscious" in actor.get_conditions():
             print(actor.get_name(), "can't move! They're unconscious!")
         else:
-            print("\nWhere to?  (from " + str(actor.get_coors()[0]) + ", " + str(actor.get_coors()[1]) + ")")
-            cancel = False
-            new_x = new_y = 0
-
-            while True:
-                if not new_x:
-                    x = input("X: ")
-                    if x == "cancel":
-                        cancel = True
-                        break
-                    try:
-                        new_x = int(x)
-                    except:
-                        print("[ER] Invalid input. Please try again.")
-                        continue
-                if not new_y:
-                    y = input("Y: ")
-                    if y == "cancel":
-                        cancel = True
-                        break
-                    try:
-                        new_y = int(y)
-                    except:
-                        print("[ER] Invalid input. Please try again.")
-                        continue
-                if new_x and new_y: break
-
-            response = enc.enc_move(actor, speed_remaining, new_x, new_y)
-            if not cancel and not response[1]:
-                enc.enc_update_map()
-                enc.enc_print_map()
-                print(actor.get_name(), "moved to", actor.get_coors())
-                speed_remaining -= response[0]
+            oneMove = False
+            if ans.lower().strip() == "move":
+                print("\nWhere to?  (from " + str(actor.get_coors()[0]) + ", " + str(actor.get_coors()[1]) + ")")
             else:
-                enc.enc_print_map()
-                print(response[1])
+                oneMove = True
+            try:
+                if oneMove:
+                    move, x, y = ans.split()
+                else:
+                    ans = input("> ")
+                    if ans.lower().strip() == "cancel":
+                        continue
+                    x, y = ans.split()
+                x = int(x)
+                y = int(y)
+
+                if oneMove and move.lower() != "move":
+                    print("[ER1] Invalid input. Please try again.")
+                    continue
+                else:
+                    response = enc.enc_move(actor, speed_remaining, x, y)
+                    # if not cancel and not response[1]:
+                    if not response[1]:
+                        enc.enc_update_map()
+                        enc.enc_print_map()
+                        print(actor.get_name(), "moved to", actor.get_coors())
+                        speed_remaining -= response[0]
+                    else:
+                        enc.enc_print_map()
+                        print(response[1])
+            except:
+                print("[ER] Invalid input. Please try again.")
+                continue
 
     elif ans.lower().strip() == "hero":
         enc.showStats()
@@ -187,6 +185,12 @@ while True:
 
     elif ans.lower().strip() == "hint":
         print(enc.get_hint())
+
+    elif ans.lower().strip() == "map":
+        enc.enc_print_map()
+
+    else:
+        print("[ER] Invalid input, please try again.")
 
     # Action Menus:
     # ===============================================================================
@@ -222,8 +226,17 @@ while True:
                     if item_name.lower() == "cancel":
                         break
                     success = enc.inv_use(item_name, True)
+
+        elif ans.lower().strip() == "end":
+            print("Your turn has ended.")
+            enc.enc_print_map()
+            enc.next_turn()
+            actor = enc.get_actor()
+            speed_remaining = actor.get_stat("Speed")
+            can_act = True
+            action = True
+            continue
+
         if success:
             action = False
             can_act = False
-
-
