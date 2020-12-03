@@ -18,7 +18,7 @@ commands = {
             "hint": "Provides a hint if possible.",
             "inv": "Displays inventory.",
             "map": "Displays map once again.",
-            "move": "Change current position (\'move x y\' or \'move\').",
+            "move": "Change current position (or \'move x y\').",
             "use": "Uses an item from inventory."
 }
 
