@@ -14,11 +14,11 @@ commands = {
             "end": "Ends the current turn",
             "exit": "Ends the program.",
             "help": "Displays list of commands.",
+            "hero": "Displays your stats.",
+            "hint": "Provides a hint if possible.",
             "inv": "Displays inventory.",
             "map": "Displays map once again.",
             "move": "Change current position (\'move x y\' or \'move\').",
-            "hero": "Displays your stats.",
-            "hint": "Provides a hint if possible.",
             "use": "Uses an item from inventory."
 }
 
