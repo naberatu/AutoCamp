@@ -129,28 +129,27 @@ while True:
         if "unconscious" in actor.get_conditions():
             print(actor.get_name(), "can't move! They're unconscious!")
         else:
-            oneMove = False
+            one_step = False
             if ans.lower().strip() == "move":
                 print("\nWhere to?  (from " + str(actor.get_coors()[0]) + ", " + str(actor.get_coors()[1]) + ")")
             else:
-                oneMove = True
+                one_step = True
             try:
-                if oneMove:
+                if one_step:
                     move, x, y = ans.split()
                 else:
                     ans = input("> ")
                     if ans.lower().strip() == "cancel":
                         continue
                     x, y = ans.split()
+
                 x = int(x)
                 y = int(y)
-
-                if oneMove and move.lower() != "move":
+                if one_step and move.lower() != "move":
                     print("[ER1] Invalid input. Please try again.")
                     continue
                 else:
                     response = enc.enc_move(actor, speed_remaining, x, y)
-                    # if not cancel and not response[1]:
                     if not response[1]:
                         enc.enc_update_map()
                         enc.enc_print_map()
