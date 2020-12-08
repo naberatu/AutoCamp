@@ -153,8 +153,9 @@ class Encounter:
                 if (type(self.animateList[i]) == Enemy) and self.distance_between(actor, self.animateList[i]) <= 5:
                     enemies_in_attack_range.append(self.animateList[i])
                 if (type(self.animateList[i]) == Enemy) and self.distance_between(actor,
-                                                                                  self.animateList[i]) > actor.get_stat(
-                        "Speed"):
+                                                                                  self.animateList[
+                                                                                      i]) <= actor.get_stat(
+                    "Speed"):
                     enemies_in_range.append(self.animateList[i])
             if len(enemies_in_attack_range) != 0:
                 min_health_remaining = float('inf')
@@ -166,12 +167,15 @@ class Encounter:
                 response = "Attack " + str(
                     enemies_in_attack_range[min_health_remaining_index].get_name()) + " at (" + str(
                     enemies_in_attack_range[min_health_remaining_index].get_coors()[0]) + ", " + str(
-                    enemies_in_attack_range[min_health_remaining_index].get_coors()[1]) + ")";
+                    enemies_in_attack_range[min_health_remaining_index].get_coors()[1]) + ")"
                 return response
 
     def distance_between(self, actor_one, actor_two):
-        return (abs(actor_one.get_coors()[0] - actor_two.get_coors()[0]) * 5) + (
-                    abs(actor_one.get_coors()[1] - actor_one.get_coors()[1]) * 5)
+        if (abs(actor_one.get_coors()[0] - actor_two.get_coors()[0]) == 1 and abs(
+                actor_one.get_coors()[1] - actor_two.get_coors()[1]) == 1):
+            return 5
+        return ((abs(actor_one.get_coors()[0] - actor_two.get_coors()[0]) * 5) + (
+                abs(actor_one.get_coors()[1] - actor_two.get_coors()[1]) * 5))
 
     # ===============================================================================
     # Inventory Methods

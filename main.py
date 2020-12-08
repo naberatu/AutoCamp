@@ -188,12 +188,9 @@ while True:
     elif ans.lower().strip() == "map":
         enc.enc_print_map()
 
-    else:
-        print("[ER] Invalid input, please try again.")
-
     # Action Menus:
     # ===============================================================================
-    if action:
+    elif action:
         success = False
         if ans.lower().strip() == "attack":
             if "unconscious" in actor.get_conditions():
@@ -214,6 +211,9 @@ while True:
 
                     elif ans.lower() in alpha[:len(enemiesInRange)]:
                         enc.attack(enemiesInRange[alpha.index(ans.lower())], False, False)
+                        success = True
+                        # action = False
+                        # can_act = False
 
         elif ans.lower().strip() == "use":
             if "unconscious" in actor.get_conditions():
@@ -239,3 +239,9 @@ while True:
         if success:
             action = False
             can_act = False
+
+    elif not action:
+        print("You already acted this turn!")
+    else:
+        print("[ER] Invalid input, please try again.")
+
