@@ -8,6 +8,7 @@ from statblock import StatBlock
 from inanimate import Inanimate
 from enemy import Enemy
 import random
+import pickle
 
 commands = {
             "act": "Opens action menu.",
@@ -28,37 +29,59 @@ MAP_MAX_X = 15
 MAP_MAX_Y = 10
 
 # Example Entities
-enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
-enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
-enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
-enc.add_entity(Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 1, StatBlock()))
-enc.add_entity(Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock()))
-enc.add_entity(Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 1, StatBlock()))
-enc.add_entity(Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock()))
-enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 1, StatBlock()))
-enc.start_encounter()
+# enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
+# enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
+# enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
+# enc.add_entity(Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 1, StatBlock()))
+# enc.add_entity(Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock()))
+# enc.add_entity(Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 1, StatBlock()))
+# enc.add_entity(Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock()))
+# enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 1, StatBlock()))
+# enc.start_encounter()
+# enc.enc_fill_map(MAP_MAX_X, MAP_MAX_Y)
+#
+# sword = Inanimate("Iron Sword", 0, 1, 20, "Deals +2 Damage", 1, 4)
+# armor = Inanimate("Chainmail", 1, 2, 20, "Provides +10 AC", 1, 6)
+# potion = Inanimate("Mana Potion", 2, 3, 30, "Restores Mana", 6, 0.5)
+#
+# # Creator Loop
+# for index in range(enc.get_al_size()):
+#     actor = enc.get_entity(True, index)
+#
+#     if type(actor) == Enemy:
+#         actor.set_stats("Max HP", 25)
+#
+#     if type(actor) == Player:
+#         actor.inv_add(sword, 1)
+#         actor.inv_add(armor, 1)
+#         actor.inv_add(potion, random.randint(1, 6))
+#         actor.set_weapon(sword)
+#         actor.set_armor(armor)
+#
+#     while enc.enc_move(actor, max(MAP_MAX_X, MAP_MAX_Y) * 5,
+#                        random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
+#         pass
+# # end
+#
+# # Saving Loop
+# entity_list = list()
+# for index in range(enc.get_al_size()):
+#     entity_list.append(enc.get_entity(True, index))
+#
+# entity_file = open("Entities.pickle", "wb")
+# pickle.dump(entity_list, entity_file)
+# entity_file.close()
+
+# Loading Loop
 enc.enc_fill_map(MAP_MAX_X, MAP_MAX_Y)
 
-sword = Inanimate("Iron Sword", 0, 1, 20, "Deals +2 Damage", 1, 4)
-armor = Inanimate("Chainmail", 1, 2, 20, "Provides +10 AC", 1, 6)
-potion = Inanimate("Mana Potion", 2, 3, 30, "Restores Mana", 6, 0.5)
+loaded_entities = pickle.load(open("Entities.pickle", "rb"))       # Loads all entities from file.
 
-for index in range(enc.get_al_size()):
-    actor = enc.get_entity(True, index)
+for entity in loaded_entities:
+    enc.add_entity(entity)
+    enc.enc_move(entity, max(MAP_MAX_X, MAP_MAX_Y) * 5, entity.get_coors()[0], entity.get_coors()[1])
 
-    if type(actor) == Enemy:
-        actor.set_stats("Max HP", 25)
-
-    if type(actor) == Player:
-        actor.inv_add(sword, 1)
-        actor.inv_add(armor, 1)
-        actor.inv_add(potion, random.randint(1, 6))
-        actor.set_weapon(sword)
-        actor.set_armor(armor)
-
-    while enc.enc_move(actor, max(MAP_MAX_X, MAP_MAX_Y) * 5,
-                       random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
-        pass
+enc.start_encounter()
 
 print("\nWelcome to the AutoCamp Demonstration v0.3")
 enc.enc_update_map()
@@ -179,6 +202,13 @@ while True:
         continue
 
     elif ans.lower().strip() == "exit":
+        entity_list = list()
+        for index in range(enc.get_al_size()):
+            entity_list.append(enc.get_entity(True, index))
+
+        entity_file = open("Entities.pickle", "wb")
+        pickle.dump(entity_list, entity_file)
+        entity_file.close()
         print("Game Over! Thanks for playing!")
         break
 
@@ -244,4 +274,4 @@ while True:
         print("You already acted this turn!")
     else:
         print("[ER] Invalid input, please try again.")
-
+#
