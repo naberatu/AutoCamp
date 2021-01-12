@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from os import environ
+from display import Display
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from encounter import Encounter
 from player import Player
@@ -24,12 +25,15 @@ commands = {
 }
 
 # Parameters & Encounter init.
+disp = Display()
 enc = Encounter("slot")
 MAP_MAX_X = 15
 MAP_MAX_Y = 10
 
 # Loading Code
 enc.enc_fill_map(MAP_MAX_X, MAP_MAX_Y)
+
+disp.game_intro()
 
 try:
     loaded_entities = pickle.load(open("Entities.pickle", "rb"))       # Loads all entities from file.
