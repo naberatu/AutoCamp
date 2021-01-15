@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 from os import environ
-from display import Display
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+from display import Display
 from encounter import Encounter
 from player import Player
 from statblock import StatBlock
@@ -10,6 +10,7 @@ from inanimate import Inanimate
 from enemy import Enemy
 import random
 import pickle
+
 
 commands = {
             "act": "Opens action menu.",
@@ -26,23 +27,16 @@ commands = {
 
 # Parameters & Encounter init.
 disp = Display()
-enc = Encounter("slot")
-MAP_MAX_X = 15
-MAP_MAX_Y = 10
-
-# Loading Code
-enc.enc_fill_map(MAP_MAX_X, MAP_MAX_Y)
-
-disp.game_intro()
 
 try:
-    loaded_entities = pickle.load(open("Entities.pickle", "rb"))       # Loads all entities from file.
+    enc = pickle.load(open("savegame.camp", "rb"))
 
-    for entity in loaded_entities:
-        enc.add_entity(entity)
-        enc.enc_move(entity, max(MAP_MAX_X, MAP_MAX_Y) * 5, entity.get_coors()[0], entity.get_coors()[1])
-        enc.start_encounter()
 except:
+    enc = Encounter("slot")
+    MAP_MAX_X = 15
+    MAP_MAX_Y = 10
+    enc.enc_fill_map(MAP_MAX_X, MAP_MAX_Y)
+
     # Example Entities
     enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
     enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
@@ -77,16 +71,21 @@ except:
             pass
 
     # Saving Loop
-    entity_list = list()
+    player_list = list()
     for index in range(enc.get_al_size()):
-        entity_list.append(enc.get_entity(True, index))
+        entity = enc.get_entity(True, index)
+        if type(entity) == Player:
+            player_list.append(entity)
 
-    entity_file = open("Entities.pickle", "wb")
-    pickle.dump(entity_list, entity_file)
-    entity_file.close()
+    pickle.dump(player_list, open("players.camp", "wb"))
+    pickle.dump(enc, open("savegame.camp", "wb"))
+
 # End Except statement
 
+
 print("\nWelcome to the AutoCamp Demonstration v1.1")
+disp.game_intro()
+
 enc.enc_update_map()
 enc.enc_print_map()
 actor = enc.get_actor()
@@ -205,13 +204,24 @@ while True:
         continue
 
     elif ans.lower().strip() == "exit":
+        # Begin collecting players.
         entity_list = list()
         for index in range(enc.get_al_size()):
-            entity_list.append(enc.get_entity(True, index))
+            entity = enc.get_entity(True, index)
+            if type(entity) == Player:
+                entity_list.append(entity)
 
-        entity_file = open("Entities.pickle", "wb")
+        # Save all players to players.camp.
+        entity_file = open("players.camp", "wb")
         pickle.dump(entity_list, entity_file)
         entity_file.close()
+
+        # Save the current encounter.
+        camp_file = open("savegame.camp", "wb")
+        pickle.dump(enc, camp_file)
+        camp_file.close()
+
+        # Exit game
         print("Game Over! Thanks for playing!")
         break
 
@@ -277,4 +287,4 @@ while True:
         print("You already acted this turn!")
     else:
         print("[ER] Invalid input, please try again.")
-#
+
