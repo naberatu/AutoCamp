@@ -3,7 +3,7 @@ from entity import Entity
 
 
 class Inanimate(Entity):
-    def __init__(self, name, entity_id, item_code, cost=None, details=None, max_stack=None, weight=None, tile_size=None):
+    def __init__(self, name, entity_id, item_code, cost=1, details="This is an item.", max_stack=1, weight=1, tile_size=1):
         super().__init__(name, entity_id)    # should inherit everything this way
 
         self.details = details
@@ -21,28 +21,21 @@ class Inanimate(Entity):
             self.is_prop = True
         elif item_code == 1:
             self.is_weapon = True
-            self.properties = {"damage": 0,
-                               "damage_type": None,
-                               "modifier": None}
+            self.properties = {"dmg_dice": 1,
+                               "dmg_sides": 4,
+                               "dmg_type": None }
         elif item_code == 2:
             self.is_armor = True
             self.properties = {"armor_class": 0,
                                "modifier": None,
-                               "stealth": True}
+                               "stealth_dis": False }
         elif item_code == 3:
             self.is_consumable = True
             self.properties = {"type": "healing",
-                               "strength": None}
+                               "strength": 1}
 
-        if tile_size is None:
-            self.tile_size = 1
-        else:
-            self.tile_size = tile_size
-
-        if max_stack is None:
-            self.maxStack = 1
-        else:
-            self.maxStack = max_stack
+        self.tile_size = tile_size
+        self.maxStack = max_stack
 
     # Accessors
     # ==================================
@@ -100,16 +93,34 @@ class Inanimate(Entity):
     def set_cost(self, value):
         self.cost = value
 
+    def set_properties(self, *args):
+        if len(args) == 3 and self.is_weapon:
+            self.properties["dmg_dice"] = args[0]
+            self.properties["dmg_sides"] = args[1]
+            self.properties["dmg_type"] = args[2]
+        elif len(args) >= 2 and self.is_armor:
+            self.properties["armor_class"] = args[0]
+            self.properties["modifier"] = args[1]
+            try:
+                self.properties["stealth_dis"] = args[2]
+            except:
+                self.properties["stealth_dis"] = False
+        elif len(args) == 2 and self.is_consumable:
+            self.properties["type"] = args[0]
+            self.properties["strength"] = args[1]
+        else:
+            print("[ER] Invalid inputs to properties.")
+
     def set_property(self, name, value):
         if self.properties.keys().__contains__(name):
-            self.propertiesp[name] = value
+            self.properties[name] = value
         else:
             print("[ER] This item does not have that property!")
 
-    def use(self):
-        if self.item_type:
-            print("[OK] Usage: ", self.details)
-            # if self.consumable:
-                # Actually use the item
-        else:
-            print("[ER] This cannot be used!")
+    # def use(self):
+    #     if self.item_type:
+    #         print("[OK] Usage: ", self.details)
+    #         if self.consumable:
+    #             Actually use the item
+        # else:
+        #     print("[ER] This cannot be used!")
