@@ -3,7 +3,8 @@ from entity import Entity
 
 
 class Inanimate(Entity):
-    def __init__(self, name, entity_id, item_code, cost=1, details="This is an item.", max_stack=1, weight=1, tile_size=1):
+    def __init__(self, name, entity_id=0, item_code=1, cost=1, details="This is an item.", max_stack=1, weight=1,
+                 alpha=0, beta=0, gamma=0, tile_size=1):
         super().__init__(name, entity_id)    # should inherit everything this way
 
         self.details = details
@@ -21,18 +22,18 @@ class Inanimate(Entity):
             self.is_prop = True
         elif item_code == 1:
             self.is_weapon = True
-            self.properties = {"dmg_dice": 1,
-                               "dmg_sides": 4,
-                               "dmg_type": None }
+            self.properties = {"dmg_dice": alpha,
+                               "dmg_sides": beta,
+                               "dmg_type": gamma}
         elif item_code == 2:
             self.is_armor = True
-            self.properties = {"armor_class": 0,
-                               "modifier": None,
-                               "stealth_dis": False }
+            self.properties = {"armor_class": alpha,
+                               "modifier": beta,
+                               "stealth_dis": gamma}
         elif item_code == 3:
             self.is_consumable = True
-            self.properties = {"type": "healing",
-                               "strength": 1}
+            self.properties = {"type": alpha,
+                               "strength": beta}
 
         self.tile_size = tile_size
         self.maxStack = max_stack

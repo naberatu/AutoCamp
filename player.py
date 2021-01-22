@@ -77,12 +77,12 @@ class Player(Animate):
         print("-----------------------------------------------------------------------------")
 
         if list_equipped:
-            print("Weapon: " + "{:<20}".format(self.get_weapon().get_name())
-                  + "\tArmor: " + "{:<20}".format(self.get_armor().get_name()))
+            print("Weapon: " + "{:<20}".format(self.get_weapon())
+                  + "\tArmor: " + "{:<20}".format(self.get_armor()))
             print("=============================================================================")
 
         for item, quantity in self.inventory.items():
-            print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
+            print("{:<20}".format(item).ljust(20) + "\t\tx" + str(quantity))
         print("=============================================================================")
         return True
 

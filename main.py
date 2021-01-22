@@ -27,7 +27,7 @@ commands = {
 }
 
 # Parameters & Encounter init.
-disp = Display()
+# disp = Display()
 
 try:
     enc = pickle.load(open("savegame.camp", "rb"))
@@ -52,9 +52,9 @@ except:
     # sword = Inanimate("Iron Sword", 0, 1, 20, "Deals +2 Damage", 1, 4)
     # armor = Inanimate("Chainmail", 1, 2, 20, "Provides +10 AC", 1, 6)
     # potion = Inanimate("Mana Potion", 2, 3, 30, "Restores Mana", 6, 0.5)
-    sword = items.catalog["Iron Sword"]
-    armor = items.catalog["Chain Mail"]
-    potion = items.catalog["Mana Potion"]
+    sword = items.catalog["Shortsword"].get_name()
+    armor = items.catalog["Chain Mail"].get_name()
+    potion = items.catalog["Mana Potion"].get_name()
 
     # Creator Loop
     for index in range(enc.get_al_size()):
@@ -271,7 +271,7 @@ while True:
                     item_name = input("Item: ")
                     if item_name.lower() == "":
                         break
-                    success = enc.inv_use(item_name, True)
+                    success = actor.inv_remove(item_name)
 
         elif ans.lower().strip() == "end":
             print("Your turn has ended.")

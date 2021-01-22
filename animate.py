@@ -5,15 +5,11 @@ import random
 
 
 class Animate(Entity):
-    def __init__(self, name, entity_id, race, role, level, stat_block=None):
+    def __init__(self, name, entity_id, race, role, level, stat_block=StatBlock()):
         super().__init__(name, entity_id)       # should inherit everything this way
         self.conditions = set()
 
-        if stat_block is not None:
-            self.stat_block = stat_block
-        else:
-            self.stat_block = StatBlock()       # empty stat block
-
+        self.stat_block = stat_block
         self.race = race
         self.role = role
         self.level = level
@@ -25,37 +21,8 @@ class Animate(Entity):
         self.is_surprised = False
 
     # ==================================
-    # Accessors
+    # Inventory
     # ==================================
-    def get_stat_block(self):
-        return self.stat_block
-
-    def get_level(self):
-        return self.level
-
-    def get_role(self):
-        return self.role
-
-    def get_race(self):
-        return self.race
-
-    def get_stat(self, stat):
-        return self.stat_block.get_stat(stat)
-
-    def get_conditions(self):
-        return self.conditions
-
-    def get_inv(self):
-        return self.inventory
-
-    def get_iff(self):
-        return self.is_enemy
-
-    def get_inv_max(self):
-        return self.inv_max
-
-    def get_inv_scheme(self):
-        return self.inv_scheme
 
     def inv_is_full(self, notify=True):
         # -------------------------------------------------------
@@ -99,6 +66,75 @@ class Animate(Entity):
         if notify:
             print("[ER] You don't have this item!")
         return False
+
+    def inv_add(self, item, amount):
+        if self.inv_is_full():
+            return
+
+        if self.inv_scheme == "weight":
+            added_weight = item.get_weight() * amount
+            if self.get_inv_size() + added_weight <= self.inv_max:
+                if item in self.inventory:
+                    self.inventory[item] += amount
+                else:
+                    self.inventory[item] = amount
+            else:
+                print("[ER] It's too much to carry!")
+        else:
+            if item in self.inventory:
+                self.inventory[item] += amount
+            else:
+                self.inventory[item] = amount
+
+    def inv_remove(self, item, amount=1, discarding=True, selling=False, notify=True):
+        if self.inventory == {}:
+            print("[ER] Your inventory is empty!")
+            return False
+        try:
+            if selling:
+                earnings = item.get_cost() * amount
+
+            self.inventory[item] -= amount
+            if self.inventory[item] <= 0:
+                del self.inventory[item]
+            if discarding and notify:
+                print("[OK] You have discarded", amount, item, "!")
+            return True
+        except:
+            return False
+
+    # ==================================
+    # Accessors
+    # ==================================
+    def get_stat_block(self):
+        return self.stat_block
+
+    def get_level(self):
+        return self.level
+
+    def get_role(self):
+        return self.role
+
+    def get_race(self):
+        return self.race
+
+    def get_stat(self, stat):
+        return self.stat_block.get_stat(stat)
+
+    def get_conditions(self):
+        return self.conditions
+
+    # def get_inv(self):
+    #     return self.inventory
+
+    def get_iff(self):
+        return self.is_enemy
+
+    def get_inv_max(self):
+        return self.inv_max
+
+    def get_inv_scheme(self):
+        return self.inv_scheme
 
     # ==================================
     # Mutators
@@ -159,38 +195,4 @@ class Animate(Entity):
     def set_inv_max_size(self, size):
         self.inv_max = size
 
-    def inv_add(self, item, amount):
-        if self.inv_is_full(): pass
-        elif self.inv_scheme == "weight":
-            added_weight = item.get_weight() * amount
-            if self.get_inv_size() + added_weight <= self.inv_max:
-                if item in self.inventory:
-                    self.inventory[item] += amount
-                else:
-                    self.inventory[item] = amount
-            else:
-                print("[ER] It's too much to carry!")
-        else:
-            if item in self.inventory:
-                self.inventory[item] += amount
-            else:
-                self.inventory[item] = amount
 
-    def inv_remove(self, item, amount, discarding, selling, notify=True):
-        if self.inventory == {}:
-            print("[ER] Your inventory is empty!")
-            return False
-        # item = self.get_inv_item(item, notify)
-        if not item:
-            print("[ER] You don't have that!")
-            return False
-        else:
-            if selling:
-                earnings = item.get_cost() * amount
-
-            self.inventory[item] -= amount
-            if self.inventory[item] <= 0:
-                del self.inventory[item]
-            if discarding:
-                print("[OK] You have tossed away ", amount, " ", item.get_name(), "!")
-            return True
