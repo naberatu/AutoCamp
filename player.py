@@ -67,6 +67,68 @@ class Player(Animate):
     def get_death_evasions(self):
         return self.death_evasions
 
+    def inv_is_full(self, notify=True):
+        # -------------------------------------------------------
+        if self.inv_scheme == "slot":
+            if len(self.inventory) == self.inv_max:
+                if notify:
+                    print("[ER] Your inventory is full!")
+                return True
+            else:
+                return False
+        # -------------------------------------------------------
+        elif self.inv_scheme == "weight":
+            if self.get_inv_size() >= self.inv_max:
+                if notify:
+                    print("[ER] Your inventory is full!")
+                return True
+            else:
+                return False
+        # -------------------------------------------------------
+        elif self.inv_scheme is None:
+            return False
+
+    def get_inv_size(self):
+        if self.inv_scheme == "slot":
+            return len(self.inventory)
+        elif self.inv_scheme == "weight":
+            total_weight = 0
+            for i in self.inventory:
+                total_weight += i[0].get_weight * i[1]
+            return total_weight
+        else:
+            print("[OK] Your inventory is infinite!")
+            return -1
+
+    def find_item(self, item_name, notify=True):
+        for item in self.inventory:
+            if item.get_name() == item_name:
+                if notify:
+                    print("[OK] Aha, found it!")
+                return item
+        if notify:
+            print("[ER] You don't have this item!")
+        return False
+
+    def inv_add(self, item, amount):
+        if self.inv_is_full():
+            return
+
+        if self.inv_scheme == "weight":
+            added_weight = item.get_weight() * amount
+            if self.get_inv_size() + added_weight <= self.inv_max:
+                if item in self.inventory:
+                    self.inventory[item] += amount
+                else:
+                    self.inventory[item] = amount
+            else:
+                print("[ER] It's too much to carry!")
+        else:
+            if item in self.inventory:
+                self.inventory[item] += amount
+            else:
+                self.inventory[item] = amount
+
     def print_inv(self, list_equipped):
         if self.inventory == {}:
             print("[ER] Your inventory is empty!")
@@ -86,8 +148,34 @@ class Player(Animate):
         print("=============================================================================")
         return True
 
+    def inv_remove(self, item, amount=1, discarding=True, selling=False, notify=True):
+        if self.inventory == {}:
+            print("[ER] Your inventory is empty!")
+            return False
+        try:
+            if selling:
+                earnings = item.get_cost() * amount
+
+            if self.inv_use(item):
+                self.inventory[item] -= amount
+                if self.inventory[item] <= 0:
+                    del self.inventory[item]
+                if discarding and notify:
+                    print("[OK] You have discarded", amount, item, "!")
+                return True
+            else:
+                print("[ER] You cannot discard this item")
+        except:
+            return False
+
     # Mutators
     # ==================================
+    def inv_use(self, item):
+        if (self.weapon == item or self.armor == item) and self.inventory[item] == 1:
+            return False
+        else:
+            return True
+
     def gain_exp(self, amount):
         self.exp += amount
 
