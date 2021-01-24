@@ -169,12 +169,13 @@ class Player(Animate):
         print("=============================================================================")
         return True
 
-    def inv_remove(self, item, amount=1, discarding=True, using=False, dropping=False, selling=False, notify=True):
+    def inv_remove(self, item, amount=1, discarding=False, using=False, dropping=False, selling=False, notify=True):
         if self.inventory == {}:
             print("[ER] Inventory is empty!")
             return False
         try:
             # meaning that you are getting money in return.
+            amount = int(amount)
             earnings = 0
             if selling:
                 earnings = item.get_cost() * amount
@@ -187,6 +188,10 @@ class Player(Animate):
                     self.armor = None
 
             elif discarding or using:
+                if amount > self.inventory[item] or amount <= 0:
+                    print("[ER] You can't discard that amount!")
+                    return False
+
                 self.inventory[item] -= amount
                 if self.inventory[item] <= 0:
                     del self.inventory[item]
@@ -202,8 +207,10 @@ class Player(Animate):
                     print("[OK] You discarded", amount, item, "!")
             return True
 
-        except:
-            print("[ER] Invalid item!")
+        except ValueError:
+            print("[ER] Invalid amount!")
+        except KeyError:
+            print("[ER] You don't have that!")
             return False
 
     def set_inv_scheme(self, scheme=None):
@@ -275,30 +282,11 @@ class Player(Animate):
             print("[OK] Your inventory is infinite!")
             return -1
 
-    # def find_item(self, item_name, notify=True):
-    #     for item in self.inventory:
-    #         if item.get_name() == item_name:
-    #             if notify:
-    #                 print("[OK] Aha, found it!")
-    #             return item
-    #     if notify:
-    #         print("[ER] You don't have this item!")
-    #     return False
-
     # ==================================
     # Mutators
     # ==================================
     def gain_exp(self, amount):
         self.exp += amount
-
-    # def swap_weapon(self, item):
-    #     for i in self.inventory:
-    #         if self.inventory[i].entity_id == item:
-    #             temp = self.weapon
-    #             self.weapon = self.inventory[i]
-    #             self.inventory[i] = temp
-    #             return 0                        # meaning successful swap
-    #     return -1                               # weapon not found
 
     def set_armor(self, item):
         self.armor = item
