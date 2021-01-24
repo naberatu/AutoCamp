@@ -126,6 +126,16 @@ class Player(Animate):
             self.armor = item
             self.inv_remove(item)
 
+    def inv_dequip(self, item):
+        if item == self.weapon:
+            self.inv_add(item)
+            self.weapon = None
+        if item == self.armor:
+            self.inv_add(item)
+            self.armor = None
+        else:
+            print("[ER] You do not have that equipped!")
+
     def inv_print(self, list_equipped=True):
         if self.inventory == {}:
             print("[ER] Your inventory is empty!")
@@ -159,24 +169,41 @@ class Player(Animate):
         print("=============================================================================")
         return True
 
-    def inv_remove(self, item, amount=1, discarding=True, selling=False, notify=True):
+    def inv_remove(self, item, amount=1, discarding=True, using=False, dropping=False, selling=False, notify=True):
         if self.inventory == {}:
-            print("[ER] Your inventory is empty!")
+            print("[ER] Inventory is empty!")
             return False
         try:
+            # meaning that you are getting money in return.
+            earnings = 0
             if selling:
                 earnings = item.get_cost() * amount
 
-            if self.inv_use(item):
+            # Dropping: Discarding an item in your hand.
+            if dropping:
+                if item == self.weapon:
+                    self.weapon = None
+                elif item == self.armor:
+                    self.armor = None
+
+            elif discarding or using:
                 self.inventory[item] -= amount
                 if self.inventory[item] <= 0:
                     del self.inventory[item]
-                if discarding and notify:
-                    print("[OK] You have discarded", amount, item, "!")
-                return True
-            else:
-                print("[ER] You cannot discard this item")
+
+            if notify:
+                if selling:
+                    print("[OK] You sold", amount, item, "for", earnings, "!")
+                elif using:
+                    print("[OK] You used", amount, item, "!")
+                elif dropping:
+                    print("[OK] You dropped", amount, item, "!")
+                elif discarding:
+                    print("[OK] You discarded", amount, item, "!")
+            return True
+
         except:
+            print("[ER] Invalid item!")
             return False
 
     def set_inv_scheme(self, scheme=None):
@@ -193,12 +220,6 @@ class Player(Animate):
 
     def get_inv_max(self):
         return self.inv_max
-
-    def inv_use(self, item):
-        if (self.weapon == item or self.armor == item) and self.inventory[item] == 1:
-            return False
-        else:
-            return True
 
     # ==================================
     # Accessors

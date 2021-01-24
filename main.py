@@ -159,7 +159,7 @@ while True:
                 one_step = True
             try:
                 if one_step:
-                    move, x, y = ans.split()
+                    move, x, y = ans.lower().split()
                 else:
                     ans = input("> ")
                     if ans.lower().strip() == "cancel":
@@ -168,7 +168,8 @@ while True:
 
                 x = int(x)
                 y = int(y)
-                if one_step and move.lower() != "move":
+                # if one_step and move.lower() != "move":
+                if one_step and move != "move":
                     print("[ER1] Invalid input. Please try again.")
                     continue
                 else:
@@ -256,16 +257,24 @@ while True:
                         # action = False
                         # can_act = False
 
-        elif ans.lower().strip() == "use":
+        elif "use" in ans.lower().strip():
             if "unconscious" in actor.get_conditions():
                 print(actor.get_name(), "can't use an item! They're unconscious!")
             else:
-                active = actor.inv_print(False)
-                while active and not success:
-                    item_name = input("Item: ")
-                    if item_name.lower() == "":
-                        break
-                    success = actor.inv_remove(item_name)
+                if ans.lower().strip() == "use":
+                    active = actor.inv_print(False)
+                    while active and not success:
+                        item_name = input("Item: ")
+                        if item_name.lower() == "":
+                            break
+                        success = actor.inv_remove(item_name, using=True)
+                else:
+                    use, item_name = ans.split(' ', 1)
+                    if use.lower() == "use":
+                        actor.inv_remove(item_name, using=True)
+                    else:
+                        print("[ER] Invalid input. Please try again.")
+                        continue
 
         elif ans.lower().strip() == "end":
             print("Your turn has ended.")
