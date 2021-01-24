@@ -93,38 +93,31 @@ class Player(Animate):
             else:
                 print("[ER] It's too much to carry!")
         else:
-            if item in self.inventory:
+            if item in self.inventory.keys():
                 self.inventory[item] += amount
             else:
                 self.inventory[item] = amount
 
-    def inv_equip(self, item, is_weapon=True):
+    def inv_equip(self, item):
         # If it doesn't exist, don't bother.
         if item not in self.inventory.keys():
             print("[ER] Item not found!")
             return
 
-        # If it's not a weapon, then check if it's armor.
-        is_armor = False
-        if not is_weapon:
-            is_armor = items.catalog[item].get_is_armor()
-
-        # If it's neither weapon nor armor, don't do anything.
-        if not is_weapon and not is_armor:
-            print("[ER] You can't equip that!")
-            return
-
         # Perform the swap
-        if is_weapon:
+        if items.catalog[item].get_is_weapon():
             if self.weapon:
                 self.inv_add(self.weapon)
             self.weapon = item
-            self.inv_remove(item)
-        elif is_armor:
+            self.inv_remove(item, discarding=True, notify=False)
+        elif items.catalog[item].get_is_armor():
             if self.armor:
                 self.inv_add(self.armor)
             self.armor = item
-            self.inv_remove(item)
+            self.inv_remove(item, discarding=True, notify=False)
+        else:
+            print("[ER] You can't equip that!")
+            return
 
     def inv_dequip(self, item):
         if item == self.weapon:

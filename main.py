@@ -47,11 +47,6 @@ except:
     enc.add_entity(Player("Veth Brenatto", "Goblin", "Rogue"))
     enc.start_encounter()
 
-    # Done to ensure the item actually exists.
-    sword = items.catalog["Shortsword"].get_name()
-    armor = items.catalog["Chain Mail"].get_name()
-    potion = items.catalog["Mana Potion"].get_name()
-
     # Creator Loop
     for index in range(enc.get_al_size()):
         actor = enc.get_entity(True, index)
@@ -60,9 +55,9 @@ except:
             actor.set_stats("Max HP", 25)
 
         if type(actor) == Player:
-            actor.set_weapon(sword)
-            actor.set_armor(armor)
-            actor.inv_add(potion, random.randint(1, 6))
+            actor.set_weapon("Shortsword")
+            actor.set_armor("Chain Mail")
+            actor.inv_add("Mana Potion", random.randint(1, 6))
 
         while enc.enc_move(actor, max(MAP_MAX_X, MAP_MAX_Y) * 5,
                            random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
@@ -271,7 +266,7 @@ while True:
                 else:
                     use, item_name = ans.split(' ', 1)
                     if use.lower() == "use":
-                        actor.inv_remove(item_name, using=True)
+                        actor.inv_remove(item_name.lower(), using=True)
                     else:
                         print("[ER] Invalid input. Please try again.")
                         continue

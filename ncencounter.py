@@ -88,31 +88,31 @@ class NCEncounter(Encounter):
         else:
             self.showStats()
 
-    def getItemQuantity(self, name, ent):
-        pcInventory = ent.get_inv()
-        for obj in pcInventory:
-            if obj.get_name() == name:
-                return pcInventory[obj]
+    # def getItemQuantity(self, name, ent):
+    #     pcInventory = ent.get_inv()
+    #     for obj in pcInventory:
+    #         if obj.get_name() == name:
+    #             return pcInventory[obj]
 
-    def itemFromName(self, name):
-        pcInventory = self.currentEntity.get_inv()
-        for obj in pcInventory:
-            if obj.get_name() == name:
-                return obj
+    # def itemFromName(self, name):
+    #     pcInventory = self.currentEntity.get_inv()
+    #     for obj in pcInventory:
+    #         if obj.get_name() == name:
+    #             return obj
 
-    def isWearing(self, name):
-        if self.currentEntity.get_armor() == self.itemFromName(name):
-            return True
-        elif self.currentEntity.get_weapon() == self.itemFromName(name):
-            return True
-        else:
-            return False
+    # def isWearing(self, name):
+    #     if self.currentEntity.get_armor() == self.itemFromName(name):
+    #         return True
+    #     elif self.currentEntity.get_weapon() == self.itemFromName(name):
+    #         return True
+    #     else:
+    #         return False
 
-    def inv_dequip(self, name):
-        if self.itemFromName(name) == self.currentEntity.get_armor():
-            self.currentEntity.set_armor(None)
-        elif self.itemFromName(name) == self.currentEntity.get_weapon():
-            self.currentEntity.set_weapon(None)
+    # def inv_dequip(self, name):
+    #     if self.itemFromName(name) == self.currentEntity.get_armor():
+    #         self.currentEntity.set_armor(None)
+    #     elif self.itemFromName(name) == self.currentEntity.get_weapon():
+    #         self.currentEntity.set_weapon(None)
 
     def discardBranch(self):
         discarding = True
@@ -120,40 +120,28 @@ class NCEncounter(Encounter):
             to_discard = input("What would you like to discard?\n> ")
             if to_discard == "cancel":
                 break
-            # elif to_discard not in [x.get_name() for x in self.currentEntity.get_inv().keys()]:
-            #     print("[ER] {} not in inventory! Please select something in your inventory".format(to_discard))
-            #     continue
-
             discard_quantity = input("How many would you like to discard?\n> ")
-            try:
-                if discard_quantity == "cancel":
-                    break
-                # elif int(discard_quantity) < 0 or int(discard_quantity) > self.currentEntity.inventory[to_discard]: # self.getItemQuantity(to_discard, self.currentEntity):
-                #     print("[ER] You can not toss away that many!")
-                else:
-                    # if self.isWearing(to_discard):
-                    #     self.inv_dequip(to_discard)
-                    # self.inv_discard(self.itemFromName(to_discard), int(discard_quantity))
-                    discarding = not self.currentEntity.inv_remove(to_discard, amount=discard_quantity, discarding=True)
-            except ValueError:
-                print("[ER] Please input a positive whole number to throw away!")
+            if discard_quantity == "cancel":
+                break
+            else:
+                discarding = not self.currentEntity.inv_remove(to_discard, amount=discard_quantity, discarding=True)
 
     def equipBranch(self):
         equipping = True
+        self.currentEntity.inv_add("Spear")
         while equipping:
             to_equip = input("What would you like to equip?\n> ")
             if to_equip == "cancel":
-                equipping = False
-                continue
-            elif to_equip not in [x.get_name() for x in self.currentEntity.get_inv().keys()]:
-                print("[ER] {} not in inventory! Please select something in your inventory".format(
-                    to_equip))
-            elif self.isWearing(to_equip):
-                print("[ER] {} is already wearing {}!".format(self.currentEntity.get_name(), to_equip))
-            elif self.itemFromName(to_equip).is_armor == False and self.itemFromName(to_equip).is_weapon == False:
-                print("[ER]: The item you are trying to equip is neither armor nor a weapon!")
+                break
+            # elif to_equip not in [x.get_name() for x in self.currentEntity.get_inv().keys()]:
+            #     print("[ER] {} not in inventory! Please select something in your inventory".format(
+            #         to_equip))
+            # elif self.isWearing(to_equip):
+            #     print("[ER] {} is already wearing {}!".format(self.currentEntity.get_name(), to_equip))
+            # elif self.itemFromName(to_equip).is_armor == False and self.itemFromName(to_equip).is_weapon == False:
+            #     print("[ER]: The item you are trying to equip is neither armor nor a weapon!")
             else:
-                self.inv_equip(self.itemFromName(to_equip))
+                self.currentEntity.inv_equip(to_equip)
                 equipping = False
 
     def useBranch(self):
