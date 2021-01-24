@@ -7,7 +7,7 @@ from math import floor
 
 
 class Encounter:
-    def __init__(self, max_inventory):
+    def __init__(self, max_inventory="slot"):
         self.currentEntity = None
         self.animateList = list()
         self.inanimateList = list()

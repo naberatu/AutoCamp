@@ -3,9 +3,9 @@ from entity import Entity
 
 
 class Inanimate(Entity):
-    def __init__(self, name, entity_id=0, item_code=1, cost=1, details="This is an item.", max_stack=1, weight=1,
+    def __init__(self, name, item_code=1, cost=1, details="This is an item.", max_stack=1, weight=1,
                  alpha=0, beta=0, gamma=0, tile_size=1):
-        super().__init__(name, entity_id)    # should inherit everything this way
+        super().__init__(name)    # should inherit everything this way
 
         self.details = details
         self.weight = weight

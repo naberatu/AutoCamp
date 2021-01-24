@@ -12,7 +12,7 @@ class StatBlock:
 
             # Misc Stats
             "Inspiration": 0,
-            "Proficiency Bonus": 0,
+            "Proficiency Bonus": 2,
 
             # Ability Scores
             "Strength": 0,

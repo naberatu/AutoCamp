@@ -6,7 +6,6 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from encounter import Encounter
 from player import Player
 from statblock import StatBlock
-from inanimate import Inanimate
 from enemy import Enemy
 import items
 import random
@@ -31,27 +30,24 @@ commands = {
 
 try:
     enc = pickle.load(open("savegame.camp", "rb"))
-
 except:
-    enc = Encounter("slot")
+    enc = Encounter()
     MAP_MAX_X = 15
     MAP_MAX_Y = 10
     enc.enc_fill_map(MAP_MAX_X, MAP_MAX_Y)
 
     # Example Entities
-    enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
-    enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
-    enc.add_entity(Enemy("Werewolf", random.randint(1, 10000), "Wolf", "Doggo", 1, StatBlock()))
-    enc.add_entity(Player("Fjord", random.randint(1, 10000), "Orc", "Warlock", 1, StatBlock()))
-    enc.add_entity(Player("Jester Lavorre", random.randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock()))
-    enc.add_entity(Player("Caleb Widowgast", random.randint(1, 10000), "Human", "Wizard", 1, StatBlock()))
-    enc.add_entity(Player("Yasha Nyoodrin", random.randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock()))
-    enc.add_entity(Player("Veth Brenatto", random.randint(1, 10000), "Goblin", "Rogue", 1, StatBlock()))
+    enc.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+    enc.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+    enc.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+    enc.add_entity(Player("Fjord", "Orc", "Warlock"))
+    enc.add_entity(Player("Jester Lavorre", "Tiefling", "Cleric"))
+    enc.add_entity(Player("Caleb Widowgast", "Human", "Wizard"))
+    enc.add_entity(Player("Yasha Nyoodrin", "Aasimar", "Barbarian"))
+    enc.add_entity(Player("Veth Brenatto", "Goblin", "Rogue"))
     enc.start_encounter()
 
-    # sword = Inanimate("Iron Sword", 0, 1, 20, "Deals +2 Damage", 1, 4)
-    # armor = Inanimate("Chainmail", 1, 2, 20, "Provides +10 AC", 1, 6)
-    # potion = Inanimate("Mana Potion", 2, 3, 30, "Restores Mana", 6, 0.5)
+    # Done to ensure the item actually exists.
     sword = items.catalog["Shortsword"].get_name()
     armor = items.catalog["Chain Mail"].get_name()
     potion = items.catalog["Mana Potion"].get_name()
@@ -64,11 +60,9 @@ except:
             actor.set_stats("Max HP", 25)
 
         if type(actor) == Player:
-            actor.inv_add(sword, 1)
-            actor.inv_add(armor, 1)
-            actor.inv_add(potion, random.randint(1, 6))
             actor.set_weapon(sword)
             actor.set_armor(armor)
+            actor.inv_add(potion, random.randint(1, 6))
 
         while enc.enc_move(actor, max(MAP_MAX_X, MAP_MAX_Y) * 5,
                            random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
@@ -87,7 +81,7 @@ except:
 # End Except statement
 
 
-print("\nWelcome to the AutoCamp Demonstration v1.1")
+print("\nWelcome to the AutoCamp Demonstration v1.3")
 # disp.game_intro()
 
 enc.enc_update_map()
@@ -195,7 +189,7 @@ while True:
         enc.showStats()
 
     elif ans.lower().strip() == "inv":
-        actor.print_inv(True)
+        actor.inv_print()
 
     elif ans.lower().strip() == "end":
         print("Your turn has ended.")
@@ -266,7 +260,7 @@ while True:
             if "unconscious" in actor.get_conditions():
                 print(actor.get_name(), "can't use an item! They're unconscious!")
             else:
-                active = actor.print_inv(False)
+                active = actor.inv_print(False)
                 while active and not success:
                     item_name = input("Item: ")
                     if item_name.lower() == "":

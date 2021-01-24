@@ -5,8 +5,8 @@ import random
 
 
 class Animate(Entity):
-    def __init__(self, name, entity_id, race, role, level, stat_block=StatBlock()):
-        super().__init__(name, entity_id)       # should inherit everything this way
+    def __init__(self, name, race=None, role=None, level=1, stat_block=StatBlock()):
+        super().__init__(name)       # should inherit everything this way
         self.conditions = set()
 
         self.stat_block = stat_block
@@ -16,21 +16,16 @@ class Animate(Entity):
         self.inventory = dict()                 # Key is Item, Value is quantity.
         self.inv_max = 20                       # maximum inventory capacity possible
         self.inv_scheme = "slot"                # whether the inventory stores by slot, item weight, or infinite
-        self.is_enemy = None
+        self.is_enemy = False
         self.is_stealthy = False
         self.is_surprised = False
 
     # ==================================
-    # Inventory
-    # ==================================
-
-
-
-
-
-    # ==================================
     # Accessors
     # ==================================
+    def get_id(self):
+        return self.entity_id
+
     def get_stat_block(self):
         return self.stat_block
 
@@ -52,15 +47,12 @@ class Animate(Entity):
     def get_iff(self):
         return self.is_enemy
 
-    def get_inv_max(self):
-        return self.inv_max
-
-    def get_inv_scheme(self):
-        return self.inv_scheme
-
     # ==================================
     # Mutators
     # ==================================
+    def set_id(self, new_id):
+        self.entity_id = new_id
+
     def level_up(self):
         if self.level < 20:
             self.level += 1
@@ -108,13 +100,6 @@ class Animate(Entity):
     def set_iff(self, iff):
         self.is_enemy = iff
 
-    def set_inv_scheme(self, scheme=None):
-        if scheme == "slot" or scheme == "weight" or scheme is None:
-            self.inv_scheme = scheme
-        else:
-            print("[ER] Invalid inventory scheme!")
 
-    def set_inv_max_size(self, size):
-        self.inv_max = size
 
 

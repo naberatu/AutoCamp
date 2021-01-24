@@ -1,8 +1,7 @@
 
 class Entity:
-    def __init__(self, name, entity_id):
+    def __init__(self, name):
         self.name = name                # must have a name to be created
-        self.entity_id = entity_id
         self.coors = [1, 1, 1]       # done separately, since this refers to on-screen appearance
         self.tileSize = 1
 
@@ -17,9 +16,6 @@ class Entity:
     def get_coors(self):
         return self.coors
 
-    def get_id(self):
-        return self.entity_id
-
     # Mutators
     # ==================================
     def set_name(self, value):
@@ -33,5 +29,4 @@ class Entity:
         self.coors[1] = y
         self.coors[2] = z
 
-    def set_id(self, new_id):
-        self.entity_id = new_id
+

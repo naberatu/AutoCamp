@@ -1,10 +1,11 @@
 
 from animate import Animate
+from statblock import StatBlock
 
 
 class Enemy(Animate):
-    def __init__(self, name, entity_id, race, role, level, stat_block):
-        super().__init__(name, entity_id, race, role, level, stat_block)      # should inherit everything this way
+    def __init__(self, name, race=None, role=None, level=1, stat_block=StatBlock()):
+        super().__init__(name, race, role, level, stat_block)      # should inherit everything this way
         self.expYield = 0
         self.is_enemy = True
         self.maxInvSize = 10            # Arbitrary value
@@ -17,23 +18,23 @@ class Enemy(Animate):
         return self.expYield
 
     def print_inv(self, list_equipped):
-        if self.inventory == {}:
-            print("[ER] Your inventory is empty!")
-            return False
-
-        print("\n=============================================================================")
-        print(self.name + "\'s Inventory")
-        print("-----------------------------------------------------------------------------")
-
-        if list_equipped:
-            print("Weapon: " + "{:<20}".format(self.get_weapon().get_name())
-                  + "\tArmor: " + "{:<20}".format(self.get_armor().get_name()))
-            print("=============================================================================")
-
-        for item, quantity in self.inventory.items():
-            print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
-        print("=============================================================================")
-        return True
+        # if self.inventory == {}:
+        print("[ER] Enemies have no inventory!")
+        return False
+    #
+    #     print("\n=============================================================================")
+    #     print(self.name + "\'s Inventory")
+    #     print("-----------------------------------------------------------------------------")
+    #
+    #     if list_equipped:
+    #         print("Weapon: " + "{:<20}".format(self.get_weapon().get_name())
+    #               + "\tArmor: " + "{:<20}".format(self.get_armor().get_name()))
+    #         print("=============================================================================")
+    #
+    #     for item, quantity in self.inventory.items():
+    #         print("{:<20}".format(item.get_name()).ljust(20) + "\t\tx" + str(quantity))
+    #     print("=============================================================================")
+    #     return True
 
     # Mutators
     # ==================================
