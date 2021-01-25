@@ -33,7 +33,6 @@ class Player(Animate):
         self.companion = None           # We can add functionality to adjust later
         self.type_tag = "player"
         self.stat_block = stat_block
-        # self.stat_block.modify_stat("Proficiency Bonus", 2)
 
         if race == ("Dwarf" or "Gnome" or "Halfling"):
             self.stat_block.modify_stat("Speed", 25)

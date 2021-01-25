@@ -60,21 +60,13 @@ class NCEncounter(Encounter):
     def diceBranch(self):
         rolling = True
         while rolling:
-            try:
-                rolls = input("How many dice?\n> ")
-                if rolls == "cancel":
-                    rolling = False
-                    continue
-                faces = input("How many faces?\n> ")
-                if faces == "cancel":
-                    rolling = False
-                    continue
-                self.rollDice(int(rolls), int(faces))
-                print()
-                rolling = False
-            except ValueError:
-                print(
-                    "[ER] Invalid input! Number of dice must be a whole number > 1.\n\t Valid dice are: d4, d6, d8, d10, d12, and d20.")
+            rolls = input("\nInput dice throw (\"num dice\"d\"num faces\"):\n> ")
+            if rolls == "cancel":
+                break
+            rolls, faces = rolls.lower().split("d")
+            self.rollDice(int(rolls), int(faces))
+            print()
+            rolling = False
 
     def statsBranch(self):
         print("Whose stats would you like to view?")
@@ -98,7 +90,7 @@ class NCEncounter(Encounter):
 
     def equipBranch(self):
         equipping = True
-        self.currentEntity.inv_add("Spear")
+        # self.currentEntity.inv_add("Spear")      # For testing
         while equipping:
             to_equip = input("What would you like to equip?\n> ")
             if to_equip == "cancel":
@@ -116,6 +108,7 @@ class NCEncounter(Encounter):
             else:
                 flag = self.currentEntity.inv_remove(to_use, using=True)
 
+    # Look at next
     def giveBranch(self):
         giving = True
         giver = self.currentEntity
@@ -215,5 +208,5 @@ class NCEncounter(Encounter):
 if __name__ == "__main__":
     nce = NCEncounter("placeholder", "town")
     nce.animateList = pickle.load(open("players.camp", "rb"))
-
     nce.genLoop()
+    pickle.dump(nce.animateList, open("players.camp", "wb"))

@@ -198,77 +198,29 @@ class Encounter:
         elif acceptor.inv_is_full(False):
             print("[ER] ", acceptor.get_name(), "'s inventory is full!")
 
-    # def showStats(self) -> None:
-    #     actor = self.currentEntity
-    #     stat = actor.get_stat_block().get_dict()
-    #
-    #     print("\n==============================================================================")
-    #     text = "{:20}".format(actor.get_name())
-    #
-    #     if (type(actor) == Player) or (type(actor) == Enemy):
-    #         text += "{:^30}".format(actor.get_race() + " " + actor.get_role()) + "\t[Lv. {:<2}]".format(actor.get_level())
-    #     else:
-    #         text += "{:^30}".format(actor.get_race() + " " + actor.get_role())
-    #
-    #     print(text, "\n------------------------------------------------------------------------------")
-    #     text = "HP: " + "{:12}".format(("{:3} /{}".rjust(12).format(stat["Current HP"], stat["Max HP"])))
-    #     text += "\t" + "{:^30}".format("[AC: {:<2}]".format(stat["Armor Class"]))
-    #     text += "\tSpeed: {:<2}".format(stat["Speed"])
-    #     print(text, "\n==============================================================================")
-    #
-    #     if type(actor) == Player and actor.get_companion() is not None:
-    #         print("Companion:", actor.companion)
-    #     elif type(actor) == Enemy:
-    #         print("EXP Yield:", actor.get_exp_yield())
-    #
-    #     text = "{:19}".format("Inspiration:") + " {:<2}".format(stat["Inspiration"])
-    #     text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"]) + "\n"
-    #     print(text)
-    #
-    #     tracer, text = 0, ""
-    #     for name, value in list(stat.items())[7:30]:
-    #         if tracer < 6:
-    #             if tracer % 2 == 0:
-    #                 text = "{:19}".format(name + ": ") + "{:2}".format(value)
-    #             else:
-    #                 text += "\t\t{:19}".format(name + ": ") + "{:2}".format(value)
-    #                 print(text)
-    #         elif tracer >= 6:
-    #             if tracer == 6:
-    #                 print()
-    #             if tracer % 3 == 0:
-    #                 text = "{:19}".format(name + ": ") + "{:+2}".format(value)
-    #             else:
-    #                 text += "\t\t{:19}".format(name + ": ") + "{:+2}".format(value)
-    #                 if (tracer + 1) % 3 == 0:
-    #                     print(text)
-    #         tracer += 1
-    #
-    #     print("==============================================================================")
-
     # ===============================================================================
     # Dice & Check Methods
     # ===============================================================================
     @staticmethod
-    def rollDice(rolls, numOfFaces, print_results=True) -> int:
+    def rollDice(rolls, number_of_faces, print_results=True) -> int:
         total = 0
-
-        validFaces = [4, 6, 8, 10, 12, 20]
-        if numOfFaces not in validFaces:
-            print(str(numOfFaces) + " is not a valid number of faces!!")
-            print("Valid dice are: d4, d6, d8, d10, d12, and d20.")
-            return total
 
         if (rolls < 1) or (type(rolls) != int):
             print("Rolls must be whole numbers > 1!!")
             return total
 
+        valid_faces = [4, 6, 8, 10, 12, 20]
+        if number_of_faces not in valid_faces:
+            print(str(number_of_faces) + " is not a valid number of faces!!")
+            print("Valid dice are: d4, d6, d8, d10, d12, and d20.")
+            return total
+
         for roll in range(rolls):
-            result = randint(1, numOfFaces)
+            result = randint(1, number_of_faces)
             total += result
 
             if print_results:
-                print("Rolling D{} {} of {}... Result is {}".format(numOfFaces, roll + 1, rolls, result))
+                print("Rolling D{} {} of {}... Result is {}".format(number_of_faces, roll + 1, rolls, result))
         if print_results:
             print("Final total is... {}!!".format(total))
         return total
