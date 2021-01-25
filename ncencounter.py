@@ -1,8 +1,4 @@
 from encounter import Encounter
-from inanimate import Inanimate
-from random import randint
-from player import Player
-from statblock import StatBlock
 import pickle
 
 
@@ -86,33 +82,7 @@ class NCEncounter(Encounter):
         if choice == "cancel":
             pass
         else:
-            self.showStats()
-
-    # def getItemQuantity(self, name, ent):
-    #     pcInventory = ent.get_inv()
-    #     for obj in pcInventory:
-    #         if obj.get_name() == name:
-    #             return pcInventory[obj]
-
-    # def itemFromName(self, name):
-    #     pcInventory = self.currentEntity.get_inv()
-    #     for obj in pcInventory:
-    #         if obj.get_name() == name:
-    #             return obj
-
-    # def isWearing(self, name):
-    #     if self.currentEntity.get_armor() == self.itemFromName(name):
-    #         return True
-    #     elif self.currentEntity.get_weapon() == self.itemFromName(name):
-    #         return True
-    #     else:
-    #         return False
-
-    # def inv_dequip(self, name):
-    #     if self.itemFromName(name) == self.currentEntity.get_armor():
-    #         self.currentEntity.set_armor(None)
-    #     elif self.itemFromName(name) == self.currentEntity.get_weapon():
-    #         self.currentEntity.set_weapon(None)
+            self.currentEntity.showStats()
 
     def discardBranch(self):
         discarding = True
@@ -133,13 +103,6 @@ class NCEncounter(Encounter):
             to_equip = input("What would you like to equip?\n> ")
             if to_equip == "cancel":
                 break
-            # elif to_equip not in [x.get_name() for x in self.currentEntity.get_inv().keys()]:
-            #     print("[ER] {} not in inventory! Please select something in your inventory".format(
-            #         to_equip))
-            # elif self.isWearing(to_equip):
-            #     print("[ER] {} is already wearing {}!".format(self.currentEntity.get_name(), to_equip))
-            # elif self.itemFromName(to_equip).is_armor == False and self.itemFromName(to_equip).is_weapon == False:
-            #     print("[ER]: The item you are trying to equip is neither armor nor a weapon!")
             else:
                 self.currentEntity.inv_equip(to_equip)
                 equipping = False
@@ -250,37 +213,7 @@ class NCEncounter(Encounter):
 
 
 if __name__ == "__main__":
-    NCE1 = NCEncounter("placeholder", "town")
+    nce = NCEncounter("placeholder", "town")
+    nce.animateList = pickle.load(open("players.camp", "rb"))
 
-    # dagger = Inanimate("Rusty Butter Knife", 4, 25,
-    #                    "Jagged at the edges from facing too many slices of toast. Still smells faintly of butter.",
-    #                    1, 1)
-    # sword = Inanimate("Iron Sword", 1, 20, "Deals +2 Damage", 1, 4)
-    # armor = Inanimate("Chainmail", 2, 20, "Provides +10 AC", 1, 6)
-    # potion = Inanimate("Mana Potion", 3, 30, "Restores Mana", 6, 0.5)
-    # monies = Inanimate("Gold", 5, 1, "Ooo, shiny!!", 1000000, 0.1)
-
-    # dagger.is_weapon = True
-    # sword.is_weapon = True
-    # armor.is_armor = True
-    # potion.is_consumable = True
-    #
-    # players = [Player("Fjord", randint(1, 10000), "Orc", "Warlock", 1, StatBlock()),
-    #            Player("Jester Lavorre", randint(1, 10000), "Tiefling", "Cleric", 1, StatBlock()),
-    #            Player("Caleb Widowgast", randint(1, 10000), "Human", "Wizard", 1, StatBlock()),
-    #            Player("Yasha Nyoodrin", randint(1, 10000), "Aasimar", "Barbarian", 1, StatBlock()),
-    #            Player("Veth Brenatto", randint(1, 10000), "Goblin", "Rogue", 1, StatBlock())]
-    #
-    # for p in players:
-    #     p.inv_add(sword, 1)
-    #     p.inv_add(armor, 1)
-    #     p.inv_add(potion, randint(1, 6))
-    #     p.inv_add(dagger, 1)
-    #     p.inv_add(monies, randint(1, 1000))
-    #     p.set_weapon(sword)
-    #     p.set_armor(armor)
-    #     NCE1.add_entity(p)
-
-    NCE1.animateList = pickle.load(open("players.camp", "rb"))
-
-    NCE1.genLoop()
+    nce.genLoop()

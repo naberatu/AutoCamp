@@ -13,12 +13,61 @@ class Animate(Entity):
         self.race = race
         self.role = role
         self.level = level
+        self.companion = None
+        self.exp = 0
+        self.type_tag = None
         self.inventory = dict()                 # Key is Item, Value is quantity.
         self.inv_max = 20                       # maximum inventory capacity possible
         self.inv_scheme = "slot"                # whether the inventory stores by slot, item weight, or infinite
         self.is_enemy = False
         self.is_stealthy = False
         self.is_surprised = False
+
+    def showStats(self) -> None:
+        stat = self.stat_block.get_dict()
+
+        print("\n==============================================================================")
+        text = "{:20}".format(self.get_name())
+        text += "{:^30}".format(self.get_race() + " " + self.get_role())
+
+        if self.type_tag == "player" or self.type_tag == "enemy":
+            text += "\t[Lv. {:<2}]".format(self.get_level())
+
+        print(text, "\n------------------------------------------------------------------------------")
+        text = "HP: " + "{:12}".format(("{:3} /{}".rjust(12).format(stat["Current HP"], stat["Max HP"])))
+        text += "\t" + "{:^30}".format("[AC: {:<2}]".format(stat["Armor Class"]))
+        text += "\tSpeed: {:<2}".format(stat["Speed"])
+        print(text, "\n==============================================================================")
+
+        if self.type_tag == "player" and self.companion:
+            print("Companion:", self.companion)
+        elif self.type_tag == "enemy":
+            print("EXP Yield:", self.exp)
+
+        text = "{:19}".format("Inspiration:") + " {:<2}".format(stat["Inspiration"])
+        text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"]) + "\n"
+        print(text)
+
+        tracer, text = 0, ""
+        for name, value in list(stat.items())[7:30]:
+            if tracer < 6:
+                if tracer % 2 == 0:
+                    text = "{:19}".format(name + ": ") + "{:2}".format(value)
+                else:
+                    text += "\t\t{:19}".format(name + ": ") + "{:2}".format(value)
+                    print(text)
+            elif tracer >= 6:
+                if tracer == 6:
+                    print()
+                if tracer % 3 == 0:
+                    text = "{:19}".format(name + ": ") + "{:+2}".format(value)
+                else:
+                    text += "\t\t{:19}".format(name + ": ") + "{:+2}".format(value)
+                    if (tracer + 1) % 3 == 0:
+                        print(text)
+            tracer += 1
+
+        print("==============================================================================")
 
     # ==================================
     # Accessors

@@ -198,53 +198,53 @@ class Encounter:
         elif acceptor.inv_is_full(False):
             print("[ER] ", acceptor.get_name(), "'s inventory is full!")
 
-    def showStats(self) -> None:
-        actor = self.currentEntity
-        stat = actor.get_stat_block().get_dict()
-
-        print("\n==============================================================================")
-        text = "{:20}".format(actor.get_name())
-
-        if (type(actor) == Player) or (type(actor) == Enemy):
-            text += "{:^30}".format(actor.get_race() + " " + actor.get_role()) + "\t[Lv. {:<2}]".format(actor.get_level())
-        else:
-            text += "{:^30}".format(actor.get_race() + " " + actor.get_role())
-
-        print(text, "\n------------------------------------------------------------------------------")
-        text = "HP: " + "{:12}".format(("{:3} /{}".rjust(12).format(stat["Current HP"], stat["Max HP"])))
-        text += "\t" + "{:^30}".format("[AC: {:<2}]".format(stat["Armor Class"]))
-        text += "\tSpeed: {:<2}".format(stat["Speed"])
-        print(text, "\n==============================================================================")
-
-        if type(actor) == Player and actor.get_companion() is not None:
-            print("Companion:", actor.companion)
-        elif type(actor) == Enemy:
-            print("EXP Yield:", actor.get_exp_yield())
-
-        text = "{:19}".format("Inspiration:") + " {:<2}".format(stat["Inspiration"])
-        text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"]) + "\n"
-        print(text)
-
-        tracer, text = 0, ""
-        for name, value in list(stat.items())[7:30]:
-            if tracer < 6:
-                if tracer % 2 == 0:
-                    text = "{:19}".format(name + ": ") + "{:2}".format(value)
-                else:
-                    text += "\t\t{:19}".format(name + ": ") + "{:2}".format(value)
-                    print(text)
-            elif tracer >= 6:
-                if tracer == 6:
-                    print()
-                if tracer % 3 == 0:
-                    text = "{:19}".format(name + ": ") + "{:+2}".format(value)
-                else:
-                    text += "\t\t{:19}".format(name + ": ") + "{:+2}".format(value)
-                    if (tracer + 1) % 3 == 0:
-                        print(text)
-            tracer += 1
-
-        print("==============================================================================")
+    # def showStats(self) -> None:
+    #     actor = self.currentEntity
+    #     stat = actor.get_stat_block().get_dict()
+    #
+    #     print("\n==============================================================================")
+    #     text = "{:20}".format(actor.get_name())
+    #
+    #     if (type(actor) == Player) or (type(actor) == Enemy):
+    #         text += "{:^30}".format(actor.get_race() + " " + actor.get_role()) + "\t[Lv. {:<2}]".format(actor.get_level())
+    #     else:
+    #         text += "{:^30}".format(actor.get_race() + " " + actor.get_role())
+    #
+    #     print(text, "\n------------------------------------------------------------------------------")
+    #     text = "HP: " + "{:12}".format(("{:3} /{}".rjust(12).format(stat["Current HP"], stat["Max HP"])))
+    #     text += "\t" + "{:^30}".format("[AC: {:<2}]".format(stat["Armor Class"]))
+    #     text += "\tSpeed: {:<2}".format(stat["Speed"])
+    #     print(text, "\n==============================================================================")
+    #
+    #     if type(actor) == Player and actor.get_companion() is not None:
+    #         print("Companion:", actor.companion)
+    #     elif type(actor) == Enemy:
+    #         print("EXP Yield:", actor.get_exp_yield())
+    #
+    #     text = "{:19}".format("Inspiration:") + " {:<2}".format(stat["Inspiration"])
+    #     text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"]) + "\n"
+    #     print(text)
+    #
+    #     tracer, text = 0, ""
+    #     for name, value in list(stat.items())[7:30]:
+    #         if tracer < 6:
+    #             if tracer % 2 == 0:
+    #                 text = "{:19}".format(name + ": ") + "{:2}".format(value)
+    #             else:
+    #                 text += "\t\t{:19}".format(name + ": ") + "{:2}".format(value)
+    #                 print(text)
+    #         elif tracer >= 6:
+    #             if tracer == 6:
+    #                 print()
+    #             if tracer % 3 == 0:
+    #                 text = "{:19}".format(name + ": ") + "{:+2}".format(value)
+    #             else:
+    #                 text += "\t\t{:19}".format(name + ": ") + "{:+2}".format(value)
+    #                 if (tracer + 1) % 3 == 0:
+    #                     print(text)
+    #         tracer += 1
+    #
+    #     print("==============================================================================")
 
     # ===============================================================================
     # Dice & Check Methods

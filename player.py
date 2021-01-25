@@ -31,6 +31,7 @@ class Player(Animate):
         self.is_enemy = False
         self.maxInvWeight = 210         # Arbitrary value
         self.companion = None           # We can add functionality to adjust later
+        self.type_tag = "player"
         self.stat_block = stat_block
         # self.stat_block.modify_stat("Proficiency Bonus", 2)
 
