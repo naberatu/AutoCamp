@@ -190,13 +190,12 @@ class Encounter:
     def inv_sell(self, item_name, amount):
         self.currentEntity.inv_remove(item_name, amount, False, True)
 
-    def inv_give(self, acceptor, item_name, amount):
-        if not acceptor.is_enemy() and not acceptor.inv_is_full(False):
-            item = self.currentEntity.inv_remove(item_name, amount, False, False)
-            acceptor.inv_add(item)
-            print("[OK] You gave", acceptor.get_name(), " ", item_name, "!")
-        elif acceptor.inv_is_full(False):
-            print("[ER] ", acceptor.get_name(), "'s inventory is full!")
+    def inv_give(self, recipient, item_name, amount=1):
+        if not recipient.get_iff() and recipient.inv_add(item_name, amount=amount) \
+                and self.currentEntity.inv_remove(item_name, amount=amount, discarding=True, notify=False):
+            print("[OK] You gave", recipient.get_name(), amount, item_name, "!")
+        else:
+            print("[ER] Cannot give", item_name, "to", recipient.get_name(), "!")
 
     # ===============================================================================
     # Dice & Check Methods

@@ -79,24 +79,34 @@ class Player(Animate):
 
     def inv_add(self, item, amount=1):
         if self.inv_is_full():
-            return
+            return False
 
         if items.catalog[item].get_is_weapon() and self.weapon is None:
             self.weapon = items.catalog[item]
-        elif self.inv_scheme == "weight":
-            added_weight = item.get_weight() * amount
-            if self.get_inv_size() + added_weight <= self.inv_max:
-                if item in self.inventory:
+            return True
+
+        try:
+            amount = int(amount)
+            if self.inv_scheme == "weight":
+                added_weight = item.get_weight() * amount
+                if self.get_inv_size() + added_weight <= self.inv_max:
+                    if item in self.inventory:
+                        self.inventory[item] += amount
+                    else:
+                        self.inventory[item] = amount
+                    return True
+                else:
+                    print("[ER] It's too much to carry!")
+                    return False
+            else:
+                if item in self.inventory.keys():
                     self.inventory[item] += amount
                 else:
                     self.inventory[item] = amount
-            else:
-                print("[ER] It's too much to carry!")
-        else:
-            if item in self.inventory.keys():
-                self.inventory[item] += amount
-            else:
-                self.inventory[item] = amount
+                return True
+        except:
+            print("[ER] Invalid amount entered!")
+            return False
 
     def inv_equip(self, item):
         # If it doesn't exist, don't bother.

@@ -113,37 +113,23 @@ class NCEncounter(Encounter):
         giving = True
         giver = self.currentEntity
         while giving:
+
             to_give = input("What would you like to give?\n> ")
             if to_give == "cancel":
-                giving = False
-                continue
-            elif to_give not in [x.get_name() for x in self.currentEntity.get_inv().keys()]:
-                print("[ER] {} not in inventory! Please select something in your inventory".format(to_give))
-                continue
+                break
 
             give_quantity = input("How many would you like to give?\n> ")
+            if give_quantity == "cancel":
+                break
+
+            print("Who is receiving this?\n")
+            recipient = self.choosePC(True, giver)
+            if recipient == "cancel":
+                break
             try:
-                if give_quantity == "cancel":
-                    giving = False
-                    continue
-                elif int(give_quantity) < 0 or int(give_quantity) > self.getItemQuantity(
-                        to_give, self.currentEntity):
-                    print("[ER] You can not give away that many!")
-                else:
-                    print("Who is receiving this?\n")
-                    recipient = self.choosePC(True, giver)
-                    if recipient == "cancel":
-                        giving = False
-                        continue
-                    elif self.getItemQuantity(to_give, recipient) == self.itemFromName(to_give).maxStack:
-                        print("[ER] Can not give item to {}, they have the maximum limit for that item!".format(recipient.get_name()))
-                        continue
-                    elif self.isWearing(to_give):
-                        self.inv_dequip(to_give)
-                    self.inv_give(recipient, self.itemFromName(to_give), int(give_quantity))
-                    giving = False
-            except ValueError:
-                print("[ER] Please input a positive whole number to give away!")
+                self.inv_give(recipient, to_give, give_quantity)
+            except:
+                print("[ER] Could not complete that!")
 
     def invBranch(self):
         print("Whose inventory would you like to view?")
@@ -206,7 +192,7 @@ class NCEncounter(Encounter):
 
 
 if __name__ == "__main__":
-    nce = NCEncounter("placeholder", "town")
+    nce = NCEncounter("slot", "town")
     nce.animateList = pickle.load(open("players.camp", "rb"))
     nce.genLoop()
     pickle.dump(nce.animateList, open("players.camp", "wb"))
