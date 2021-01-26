@@ -87,6 +87,8 @@ class Player(Animate):
 
         try:
             amount = int(amount)
+            if amount < 1:
+                raise ValueError
             if self.inv_scheme == "weight":
                 added_weight = item.get_weight() * amount
                 if self.get_inv_size() + added_weight <= self.inv_max:

@@ -191,8 +191,8 @@ class Encounter:
         self.currentEntity.inv_remove(item_name, amount, False, True)
 
     def inv_give(self, recipient, item_name, amount=1):
-        if not recipient.get_iff() and recipient.inv_add(item_name, amount=amount) \
-                and self.currentEntity.inv_remove(item_name, amount=amount, discarding=True, notify=False):
+        if not recipient.get_iff() and self.currentEntity.inv_remove(item_name, amount=amount, discarding=True, notify=False) \
+                and recipient.inv_add(item_name, amount=amount):
             print("[OK] You gave", recipient.get_name(), amount, item_name, "!")
         else:
             print("[ER] Cannot give", item_name, "to", recipient.get_name(), "!")
