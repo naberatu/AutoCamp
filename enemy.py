@@ -13,6 +13,7 @@ class Enemy(Animate):
         self.maxInvSize = 10            # Arbitrary value
         self.weapon = None
         self.stat_block = stat_block
+        self.stat_block.modify_stat("Max HP", 25)
 
     # Accessors
     # ==================================

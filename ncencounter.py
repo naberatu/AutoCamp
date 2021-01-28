@@ -14,13 +14,14 @@ class NCEncounter(Encounter):
             "move": "Change your current location",
             "inv": "View more options regarding the party's inventory",
             "stats": "View a party member's stats",
-            "rest" : "Allow party members a moment of rest to recover"
+            "rest": "Allow party members a moment of rest to recover"
         }
         self.inv_commands = {
             "use": "Use an item in this member's inventory",
             "equip": "Arrange this member's equipment",
             "discard": "Discard an item from this member's inventory",
-            "give" : "Give an item from this member's inventory to another member",
+            "give": "Give an item from this member's inventory to another member",
+            "sell": "Sell an item in exchange for currency",
             "cancel": "return to command menu"
         }
 
@@ -76,17 +77,26 @@ class NCEncounter(Encounter):
         else:
             self.currentEntity.showStats()
 
-    def discardBranch(self):
-        discarding = True
-        while discarding:
-            to_discard = input("What would you like to discard?\n> ")
-            if to_discard == "cancel":
+    def discardBranch(self, discarding=False, selling=False):
+        term = None
+        if discarding:
+            term = "discard"
+        elif selling:
+            term = "sell"
+
+        while discarding or selling:
+            item_name = input("What would you like to " + term + "?\n> ")
+            if item_name == "cancel":
                 break
-            discard_quantity = input("How many would you like to discard?\n> ")
-            if discard_quantity == "cancel":
+            item_amount = input("How many would you like to " + term + "?\n> ")
+            if item_amount == "cancel":
                 break
-            else:
-                discarding = not self.currentEntity.inv_remove(to_discard, amount=discard_quantity, discarding=True)
+            elif term == "discard":
+                discarding = not self.currentEntity.inv_remove(item_name, amount=item_amount, discarding=True)
+            elif term == "sell":
+                selling = not self.currentEntity.inv_remove(item_name, amount=item_amount, selling=True, notify=True)
+
+
 
     def equipBranch(self):
         equipping = True
@@ -153,7 +163,7 @@ class NCEncounter(Encounter):
                     viewing_inv = False
 
                 elif inv_action == "discard":
-                    self.discardBranch()
+                    self.discardBranch(discarding=True)
 
                 elif inv_action == "equip":
                     self.equipBranch()
@@ -163,6 +173,10 @@ class NCEncounter(Encounter):
 
                 elif inv_action == "give":
                     self.giveBranch()
+
+                elif inv_action == "sell":
+                    self.discardBranch(selling=True)
+
 
     def genLoop(self):
         while self.running_general:

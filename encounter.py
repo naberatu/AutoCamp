@@ -116,7 +116,7 @@ class Encounter:
         actor.set_coors(new_x_coord, new_y_coord, new_z_coord)
         return [requested_distance, False]
 
-    def enc_fill_map(self, width, height):
+    def enc_fill_map(self, width=15, height=10):
         self.map_max_x = width
         self.map_max_y = height
         for i in range(0, height):
@@ -180,15 +180,18 @@ class Encounter:
     # ===============================================================================
     # Inventory Methods
     # ===============================================================================
-    def inv_pickup(self, item, amount, hot_swap, is_armor, notify=True):
-        if hot_swap:
-            self.currentEntity.inv_add(item, amount)
-            self.inv_equip(is_armor, item, notify)
-        else:
-            self.currentEntity.inv_add(item, amount)
-
-    def inv_sell(self, item_name, amount):
-        self.currentEntity.inv_remove(item_name, amount, False, True)
+    def inv_pickup(self, item, amount=1, hot_swap=False):
+        try:
+            if self.currentEntity.inv_add(item, amount):
+                if hot_swap and self.currentEntity.inv_equip(item):
+                    print("[OK] Picked up and equipped " + item + "!")
+                else:
+                    print("[OK] Picked up " + item + "!")
+                return True
+            raise ValueError
+        except:
+            print("[ER] Could not pick up " + item + "!")
+            return False
 
     def inv_give(self, recipient, item_name, amount=1):
         if not recipient.get_iff() and self.currentEntity.inv_remove(item_name, amount=amount, discarding=True, notify=False) \

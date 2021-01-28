@@ -114,22 +114,22 @@ class Player(Animate):
         # If it doesn't exist, don't bother.
         if item not in self.inventory.keys():
             print("[ER] Item not found!")
-            return
+            return False
 
         # Perform the swap
         if items.catalog[item].get_is_weapon():
             if self.weapon:
                 self.inv_add(self.weapon)
             self.weapon = item
-            self.inv_remove(item, discarding=True, notify=False)
+            return self.inv_remove(item, discarding=True, notify=False)
         elif items.catalog[item].get_is_armor():
             if self.armor:
                 self.inv_add(self.armor)
             self.armor = item
-            self.inv_remove(item, discarding=True, notify=False)
+            return self.inv_remove(item, discarding=True, notify=False)
         else:
             print("[ER] You can't equip that!")
-            return
+            return False
 
     def inv_dequip(self, item):
         if item == self.weapon:
@@ -182,11 +182,19 @@ class Player(Animate):
             # meaning that you are getting money in return.
             amount = int(amount)
             earnings = 0
-            if selling:
-                earnings = item.get_cost() * amount
 
             # Dropping: Discarding an item in your hand.
-            if dropping:
+            if selling:
+                earnings = items.catalog[item].get_cost() * amount
+                if item == self.weapon or item == self.armor:
+                    if not self.inv_remove(item, amount, discarding=True, notify=False):
+                        self.inv_remove(item, dropping=True, notify=False)
+                elif not self.inv_remove(item, amount, discarding=True, notify=False):
+                    raise KeyError
+
+                self.money_add(copper=earnings)
+
+            elif dropping:
                 if item == self.weapon:
                     self.weapon = None
                 elif item == self.armor:
@@ -203,7 +211,7 @@ class Player(Animate):
 
             if notify:
                 if selling:
-                    print("[OK] You sold", amount, item, "for", earnings, "!")
+                    print("[OK] You sold", amount, item, "for", earnings, "Copper!")
                 elif using:
                     print("[OK] You used", amount, item, "!")
                 elif dropping:
