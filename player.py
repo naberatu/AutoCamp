@@ -43,6 +43,7 @@ class Player(Animate):
         if self.level == 1:
             self.stat_block.modify_stat("Max HP", role_dict[role])
             self.stat_block.modify_stat("Current HP", role_dict[role])
+            self.stat_block.modify_stat("Hit Dice Quantity", self.level)
 
         self.weapon = None              # a player is either wielding a weapon, or isn't
         self.armor = None               # a player either is wearing armor, or ain't.
@@ -82,7 +83,7 @@ class Player(Animate):
             return False
 
         if items.catalog[item].get_is_weapon() and self.weapon is None:
-            self.weapon = items.catalog[item]
+            self.weapon = item
             return True
 
         try:
@@ -141,8 +142,8 @@ class Player(Animate):
         else:
             print("[ER] You do not have that equipped!")
 
-    def inv_print(self, list_equipped=True):
-        if self.inventory == {}:
+    def inv_print(self, list_equipped=True, list_inv=True):
+        if self.inventory == {} and list_inv:
             print("[ER] Your inventory is empty!")
             return False
 
@@ -168,9 +169,10 @@ class Player(Animate):
                 print("Weapon: " + "{:<20}".format(self.get_weapon())
                       + "\tArmor: " + "{:<20}".format(self.get_armor()))
 
-        print("-----------------------------------------------------------------------------")
-        for item, quantity in self.inventory.items():
-            print("{:<20}".format(item).ljust(20) + "\t\tx" + str(quantity))
+        if list_inv:
+            print("-----------------------------------------------------------------------------")
+            for item, quantity in self.inventory.items():
+                print("{:<20}".format(item).ljust(20) + "\t\tx" + str(quantity))
         print("=============================================================================")
         return True
 
@@ -221,9 +223,12 @@ class Player(Animate):
             return True
 
         except ValueError:
-            print("[ER] Invalid amount!")
+            if notify:
+                print("[ER] Invalid amount!")
+            return False
         except KeyError:
-            print("[ER] You don't have that!")
+            if notify:
+                print("[ER] You don't have that!")
             return False
 
     def set_inv_scheme(self, scheme=None):

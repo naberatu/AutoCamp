@@ -2,12 +2,13 @@
 from entity import Entity
 from statblock import StatBlock
 import random
+import conditions
 
 
 class Animate(Entity):
     def __init__(self, name, race=None, role=None, level=1, stat_block=StatBlock()):
         super().__init__(name)       # should inherit everything this way
-        self.conditions = set()
+        self.conditions = dict()
 
         self.stat_block = stat_block
         self.race = race
@@ -45,11 +46,12 @@ class Animate(Entity):
             print("EXP Yield:", self.exp)
 
         text = "{:19}".format("Inspiration:") + " {:<2}".format(stat["Inspiration"])
-        text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"]) + "\n"
+        text += "\t\t{:19}".format("Proficiency Bonus:") + "{:<+2}".format(stat["Proficiency Bonus"])
+        text += "\t\tHit Dice: d" + str(stat["Hit Dice"]) + " (" + str(stat["Hit Dice Quantity"]) + "/" + str(self.level) + ")" + "\n"
         print(text)
 
         tracer, text = 0, ""
-        for name, value in list(stat.items())[7:30]:
+        for name, value in list(stat.items())[8:31]:
             if tracer < 6:
                 if tracer % 2 == 0:
                     text = "{:19}".format(name + ": ") + "{:2}".format(value)
@@ -72,9 +74,6 @@ class Animate(Entity):
     # ==================================
     # Accessors
     # ==================================
-    def get_id(self):
-        return self.entity_id
-
     def get_stat_block(self):
         return self.stat_block
 
@@ -99,9 +98,6 @@ class Animate(Entity):
     # ==================================
     # Mutators
     # ==================================
-    def set_id(self, new_id):
-        self.entity_id = new_id
-
     def level_up(self):
         if self.level < 20:
             self.level += 1
@@ -109,6 +105,7 @@ class Animate(Entity):
             old_hp = self.stat_block.get_stat("Max HP")
             self.stat_block.modify_stat("Max HP", old_hp + new_hp)
             self.stat_block.modify_stat("Current HP", old_hp + new_hp)
+            self.stat_block.modify_stat("Hit Dice Quantity", self.stat_block.get_stat("Hit Dice Quantity") + 1)
             print("[OK] Level Updated to ", self.level, "!")
         else:
             print("[ER] Already at max level!")
@@ -129,16 +126,20 @@ class Animate(Entity):
     def set_stats(self, stat, num):
         self.stat_block.modify_stat(stat, num)
 
-    def mod_conditions(self, add, cond):  # True if adding, False if removing
-        validCond = ("blinded", "charmed", "deafened", "frightened", "grappled", "incapacitated", "invisible",
-                     "paralyzed", "petrified", "poisoned", "prone", "restrained", "stunned", "unconscious")
-        if cond.lower() in validCond:
-            if add:
-                self.conditions.add(cond.lower())
+    def mod_conditions(self, condition, duration=1, adding=True):
+        try:
+            if adding:
+                self.conditions[condition] = duration
             else:
-                self.conditions.remove(cond)
-        else:
-            print(cond + " is not a valid condition!!")
+                del self.conditions[condition]
+        except KeyError:
+            print("[ER]", condition, "is not a valid condition!!")
+
+    def condition_tick(self):
+        for cond in self.conditions:
+            self.conditions[cond] -= 1
+            if self.conditions[cond] <= 0:
+                del self.conditions[cond]
 
     def set_surprise(self, surprise_status):
         self.is_surprised = surprise_status

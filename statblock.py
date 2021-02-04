@@ -9,6 +9,7 @@ class StatBlock:
             "Current HP": 0,
             "Max HP": 0,
             "Hit Dice": 0,
+            "Hit Dice Quantity": 0,     # For current remaining HD. Total is still level.
 
             # Misc Stats
             "Inspiration": 0,
@@ -44,7 +45,9 @@ class StatBlock:
         }
 
     def modify_stat(self, stat, num):
-        if stat in self.stats.keys():
+        if stat == "Current HP" and num > self.stats["Max HP"]:
+            self.stats[stat] = self.stats["Max HP"]
+        elif stat in self.stats.keys():
             try:
                 self.stats[stat] = num
                 if stat == "Max HP":

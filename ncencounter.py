@@ -1,5 +1,7 @@
 from encounter import Encounter
 import pickle
+from random import randint
+from math import floor
 
 
 class NCEncounter(Encounter):
@@ -14,15 +16,17 @@ class NCEncounter(Encounter):
             "move": "Change your current location",
             "inv": "View more options regarding the party's inventory",
             "stats": "View a party member's stats",
-            "rest": "Allow party members a moment of rest to recover"
+            "rest": "Allow party members a moment of rest to recover",
+            "exit": "save and quit."
         }
         self.inv_commands = {
             "use": "Use an item in this member's inventory",
             "equip": "Arrange this member's equipment",
+            "dequip": "Remove this member's current equipment",
             "discard": "Discard an item from this member's inventory",
             "give": "Give an item from this member's inventory to another member",
             "sell": "Sell an item in exchange for currency",
-            "cancel": "return to command menu"
+            "cancel": "return to command menu",
         }
 
     def displayCmds(self, cmd_list):
@@ -50,7 +54,9 @@ class NCEncounter(Encounter):
                     elif 0 <= chosenPC < len(self.animateList):
                         choosing = False
                 except ValueError:
-                    print("[ER] invalid input! Please select a party member or enter 'cancel' to return")
+                    print("[ER] invalid input! Please select a party member by inputting a number or enter 'cancel' to return")
+                except IndexError:
+                    print("[ER] invalid input! Please select a valid party member or enter 'cancel' to return")
         if giving:
             self.currentEntity = giver
             return self.animateList[chosenPC]
@@ -64,10 +70,13 @@ class NCEncounter(Encounter):
             rolls = input("\nInput dice throw (\"num dice\"d\"num faces\"):\n> ")
             if rolls == "cancel":
                 break
-            rolls, faces = rolls.lower().split("d")
-            self.rollDice(int(rolls), int(faces))
-            print()
-            rolling = False
+            try:
+                rolls, faces = rolls.lower().split("d")
+                self.rollDice(int(rolls), int(faces))
+                print()
+                rolling = False
+            except ValueError:
+                print("[ER] Please use the format \"num dice\"d\"num faces\")")
 
     def statsBranch(self):
         print("Whose stats would you like to view?")
@@ -95,8 +104,6 @@ class NCEncounter(Encounter):
                 discarding = not self.currentEntity.inv_remove(item_name, amount=item_amount, discarding=True)
             elif term == "sell":
                 selling = not self.currentEntity.inv_remove(item_name, amount=item_amount, selling=True, notify=True)
-
-
 
     def equipBranch(self):
         equipping = True
@@ -149,7 +156,9 @@ class NCEncounter(Encounter):
         else:
             viewing_inv = True
             while viewing_inv:
-                self.currentEntity.inv_print()
+                invNotEmpty = self.currentEntity.inv_print()
+                if not invNotEmpty:
+                    self.currentEntity.inv_print(list_inv=False)
 
                 print("What would you like to do with {}'s inventory?".format(self.currentEntity.get_name()))
 
@@ -177,11 +186,69 @@ class NCEncounter(Encounter):
                 elif inv_action == "sell":
                     self.discardBranch(selling=True)
 
+                elif inv_action == "dequip":
+                    toBeRemoved = input("What would you like to remove?\n> ")
+                    self.currentEntity.inv_dequip(toBeRemoved)
+
+    def prompt(self, ask, *args):
+        while True:
+            response = input(ask)
+            if response in args:
+                break
+        return response
+
+    def shortRest(self, dreamer):
+        sResting = True
+        while sResting:
+            if dreamer.get_stat("Hit Dice Quantity") <= 0:
+                print("[ER] {} has no more hit dice!".format(dreamer.name))
+                break
+            roll = randint(1, dreamer.get_stat("Hit Dice")) + self.modifier("Constitution", dreamer)
+            if roll < 0:
+                roll = 0
+            dreamer.set_stats("Current HP", dreamer.get_stat("Current HP") + roll)
+            print("{} has gained {} HP! Their HP is now {} /{}!".format(dreamer.name, roll,
+                                                                        dreamer.get_stat("Current HP"),
+                                                                        dreamer.get_stat("Max HP")))
+            dreamer.set_stats("Hit Dice Quantity", dreamer.get_stat("Hit Dice Quantity") - 1)
+            again = self.prompt("Would you like to take another short rest? (Y/N)\n> ", "y", "n", "Y", "N").lower()
+            if again == "n":
+                break
+
+    def longRest(self, dreamer):
+        if dreamer.get_stat("Current HP") < 1:
+            print("[ER] A character must have at least 1 HP to benefit from a long rest!")
+        else:
+            dreamer.set_stats("Current HP", dreamer.get_stat("Max HP"))
+            print("{} is now at full HP!".format(dreamer.name))
+            if dreamer.get_stat("Hit Dice Quantity") < dreamer.level:
+                recover = floor(dreamer.level / 2)
+                dreamer.set_stats("Hit Dice Quantity", dreamer.get_stat("Hit Dice Quantity") + recover)
+                if dreamer.get_stat("Hit Dice Quantity") > dreamer.level:
+                    dreamer.set_stats("Hit Dice Quantity", dreamer.level)
+
+    def restBranch(self):
+        resting = True
+        deciding = True
+        while resting:
+            print("Who would like to rest?")
+            response = self.choosePC()
+            dreamer = self.currentEntity
+            if response == "cancel":
+                break
+            while deciding:
+                restLen = self.prompt("Would you like to take a [short] rest or a [long] rest?\n>", "cancel", "short",
+                                      "long")
+                if restLen == "cancel":
+                    break
+                elif restLen == "short":
+                    self.shortRest(dreamer)
+                elif restLen == "long":
+                    self.longRest(dreamer)
 
     def genLoop(self):
         while self.running_general:
-
-            print("What would you like to do?")
+            print("Current Location: {}\nWhat would you like to do?".format(self.name))
             self.displayCmds(self.commands)
             action = input("> ")
             action = action.lower().strip()
@@ -202,7 +269,11 @@ class NCEncounter(Encounter):
                 print("SORRY!! Currently not implemented. :)")
 
             elif action == "rest":
-                print("SORRY!! Currently not implemented. :)")
+                self.restBranch()
+
+            elif action == "exit":
+                print("Thank you for playing!")
+                break
 
 
 if __name__ == "__main__":

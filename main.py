@@ -2,7 +2,7 @@
 
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
-# from display import Display
+from display import Display
 from encounter import Encounter
 from player import Player
 from statblock import StatBlock
@@ -10,7 +10,6 @@ from enemy import Enemy
 import items
 import random
 import pickle
-
 
 commands = {
             "act": "Opens action menu.",
@@ -26,7 +25,7 @@ commands = {
 }
 
 # Parameters & Encounter init.
-# disp = Display()
+disp = Display()
 player_list = list()
 MAP_MAX_X = 15
 MAP_MAX_Y = 10
@@ -34,6 +33,7 @@ MAP_MAX_Y = 10
 try:
     player_list = pickle.load(open("players.camp", "rb"))
 except:
+
     player_list.append(Player("Fjord", "Orc", "Warlock"))
     player_list.append(Player("Jester Lavorre", "Tiefling", "Cleric"))
     player_list.append(Player("Caleb Widowgast", "Human", "Wizard"))
@@ -60,43 +60,23 @@ except:
     enc.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
     for player in player_list:
         enc.add_entity(player)
-    # enc.add_entity(Player("Fjord", "Orc", "Warlock"))
-    # enc.add_entity(Player("Jester Lavorre", "Tiefling", "Cleric"))
-    # enc.add_entity(Player("Caleb Widowgast", "Human", "Wizard"))
-    # enc.add_entity(Player("Yasha Nyoodrin", "Aasimar", "Barbarian"))
-    # enc.add_entity(Player("Veth Brenatto", "Goblin", "Rogue"))
     enc.start_encounter()
 
     # Creator Loop
     for index in range(enc.get_al_size()):
         actor = enc.get_entity(True, index)
 
-        # if type(actor) == Enemy:
-        #     actor.set_stats("Max HP", 25)
-
-        # if type(actor) == Player:
-        #     actor.set_weapon("Shortsword")
-        #     actor.set_armor("Chain Mail")
-        #     actor.inv_add("Mana Potion", random.randint(1, 6))
-
         while enc.enc_move(actor, max(MAP_MAX_X, MAP_MAX_Y) * 5,
                            random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
             pass
 
-    # Saving Loop
-    # for index in range(enc.get_al_size()):
-    #     entity = enc.get_entity(True, index)
-    #     if type(entity) == Player:
-    #         player_list.append(entity)
-
-    # pickle.dump(player_list, open("players.camp", "wb"))
     pickle.dump(enc, open("savegame.camp", "wb"))
 
 # End Except statement
 
 
 print("\nWelcome to the AutoCamp Demonstration v1.3")
-# disp.game_intro()
+disp.game_intro()
 
 enc.enc_update_map()
 enc.enc_print_map()
@@ -210,6 +190,7 @@ while True:
         print("Your turn has ended.")
         enc.enc_print_map()
         enc.next_turn()
+        actor.condition_tick()  # causes conditions to tick down 1 turn or 6 seconds.
         actor = enc.get_actor()
         speed_remaining = actor.get_stat("Speed")
         can_act = True
