@@ -136,10 +136,14 @@ class Animate(Entity):
             print("[ER]", condition, "is not a valid condition!!")
 
     def condition_tick(self):
-        for cond in self.conditions:
+        del_list = list()
+        for cond in self.conditions.keys():
             self.conditions[cond] -= 1
             if self.conditions[cond] <= 0:
-                del self.conditions[cond]
+                del_list.append(cond)
+
+        for cond in del_list:
+            del self.conditions[cond]
 
     def set_surprise(self, surprise_status):
         self.is_surprised = surprise_status

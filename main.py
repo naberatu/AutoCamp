@@ -2,7 +2,7 @@
 
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
-from display import Display
+# from display import Display
 from encounter import Encounter
 from player import Player
 from statblock import StatBlock
@@ -12,26 +12,32 @@ import random
 import pickle
 
 commands = {
-            "act": "Opens action menu.",
+            "act": "Opens ACTION menu.",
             "end": "Ends the current turn",
             "exit": "Ends the program.",
             "help": "Displays list of commands.",
             "hero": "Displays your stats.",
             "hint": "Provides a hint if possible.",
             "inv": "Displays inventory.",
+            "stats": "Displays stats",
+            "cond": "Displays conditions",
             "map": "Displays map once again.",
             "move": "Change current position (or \'move x y\').",
             "use": "Uses an item from inventory."
 }
 
 # Parameters & Encounter init.
-disp = Display()
+# disp = Display()
 player_list = list()
 MAP_MAX_X = 15
 MAP_MAX_Y = 10
+RELOAD_ENC = False
+EMPTY_LIST = []
 
 try:
     player_list = pickle.load(open("players.camp", "rb"))
+    # player_list[1].mod_conditions(condition="Paralyzed", duration=2, adding=True)
+    # RELOAD_ENC = True
 except:
 
     player_list.append(Player("Fjord", "Orc", "Warlock"))
@@ -45,110 +51,169 @@ except:
         hero.set_armor("Chain Mail")
         hero.inv_add("Mana Potion", random.randint(1, 6))
 
+    pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
     pickle.dump(player_list, open("players.camp", "wb"))
+    RELOAD_ENC = True
 
 
 try:
-    enc = pickle.load(open("savegame.camp", "rb"))
+    if RELOAD_ENC:
+        RELOAD_ENC = False
+        raise KeyError
+    ENC = pickle.load(open("savegame.camp", "rb"))
 except:
-    enc = Encounter()
-    enc.enc_fill_map()
+    ENC = Encounter()
+    ENC.enc_fill_map()
 
     # Example Entities
-    enc.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
-    enc.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
-    enc.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+    ENC.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+    ENC.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+    ENC.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
     for player in player_list:
-        enc.add_entity(player)
-    enc.start_encounter()
+        ENC.add_entity(player)
+    ENC.start_encounter()
 
     # Creator Loop
-    for index in range(enc.get_al_size()):
-        actor = enc.get_entity(True, index)
+    for index in range(ENC.get_al_size()):
+        entity = ENC.get_entity(True, index)
 
-        while enc.enc_move(actor, max(MAP_MAX_X, MAP_MAX_Y) * 5,
+        while ENC.enc_move(entity, max(MAP_MAX_X, MAP_MAX_Y) * 5,
                            random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
             pass
 
-    pickle.dump(enc, open("savegame.camp", "wb"))
+    pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
+    pickle.dump(ENC, open("savegame.camp", "wb"))
 
 # End Except statement
 
 
 print("\nWelcome to the AutoCamp Demonstration v1.3")
-disp.game_intro()
+# disp.game_intro()
 
-enc.enc_update_map()
-enc.enc_print_map()
-actor = enc.get_actor()
-speed_remaining = actor.get_stat("Speed")
-can_act = True
-action = True
+ENC.enc_update_map()
+ENC.enc_print_map()
+ACTOR = ENC.get_actor()
+SPEED_REM = ACTOR.get_stat("Speed")
+CAN_ACT = True
+ACTION = True
+ADVANTAGE = False
+DISADVANTAGE = False
 
-while True:
-    if "unconscious" in actor.get_conditions() and type(actor) == Player:
-        if not actor.is_stable and enc.death_saves == 0:
-            death_save = enc.rollDice(1, 20, False)
-            enc.death_saves += 1
+
+def cond_ok(try_move=False, try_act=False, try_poison=False, try_unstable=False):
+    global CAN_ACT
+    global SPEED_REM
+    global ACTOR
+
+    if try_poison and "Poisoned" in ACTOR.get_conditions().keys():
+        return True         # Say that we are poisoned.
+
+    if try_act:
+        cond_list = {"Petrified", "Paralyzed", "Stunned", "Incapacitated"}
+        for cond in cond_list:
+            if cond in ACTOR.get_conditions().keys():
+                CAN_ACT = False
+                return cond
+        return False
+
+    if try_move:
+        cond_list = {"Petrified", "Paralyzed", "Stunned", "Incapacitated", "Restrained", "Grappled"}
+        for cond in cond_list:
+            if cond in ACTOR.get_conditions().keys():
+                SPEED_REM = 0
+                return cond
+        return False
+
+    if try_unstable and "Unconscious" in ACTOR.get_conditions():
+        if not ACTOR.is_stable and ENC.death_saves == 0:
+            death_save = ENC.rollDice(1, 20, False)
+            ENC.death_saves += 1
             if death_save >= 10:
-                actor.set_death_evasions(actor.get_death_evasions() + 1)
+                ACTOR.set_death_evasions(ACTOR.get_death_evasions() + 1)
                 print("Death save succeeded!")
 
             else:
                 if death_save == 1:  # +2 strikes if 1
-                    actor.set_death_strikes(actor.get_death_strikes() + 1)
-                actor.set_death_strikes(actor.get_death_strikes() + 1)
+                    ACTOR.set_death_strikes(ACTOR.get_death_strikes() + 1)
+                ACTOR.set_death_strikes(ACTOR.get_death_strikes() + 1)
                 print("Death save failed")
 
-            if actor.get_death_evasions() >= 3 or death_save == 20:
-                actor.mod_conditions(False, "unconscious")
-                print(actor.get_name(), "is no longer unconscious!!")
-                actor.set_stability(True)
-                actor.set_death_evasions(0)
-                actor.set_death_strikes(0)
+            if ACTOR.get_death_evasions() >= 3 or death_save == 20:
+                ACTOR.mod_conditions("Unconscious", adding=False)
+                print(ACTOR.get_name(), "is no longer unconscious!!")
+                ACTOR.set_stability(True)
+                ACTOR.set_death_evasions(0)
+                ACTOR.set_death_strikes(0)
                 if death_save == 20:
-                    actor.set_stats("Current HP", 1)
+                    ACTOR.set_stats("Current HP", 1)
+                return True
 
-            elif actor.get_death_strikes() >= 3:
-                print(actor.get_name(), "has died!!")
-                actor.set_death_evasions(0)
-                actor.set_death_strikes(0)
-                enc.animateList.remove(actor)
+            elif ACTOR.get_death_strikes() >= 3:
+                print(ACTOR.get_name(), "has died!!")
+                ACTOR.set_death_evasions(0)
+                ACTOR.set_death_strikes(0)
+                ENC.animateList.remove(ACTOR)
                 print("Your turn has ended.")
-                enc.enc_print_map()
-                enc.next_turn()
-                continue
+                ENC.enc_print_map()
+                ENC.next_turn()
+                return False
+    elif not try_poison:
+        return True
 
-    print("\n[", actor.get_name(), "] what would you like to do?")
+
+# AutoCamp Mainloop
+while True:
+    if not cond_ok(try_unstable=True):
+        continue
+    cond_ok(try_act=True)
+    DISADVANTAGE = cond_ok(try_poison=True)
+
+    print("\n[", ACTOR.get_name(), "] what would you like to do?")
     ans = input("> ")
 
-    if ans.lower().strip() == "help":
+    if ans.lower().strip() == "stats":
+        ACTOR.showStats()
+
+    elif ans.lower().strip() == "check":
+        ENC.performCheck("Constitution", ACTOR, ADVANTAGE, DISADVANTAGE)
+
+    elif ans.lower().strip() == "cond":
+        print(ACTOR.get_conditions())
+
+    elif ans.lower().strip() == "help":
         print("\nList of Commands:")
         for com, desc in commands.items():
             print("> ", com.ljust(7), "\t", desc)
         ans = input("> ")
 
-    if ans.lower().strip() == "act" and can_act:
-        print("\nPlease select an action to take:")
-        print("> attack", "\n> use", "\n> end")
-        ans = input("> ")
+    elif ans.lower().strip() == "act":
+        condition = cond_ok(try_act=True)
 
-        if ans.lower() == "cancel":
-            continue
+        if condition:
+            print("[ER] You cannot act, you are {}!".format(condition))
+        elif not CAN_ACT:
+            print("[ER] You already used your turn!")
+        else:
+            print("\nPlease select an ACTION to take:")
+            print("> attack", "\n> use", "\n> end")
+            ans = input("> ")
 
-        if ans.lower() == ("attack" or "use" or "end"):
-            action = True
+            if ans.lower() == "cancel":
+                continue
 
-    elif ans.lower().strip() == "act" and not can_act:
-        print("[ER] You cannot act this turn!")
+            if ans.lower() == ("attack" or "use" or "end"):
+                ACTION = True
 
     elif "move" in ans.lower().strip():
-        if "unconscious" in actor.get_conditions():
-            print(actor.get_name(), "can't move! They're unconscious!")
+        condition = cond_ok(try_move=True)
+        if condition:
+            print("[ER] You cannot move, you are {}!".format(condition))
+        elif SPEED_REM <= 0:
+            print("[ER] Cannot move! Speed is", SPEED_REM)
         else:
             one_step = False
             if ans.lower().strip() == "move":
-                print("\nWhere to?  (from " + str(actor.get_coors()[0]) + ", " + str(actor.get_coors()[1]) + ")")
+                print("\nWhere to?  (from {}, {}) (Speed {})".format(str(ACTOR.get_coors()[0]), str(ACTOR.get_coors()[1]), SPEED_REM))
             else:
                 one_step = True
             try:
@@ -167,41 +232,46 @@ while True:
                     print("[ER1] Invalid input. Please try again.")
                     continue
                 else:
-                    response = enc.enc_move(actor, speed_remaining, x, y)
+                    response = ENC.enc_move(ACTOR, SPEED_REM, x, y)
                     if not response[1]:
-                        enc.enc_update_map()
-                        enc.enc_print_map()
-                        print(actor.get_name(), "moved to", actor.get_coors())
-                        speed_remaining -= response[0]
+                        ENC.enc_update_map()
+                        ENC.enc_print_map()
+                        print(ACTOR.get_name(), "moved to", ACTOR.get_coors())
+                        SPEED_REM -= response[0]
                     else:
-                        enc.enc_print_map()
+                        ENC.enc_print_map()
                         print(response[1])
             except:
                 print("[ER] Invalid input. Please try again.")
                 continue
 
     elif ans.lower().strip() == "hero":
-        enc.showStats()
+        ENC.showStats()
 
     elif ans.lower().strip() == "inv":
-        actor.inv_print()
+        ACTOR.inv_print()
 
     elif ans.lower().strip() == "end":
+        # For the Old Actor
+        ACTOR.condition_tick()  # tick down 1 turn or 6 seconds.
+        ADVANTAGE = False
+        DISADVANTAGE = False
         print("Your turn has ended.")
-        enc.enc_print_map()
-        enc.next_turn()
-        actor.condition_tick()  # causes conditions to tick down 1 turn or 6 seconds.
-        actor = enc.get_actor()
-        speed_remaining = actor.get_stat("Speed")
-        can_act = True
-        action = True
+
+        # For the New Actor
+        ENC.enc_print_map()
+        ENC.next_turn()
+        ACTOR = ENC.get_actor()
+        SPEED_REM = ACTOR.get_stat("Speed")
+        CAN_ACT = True
+        ACTION = True
         continue
 
     elif ans.lower().strip() == "exit":
         # Begin collecting players.
         entity_list = list()
-        for index in range(enc.get_al_size()):
-            entity = enc.get_entity(True, index)
+        for index in range(ENC.get_al_size()):
+            entity = ENC.get_entity(True, index)
             if type(entity) == Player:
                 entity_list.append(entity)
 
@@ -212,7 +282,7 @@ while True:
 
         # Save the current encounter.
         camp_file = open("savegame.camp", "wb")
-        pickle.dump(enc, camp_file)
+        pickle.dump(ENC, camp_file)
         camp_file.close()
 
         # Exit game
@@ -220,20 +290,24 @@ while True:
         break
 
     elif ans.lower().strip() == "hint":
-        print(enc.get_hint())
+        print(ENC.get_hint())
 
     elif ans.lower().strip() == "map":
-        enc.enc_print_map()
+        ENC.enc_print_map()
 
     # Action Menus:
     # ===============================================================================
-    elif action:
+    elif ACTION:
+        condition = cond_ok(try_act=True)
         success = False
-        if ans.lower().strip() == "attack":
-            if "unconscious" in actor.get_conditions():
-                print(actor.get_name(), "can't attack! They're unconscious!")
+
+        if condition:
+            print("[ER] You cannot act, you are {}!".format(condition))
+        elif ans.lower().strip() == "attack":
+            if "unconscious" in ACTOR.get_conditions():
+                print(ACTOR.get_name(), "can't attack! They're unconscious!")
             else:
-                enemiesInRange = enc.enemyInRange()
+                enemiesInRange = ENC.enemyInRange()
                 if not enemiesInRange:
                     print("Sorry! No enemies in range of attack.")
                 else:
@@ -247,45 +321,43 @@ while True:
                         continue
 
                     elif ans.lower() in alpha[:len(enemiesInRange)]:
-                        enc.attack(enemiesInRange[alpha.index(ans.lower())], False, False)
+                        ENC.attack(enemiesInRange[alpha.index(ans.lower())], ADVANTAGE, DISADVANTAGE)
                         success = True
-                        # action = False
-                        # can_act = False
 
         elif "use" in ans.lower().strip():
-            if "unconscious" in actor.get_conditions():
-                print(actor.get_name(), "can't use an item! They're unconscious!")
+            if "unconscious" in ACTOR.get_conditions():
+                print(ACTOR.get_name(), "can't use an item! They're unconscious!")
             else:
                 if ans.lower().strip() == "use":
-                    active = actor.inv_print(False)
+                    active = ACTOR.inv_print(False)
                     while active and not success:
                         item_name = input("Item: ")
                         if item_name.lower() == "":
                             break
-                        success = actor.inv_remove(item_name, using=True)
+                        success = ACTOR.inv_remove(item_name, using=True)
                 else:
                     use, item_name = ans.split(' ', 1)
                     if use.lower() == "use":
-                        actor.inv_remove(item_name.lower(), using=True)
+                        ACTOR.inv_remove(item_name.lower(), using=True)
                     else:
                         print("[ER] Invalid input. Please try again.")
                         continue
 
         elif ans.lower().strip() == "end":
             print("Your turn has ended.")
-            enc.enc_print_map()
-            enc.next_turn()
-            actor = enc.get_actor()
-            speed_remaining = actor.get_stat("Speed")
-            can_act = True
-            action = True
+            ENC.enc_print_map()
+            ENC.next_turn()
+            ACTOR = ENC.get_actor()
+            SPEED_REM = ACTOR.get_stat("Speed")
+            CAN_ACT = True
+            ACTION = True
             continue
 
         if success:
-            action = False
-            can_act = False
+            ACTION = False
+            CAN_ACT = False
 
-    elif not action:
+    elif not ACTION:
         print("You already acted this turn!")
     else:
         print("[ER] Invalid input, please try again.")
