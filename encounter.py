@@ -235,16 +235,20 @@ class Encounter:
         roll = 0
         roll1 = self.rollDice(1, 20, False)
         roll2 = self.rollDice(1, 20, False)
+        adv_dis = ""
+
         if (advantage and disadvantage) or (not advantage and not disadvantage):
             roll = roll1
         elif advantage:
             roll = max(roll1, roll2)
+            adv_dis += "with Advantage "
         elif disadvantage:
             roll = min(roll1, roll2)
+            adv_dis += "with Disadvantage "
 
         mod = self.modifier(stat, ent)
         if print_results:
-            print("{} rolled {} with {} modifier {}".format(ent.get_name(), roll, stat, mod))
+            print("{} rolled {} {}and a {} modifier {}".format(ent.get_name(), roll, adv_dis, stat, mod))
         roll += mod
         if print_results:
             print("Result is... {}!!".format(roll))
