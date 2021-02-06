@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import os
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 # from display import Display
@@ -11,6 +12,7 @@ import items
 import random
 import pickle
 
+
 commands = {
             "act": "Opens ACTION menu.",
             "end": "Ends the current turn",
@@ -18,6 +20,7 @@ commands = {
             "help": "Displays list of commands.",
             "hero": "Displays your stats.",
             "hint": "Provides a hint if possible.",
+            "handbook": "Display the Basic Rules",
             "inv": "Displays inventory.",
             "stats": "Displays stats",
             "cond": "Displays conditions",
@@ -33,6 +36,7 @@ MAP_MAX_X = 15
 MAP_MAX_Y = 10
 RELOAD_ENC = False
 EMPTY_LIST = []
+
 
 try:
     player_list = pickle.load(open("players.camp", "rb"))
@@ -173,6 +177,9 @@ while True:
 
     if ans.lower().strip() == "stats":
         ACTOR.showStats()
+
+    elif ans.lower().strip() == "handbook":
+        os.system('C:/Users/elite/PycharmProjects/autocamp32/docs/dnd_basicrules.pdf')
 
     elif ans.lower().strip() == "check":
         ENC.performCheck("Constitution", ACTOR, ADVANTAGE, DISADVANTAGE)
