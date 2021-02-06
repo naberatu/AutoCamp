@@ -4,6 +4,7 @@ from player import Player
 from inanimate import Inanimate
 from random import randint
 from math import floor
+import math
 
 
 class Encounter:
@@ -339,3 +340,6 @@ class Encounter:
             self.dealDMG(damage, target)
         else:
             print("Attack failed!")
+
+
+
