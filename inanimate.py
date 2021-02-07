@@ -4,7 +4,7 @@ from entity import Entity
 
 class Inanimate(Entity):
     def __init__(self, name, item_code=1, cost=1, details="This is an item.", max_stack=1, weight=1,
-                 alpha=0, beta=0, gamma=0, tile_size=1):
+                 alpha=0, beta=0, gamma=0, delta=0, tile_size=1):
         super().__init__(name)    # should inherit everything this way
 
         self.details = details
@@ -29,7 +29,8 @@ class Inanimate(Entity):
             self.is_armor = True
             self.properties = {"armor_class": alpha,
                                "modifier": beta,
-                               "stealth_dis": gamma}
+                               "stealth_dis": gamma,
+                               "magical": delta}
         elif item_code == 3:
             self.is_consumable = True
             self.properties = {"type": alpha,
