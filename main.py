@@ -91,7 +91,7 @@ except:
 # End Except statement
 
 
-print("\nWelcome to the AutoCamp Demonstration v1.3")
+print("\nWelcome to the AutoCamp Demonstration")
 disp.page_startup()
 
 ENC.enc_update_map()
