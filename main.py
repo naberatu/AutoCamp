@@ -92,7 +92,7 @@ except:
 
 
 print("\nWelcome to the AutoCamp Demonstration v1.3")
-disp.game_intro()
+disp.page_startup()
 
 ENC.enc_update_map()
 ENC.enc_print_map()
