@@ -1,21 +1,47 @@
-import pygame
 import random
 import time
+import pygame
 from os import environ
 import sys
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+
+# Screen Dimensions:
+WIDTH = 800  # Use 16x16 sprites & tiles. Makes 50x30 grid.
+HEIGHT = 480
+
+# Base Colors:
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+BLUE = (115, 215, 255)
+
+# Button Dimensions:
+B_WIDTH = 200
+B_HEIGHT = 50
+B_CENTER = 300
+B_YPOS = 330
+
+
+def font_hylia(size):
+    return pygame.font.Font('./fonts/HyliaSerif.otf', size)
+
+
+def font_scaly(size):
+    return pygame.font.Font('./fonts/Scaly Sans.otf', size)
+
+
+def font_nodesto(size):
+    return pygame.font.Font('./fonts/Nodesto Caps Condensed.otf', size)
+
+
+def text_objects(text, font, color):
+    textSurface = font.render(text, True, color)
+    return textSurface, textSurface.get_rect()
 
 
 # test comment
 class Display:
     pygame.init()
-    WIDTH = 800             # Use 16x16 sprites & tiles. Makes 50x30 grid.
-    HEIGHT = 480
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    RED = (255, 0, 0)
-    GREEN = (0, 255, 0)
-    BLUE = (115, 215, 255)
+
     CLICK = False
     ICON = pygame.image.load('./assets/autocamp_icon.png')
 
@@ -24,108 +50,144 @@ class Display:
     pygame.display.set_caption('AutoCamp')
     clock = pygame.time.Clock()
 
-    def text_objects(self, text, font, color):
-        textSurface = font.render(text, True, color)
-        return textSurface, textSurface.get_rect()
-
     def change_state(self, new_state):
         if new_state == "intro":
             self.page_startup()
         elif new_state == "credits":
             self.page_credits("intro")
 
-    def font_hylia(self, size):
-        return pygame.font.Font('./fonts/HyliaSerif.otf', size)
-
-    def font_scaly(self, size):
-        return pygame.font.Font('./fonts/Scaly Sans.otf', size)
-
-    def font_nodesto(self, size):
-        return pygame.font.Font('./fonts/Nodesto Caps Condensed.otf', size)
-
     def page_credits(self, prev_state):
-        back_button = pygame.Rect(300, 350, 100, 50)
-
         while True:
-            self.gameDisplay.fill(self.BLACK)
+            self.gameDisplay.fill(BLACK)
 
-            t_credits, r_credits = self.text_objects("AutoCamp Team: Nader Atout, Diana Penalba, Adrian Gavrila", self.font_hylia(20), self.WHITE)
-            r_credits.center = ((self.WIDTH / 2), (self.HEIGHT / 2))
+            tb_title = TextBox(parent=self.gameDisplay, text="AutoCamp Team", t_font="hylia", t_size=30,
+                               top=50, center=True)
+            tb_member1 = TextBox(parent=self.gameDisplay, text="Nader Atout", t_font="hylia", t_size=20, center=True,
+                                 top=tb_title.textbox.top + tb_title.textbox.height)
+            tb_member2 = TextBox(parent=self.gameDisplay, text="Diana Penalba", t_font="hylia", t_size=20, center=True,
+                                 top=tb_member1.textbox.top + tb_member1.textbox.height)
+            tb_member3 = TextBox(parent=self.gameDisplay, text="Adrian Gavrila", t_font="hylia", t_size=20, center=True,
+                                 top=tb_member2.textbox.top + tb_member2.textbox.height)
 
-            pygame.draw.rect(self.gameDisplay, self.BLUE, back_button)
-            t_back, r_back = self.text_objects("Back", self.font_hylia(20), self.BLACK)
-            r_back.center = (350, 380)
+            tb_advisor = TextBox(parent=self.gameDisplay, text="Team Advisor", t_font="hylia", t_size=30, center=True,
+                                 top=tb_member3.textbox.top + tb_member3.textbox.height + 30)
+            tb_advname = TextBox(parent=self.gameDisplay, text="Asst. Prof. Salma Elmalaki", t_font="hylia", t_size=20,
+                                 center=True, top=tb_advisor.textbox.top + tb_advisor.textbox.height)
 
-            self.gameDisplay.blit(t_credits, r_credits)
-            self.gameDisplay.blit(t_back, r_back)
+            tb_game = TextBox(parent=self.gameDisplay, text="Original Tabletop Game", t_font="hylia", t_size=30,
+                              center=True, top=tb_advname.textbox.top + tb_advname.textbox.height + 30)
+            tb_wizards = TextBox(parent=self.gameDisplay, text="Wizards of the Coast", t_font="hylia", t_size=20,
+                                 center=True, top=tb_game.textbox.top + tb_game.textbox.height)
 
-            if back_button.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
-                self.CLICK = False
+            b_back = TextButton(parent=self.gameDisplay, text="Back", left=B_CENTER, top=B_YPOS + 50, width=B_WIDTH,
+                                height=B_HEIGHT, color=BLUE)
+
+            if b_back.rect.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
+                # self.CLICK = False
                 break
 
+            # Click Event Monitor
+            # ==================================
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.CLICK = True
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    self.CLICK = False
 
             self.clock.tick(15)
             pygame.display.update()
 
     def page_startup(self):
-        B_WIDTH = 200
-        B_HEIGHT = 50
-        B_CENTER = 300
-        B_YPOS = 330
-
-        start_button = pygame.Rect(B_CENTER, B_YPOS - (2 * B_HEIGHT), B_WIDTH, B_HEIGHT)
-        credit_button = pygame.Rect(B_CENTER, B_YPOS - B_HEIGHT, B_WIDTH, B_HEIGHT)
-        quit_button = pygame.Rect(B_CENTER, B_YPOS, B_WIDTH, B_HEIGHT)
-
         while True:
-            self.gameDisplay.fill(self.WHITE)
+            self.gameDisplay.fill(WHITE)
+            b_start = TextButton(parent=self.gameDisplay, text="Start", left=B_CENTER, top=B_YPOS - (2 * B_HEIGHT), width=B_WIDTH, height=B_HEIGHT)
+            b_credits = TextButton(parent=self.gameDisplay, text="Credits", left=B_CENTER, top=B_YPOS - B_HEIGHT, width=B_WIDTH, height=B_HEIGHT)
+            b_quit = TextButton(parent=self.gameDisplay, text="Exit", left=B_CENTER, top=B_YPOS, width=B_WIDTH, height=B_HEIGHT)
 
-            t_title, r_title = self.text_objects("Dungeons & Dragons", self.font_hylia(60), self.BLACK)
-            r_title.center = (self.WIDTH / 2, self.HEIGHT / 4)
+            t_title, r_title = text_objects("Dungeons & Dragons", font_hylia(60), BLACK)
+            r_title.center = (WIDTH / 2, HEIGHT / 4)
+            self.gameDisplay.blit(t_title, r_title)
 
-            pygame.draw.rect(self.gameDisplay, self.BLACK, start_button)
-            t_start, r_start = self.text_objects("Start", self.font_scaly(20), self.WHITE)
-            r_start.center = (start_button.left + B_WIDTH/2, start_button.top + B_HEIGHT/2)
-
-            pygame.draw.rect(self.gameDisplay, self.BLACK, credit_button)
-            t_credits, r_credits = self.text_objects("Credits", self.font_scaly(20), self.WHITE)
-            r_credits.center = (credit_button.left + B_WIDTH/2, credit_button.top + B_HEIGHT/2)
-
-            pygame.draw.rect(self.gameDisplay, self.BLACK, quit_button)
-            t_quit, r_quit = self.text_objects("Exit", self.font_scaly(20), self.WHITE)
-            r_quit.center = (quit_button.left + B_WIDTH / 2, quit_button.top + B_HEIGHT / 2)
-
-            # mx, my = pygame.mouse.get_pos()
-            if start_button.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
+            # Button Functions
+            # ==================================
+            mouse = pygame.mouse.get_pos()
+            if b_start.rect.collidepoint(mouse) and self.CLICK:
                 break
-            if quit_button.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
+            if b_quit.rect.collidepoint(mouse) and self.CLICK:
                 sys.exit()
-            if credit_button.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
+            if b_credits.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 self.change_state("credits")
 
+            # Click Event Monitor
+            # ==================================
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.CLICK = True
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    self.CLICK = False
 
-            ico = pygame.transform.scale(self.ICON, (B_HEIGHT, B_HEIGHT))
-            ltest = [ico, t_start]
-            self.gameDisplay.blit(t_title, r_title)
-            for item in ltest:
-                if item == ico:
-                    self.gameDisplay.blit(item, (start_button.left - B_HEIGHT/2 + start_button.width / 2, start_button.top))
-                else: self.gameDisplay.blit(item, r_start)
-            self.gameDisplay.blit(t_quit, r_quit)
-            self.gameDisplay.blit(t_credits, r_credits)
+            # ico = pygame.transform.scale(self.ICON, (B_HEIGHT, B_HEIGHT))
+            # ltest = [ico, t_start]
+            # for item in ltest:
+            #     if item == ico:
+            #         self.gameDisplay.blit(item, (start_button.left - B_HEIGHT/2 + start_button.width / 2, start_button.top))
+            #     else:
+            #         self.gameDisplay.blit(item, r_start)
+            # self.gameDisplay.blit(t_credits, r_credits)
 
             pygame.display.update()
             self.clock.tick(15)
 
         pygame.quit()
+
+
+class TextBox:
+    def __init__(self, parent=None, center=False, text="test", t_size=20, t_color=WHITE, t_font="scaly", left=0, top=0):
+        self.t_size, self.t_color = t_size, t_color
+
+        if t_font == "scaly":
+            self.t_font = font_scaly(t_size)
+        elif t_font == "hylia":
+            self.t_font = font_hylia(t_size)
+        elif t_font == "nodesto":
+            self.t_font = font_nodesto(t_size)
+
+        self.rect = pygame.Rect(left, top, WIDTH - (2 * left), 0)
+
+        self.text, self.textbox = text_objects(text, self.t_font, t_color)
+        if center:
+            self.textbox.center = self.rect.center
+        else:
+            self.textbox.left = left
+
+        self.textbox.top = top
+
+        parent.blit(self.text, self.textbox)
+
+
+class TextButton:
+    def __init__(self, parent=None, text="test", t_size=20, t_color=WHITE, t_font="scaly",
+                 left=0, top=0, width=100, height=50, color=BLACK):
+        self.t_size, self.t_color = t_size, t_color
+        self.color = color
+
+        if t_font == "scaly":
+            self.t_font = font_scaly(t_size)
+        elif t_font == "hylia":
+            self.t_font = font_hylia(t_size)
+        elif t_font == "nodesto":
+            self.t_font = font_nodesto(t_size)
+
+        self.rect = pygame.Rect(left, top, width, height)
+
+        self.text, self.textbox = text_objects(text, self.t_font, t_color)
+        self.textbox.center = self.rect.center
+
+        pygame.draw.rect(parent, color, self.rect)
+        parent.blit(self.text, self.textbox)
+
