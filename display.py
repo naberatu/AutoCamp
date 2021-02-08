@@ -2,22 +2,25 @@ import pygame
 import random
 import time
 from os import environ
+import sys
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 # test comment
 class Display:
     pygame.init()
-    display_width = 800             # Use 16x16 sprites & tiles. Makes 50x30 grid.
-    display_height = 480
-    black = (0, 0, 0)
-    white = (255, 255, 255)
-    red = (255, 0, 0)
-    green = (0, 255, 0)
-    blue = (0, 0, 255)
-    click = False
+    WIDTH = 800             # Use 16x16 sprites & tiles. Makes 50x30 grid.
+    HEIGHT = 480
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    BLUE = (0, 35, 220)
+    CLICK = False
+    ICON = pygame.image.load('./assets/autocamp_icon.png')
 
-    gameDisplay = pygame.display.set_mode((display_width, display_height))
-    pygame.display.set_caption('AutoCamp32')
+    gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_icon(ICON)
+    pygame.display.set_caption('AutoCamp')
     clock = pygame.time.Clock()
 
     def text_objects(self, text, font, color):
@@ -30,48 +33,45 @@ class Display:
         elif (new_state == "credits"):
             self.game_credits("intro")
 
+    def font_hylia(self, size):
+        return pygame.font.Font('./fonts/HyliaSerif.otf', size)
+
+    def font_scaly(self, size):
+        return pygame.font.Font('./fonts/Scaly Sans.otf', size)
 
     def game_credits(self, prev_state):
-
         credits = True
         back_button = pygame.Rect(300, 350, 100, 50)
 
         while credits:
-
             mx, my = pygame.mouse.get_pos()
+            self.gameDisplay.fill(self.BLACK)
 
-            self.gameDisplay.fill(self.black)
+            CredSurf, CredRect = self.text_objects("AutoCamp Team: Nader Atout, Diana Penalba, Adrian Gavrila", self.font_hylia(20), self.WHITE)
+            CredRect.center = ((self.WIDTH / 2), (self.HEIGHT / 2))
 
-            creditText = pygame.font.Font('freesansbold.ttf', 20)
-            CredSurf, CredRect = self.text_objects("AutoCamp Team: Nader Atout, Diana Penalba, Adrian Gavrila", creditText, self.white)
-            CredRect.center = ((self.display_width / 2), (self.display_height / 2))
-
-            pygame.draw.rect(self.gameDisplay, (self.blue), back_button)
-            BackText = pygame.font.Font('freesansbold.ttf', 20)
-            BackSurf, BackRect = self.text_objects("Back", BackText, self.black)
+            pygame.draw.rect(self.gameDisplay, (self.BLUE), back_button)
+            BackSurf, BackRect = self.text_objects("Back", self.font_hylia(20), self.BLACK)
             BackRect.center = (350, 380)
 
             self.gameDisplay.blit(CredSurf, CredRect)
             self.gameDisplay.blit(BackSurf, BackRect)
 
             if back_button.collidepoint((mx, my)):
-                if self.click:
+                if self.CLICK:
                     credits = False
 
-            self.click = False
+            self.CLICK = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     credits = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        self.click = True
+                        self.CLICK = True
 
             self.clock.tick(15)
 
             pygame.display.update()
-
-
-
 
     def game_intro(self):
         intro = True
@@ -82,47 +82,42 @@ class Display:
         credit_button = pygame.Rect(350, 330, 100, 50)
 
         while intro:
+            self.gameDisplay.fill(self.WHITE)
 
-            self.gameDisplay.fill(self.white)
+            TextSurf, TextRect = self.text_objects("Welcome to AutoCamp!", self.font_hylia(60), self.BLACK)
+            TextRect.center = ((self.WIDTH / 2), (self.HEIGHT / 2))
 
-            largeText = pygame.font.Font('freesansbold.ttf', 60)
-            TextSurf, TextRect = self.text_objects("Welcome to AutoCamp!", largeText, self.black)
-            TextRect.center = ((self.display_width / 2), (self.display_height / 2))
-
-            pygame.draw.rect(self.gameDisplay, (self.blue), start_button)
-            StartText = pygame.font.Font('freesansbold.ttf', 20)
-            StartSurf, StartRect = self.text_objects("Start!!", StartText, self.black)
+            pygame.draw.rect(self.gameDisplay, (self.BLUE), start_button)
+            StartSurf, StartRect = self.text_objects("Start!!", self.font_scaly(20), self.BLACK)
             StartRect.center = (150, 355)
 
-            pygame.draw.rect(self.gameDisplay, (self.red), quit_button)
-            QuitText = pygame.font.Font('freesansbold.ttf', 20)
-            QuitSurf, QuitRect = self.text_objects("Leave? D:", QuitText, self.black)
+            pygame.draw.rect(self.gameDisplay, (self.RED), quit_button)
+            QuitSurf, QuitRect = self.text_objects("Leave? D:", self.font_scaly(20), self.BLACK)
             QuitRect.center = (650, 355)
 
-            pygame.draw.rect(self.gameDisplay, (self.green), credit_button)
-            CredText = pygame.font.Font('freesansbold.ttf', 20)
-            CredSurf, CredRect = self.text_objects("Credits", CredText, self.black)
+            pygame.draw.rect(self.gameDisplay, (self.GREEN), credit_button)
+            CredSurf, CredRect = self.text_objects("Credits", self.font_scaly(20), self.BLACK)
             CredRect.center = (400, 355)
 
             mx, my = pygame.mouse.get_pos()
             if start_button.collidepoint((mx, my)):
-                if self.click:
-                    intro = False
+                if self.CLICK:
+                    break
             if quit_button.collidepoint((mx, my)):
-                if self.click:
-                    intro = False
+                if self.CLICK:
+                    sys.exit()
             if credit_button.collidepoint((mx, my)):
-                if self.click:
+                if self.CLICK:
                     change_state = True
                     new_state = "credits"
 
-            self.click = False
+            self.CLICK = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     intro = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        self.click = True
+                        self.CLICK = True
 
             self.gameDisplay.blit(TextSurf, TextRect)
             self.gameDisplay.blit(StartSurf, StartRect)
@@ -131,10 +126,13 @@ class Display:
             pygame.display.update()
             self.clock.tick(15)
 
-            if (intro == False):
-                pygame.quit()
-            elif (change_state == True):
+            # if (intro == False):
+            #     pygame.quit()
+            #     sys.exit()
+            if (change_state == True):
                 self.change_state(new_state)
 
             change_state = False
             new_state = ""
+
+        pygame.quit()
