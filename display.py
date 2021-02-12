@@ -9,10 +9,17 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 WIDTH = 800  # Use 16x16 sprites & tiles. Makes 50x30 grid.
 HEIGHT = 480
 
+# Map Dimensions:
+MAP_MAX_X = 15
+MAP_MAX_Y = 15
+
+TILE_SIZE = int(HEIGHT / MAP_MAX_Y)      # Usually would be 32
+
 # Base Colors:
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (115, 215, 255)
+DIRT = (197, 145, 84)
 
 # Button Dimensions:
 B_WIDTH = 200
@@ -36,6 +43,20 @@ def font_nodesto(size):
 def text_objects(text, font, color):
     textSurface = font.render(text, True, color)
     return textSurface, textSurface.get_rect()
+
+
+class TileButton:
+    def __init__(self, parent=None, left=0, top=0, width=TILE_SIZE, height=TILE_SIZE, color=DIRT):
+        self.color = color
+        self.rect = pygame.Rect(left, top, width, height)
+        pygame.draw.rect(parent, self.color, self.rect)
+
+        IMAGE = pygame.image.load("./assets/grasstile.png").convert()
+        IMAGE = pygame.transform.scale(IMAGE, (TILE_SIZE, TILE_SIZE))
+        img_rect = IMAGE.get_rect()
+        img_rect.center = self.rect.center
+
+        parent.blit(IMAGE, img_rect)
 
 
 class TextButton:
@@ -85,7 +106,7 @@ class TextBox:
 
 
 # test comment
-class Display:
+class Display():
     pygame.init()
 
     CLICK = False
@@ -117,10 +138,10 @@ class Display:
             # ==================================
             mouse = pygame.mouse.get_pos()
             if b_start.rect.collidepoint(mouse) and self.CLICK:
-                break
-            if b_quit.rect.collidepoint(mouse) and self.CLICK:
+                self.page_map()
+            elif b_quit.rect.collidepoint(mouse) and self.CLICK:
                 sys.exit()
-            if b_credits.rect.collidepoint(mouse) and self.CLICK:
+            elif b_credits.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 self.change_state("credits")
 
@@ -147,6 +168,42 @@ class Display:
             self.clock.tick(15)
 
         pygame.quit()
+
+    def page_map(self):
+        tile_list = list()
+        x, y = 0, 0
+        for y_tile in range(MAP_MAX_Y):
+            y = int(TILE_SIZE * y_tile)
+            for x_tile in range(MAP_MAX_X):
+                x = int(TILE_SIZE * x_tile)
+                b_tile = TileButton(parent=self.gameDisplay, left=x, top=y, color=DIRT)
+                tile_list.append([b_tile, (x, y)])
+
+        while True:
+            self.gameDisplay.fill(DIRT)
+
+            b_quitgame = TextButton(parent=self.gameDisplay, text="Quit Game", left=(MAP_MAX_X * TILE_SIZE) + 20)
+
+            for tile in tile_list:
+                tile[0] = TileButton(parent=self.gameDisplay, left=tile[1][0], top=tile[1][1], color=DIRT)
+
+
+            mouse = pygame.mouse.get_pos()
+            if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
+                return
+
+            # Click Event Monitor
+            # ==================================
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.CLICK = True
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    self.CLICK = False
+
+            pygame.display.update()
+            self.clock.tick(15)
 
     def page_credits(self, prev_state):
         while True:
