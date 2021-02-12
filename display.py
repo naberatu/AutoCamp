@@ -15,6 +15,7 @@ MAP_MAX_Y = 15
 
 TILE_SIZE = int(HEIGHT / MAP_MAX_Y)      # Usually would be 32
 
+
 # Base Colors:
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -138,6 +139,7 @@ class Display():
             # ==================================
             mouse = pygame.mouse.get_pos()
             if b_start.rect.collidepoint(mouse) and self.CLICK:
+                self.CLICK = False
                 self.page_map()
             elif b_quit.rect.collidepoint(mouse) and self.CLICK:
                 sys.exit()
@@ -179,18 +181,28 @@ class Display():
                 b_tile = TileButton(parent=self.gameDisplay, left=x, top=y, color=DIRT)
                 tile_list.append([b_tile, (x, y)])
 
+        x, y = -1, -1
+
         while True:
             self.gameDisplay.fill(DIRT)
+            tile_coors = "Tile: "
+            if x >= 0 and y >= 0:
+                tile_coors += "(" + str(x) + ", " + str(y) + ")"
 
-            b_quitgame = TextButton(parent=self.gameDisplay, text="Quit Game", left=(MAP_MAX_X * TILE_SIZE) + 20)
+            b_coors = TextBox(parent=self.gameDisplay, text=tile_coors,
+                              left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
+            b_quitgame = TextButton(parent=self.gameDisplay, text="Quit Game",
+                                    left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(0.8 * HEIGHT))
 
             for tile in tile_list:
                 tile[0] = TileButton(parent=self.gameDisplay, left=tile[1][0], top=tile[1][1], color=DIRT)
 
-
             mouse = pygame.mouse.get_pos()
             if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
                 return
+            if mouse[0] <= (MAP_MAX_Y + 1) * TILE_SIZE and self.CLICK:
+                x = int(mouse[0] / TILE_SIZE)
+                y = int(mouse[1] / TILE_SIZE)
 
             # Click Event Monitor
             # ==================================
