@@ -54,10 +54,10 @@ class TileButton:
 
         IMAGE = pygame.image.load("./assets/grasstile.png").convert()
         IMAGE = pygame.transform.scale(IMAGE, (TILE_SIZE, TILE_SIZE))
-        img_rect = IMAGE.get_rect()
-        img_rect.center = self.rect.center
+        self.img_rect = IMAGE.get_rect()
+        self.img_rect.center = self.rect.center
 
-        parent.blit(IMAGE, img_rect)
+        parent.blit(IMAGE, self.img_rect)
 
 
 class TextButton:
@@ -189,10 +189,13 @@ class Display():
             if x >= 0 and y >= 0:
                 tile_coors += "(" + str(x) + ", " + str(y) + ")"
 
-            b_coors = TextBox(parent=self.gameDisplay, text=tile_coors,
-                              left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
+            tb_coors = TextBox(parent=self.gameDisplay, text=tile_coors,
+                               left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
             b_quitgame = TextButton(parent=self.gameDisplay, text="Quit Game",
                                     left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(0.8 * HEIGHT))
+
+            r_test = pygame.Rect((MAP_MAX_X * TILE_SIZE) + 20, int(0.2 * HEIGHT), 50, 50)
+            pygame.draw.rect(self.gameDisplay, (0, 0, 0, 0), r_test)
 
             for tile in tile_list:
                 tile[0] = TileButton(parent=self.gameDisplay, left=tile[1][0], top=tile[1][1], color=DIRT)
