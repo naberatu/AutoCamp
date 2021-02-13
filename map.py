@@ -131,7 +131,8 @@ class Map:
 testMap = Map(250, 250)
 testMap.animateList[1, 0] = 'A'
 testMap.inanimateList[2, 3] = '#'
+testMap.inanimateList[4, 7] = '%'
 testMap.printMap()
 paths = testMap.dijkstras((1, 2))
-print(testMap.findPath((paths[1]), (12, 15)))
-print(paths[0][(12, 15)])
+print(testMap.findPath((paths[1]), (127, 235)))
+print(paths[0][(127, 235)])
