@@ -3,7 +3,7 @@
 import os
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
-# from display import Display
+from display import Display
 from encounter import Encounter
 from player import Player
 from statblock import StatBlock
@@ -30,7 +30,7 @@ commands = {
 }
 
 # Parameters & Encounter init.
-# disp = Display()
+disp = Display()
 player_list = list()
 MAP_MAX_X = 15
 MAP_MAX_Y = 10
@@ -91,8 +91,8 @@ except:
 # End Except statement
 
 
-print("\nWelcome to the AutoCamp Demonstration v1.3")
-# disp.game_intro()
+print("\nWelcome to the AutoCamp Demonstration")
+disp.page_startup()
 
 ENC.enc_update_map()
 ENC.enc_print_map()
