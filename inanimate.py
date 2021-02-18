@@ -17,6 +17,7 @@ class Inanimate(Entity):
         self.is_weapon = False
         self.is_armor = False
         self.is_consumable = False
+        self.is_misc = False
 
         if item_code == 0:
             self.is_prop = True
@@ -35,6 +36,9 @@ class Inanimate(Entity):
             self.is_consumable = True
             self.properties = {"type": alpha,
                                "strength": beta}
+
+        elif item_code == 4:
+            self.is_misc = True
 
         self.tile_size = tile_size
         self.maxStack = max_stack

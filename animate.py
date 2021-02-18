@@ -106,7 +106,8 @@ class Animate(Entity):
             self.stat_block.modify_stat("Max HP", old_hp + new_hp)
             self.stat_block.modify_stat("Current HP", old_hp + new_hp)
             self.stat_block.modify_stat("Hit Dice Quantity", self.stat_block.get_stat("Hit Dice Quantity") + 1)
-            print("[OK] Level Updated to ", self.level, "!")
+            # Commented out for debug
+            # print("[OK] Level Updated to ", self.level, "!")
         else:
             print("[ER] Already at max level!")
 

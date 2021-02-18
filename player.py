@@ -78,13 +78,33 @@ class Player(Animate):
             self.money["silver"] = new_s
             self.money_add(0, 0, int(old_s / 10))
 
+    def money_deduct(self, copper=0):
+        # If illogical values are placed, don't bother.
+        if copper < 0:
+            return
+        moneyInCopper = self.money["copper"] + (self.money["silver"] * 10) + (self.money["gold"] * 100)
+        if copper > moneyInCopper:
+            print("[ER] Can not complete purchase! Insufficient funds!")
+            return False
+
+        goldToLose = int(copper/100)
+        silvToLose = int((copper % 100) / 10)
+        coppToLose = int((copper % 100) % 10)
+
+        self.money["copper"] -= coppToLose
+        self.money["silver"] -= silvToLose
+        self.money["gold"] -= goldToLose
+        return True
+
     def inv_add(self, item, amount=1):
         if self.inv_is_full():
             return False
 
         if items.catalog[item].get_is_weapon() and self.weapon is None:
             self.weapon = item
-            return True
+            amount -= 1
+            if amount == 0:
+                return True
 
         try:
             amount = int(amount)
@@ -176,7 +196,7 @@ class Player(Animate):
         print("=============================================================================")
         return True
 
-    def inv_remove(self, item, amount=1, discarding=False, using=False, dropping=False, selling=False, notify=True):
+    def inv_remove(self, item, amount=1, discarding=False, using=False, dropping=False, selling=False, haggling=False, haggle_cost=0, notify=True):
         if self.inventory == {}:
             print("[ER] Inventory is empty!")
             return False
@@ -186,14 +206,25 @@ class Player(Animate):
             earnings = 0
 
             # Dropping: Discarding an item in your hand.
-            if selling:
-                earnings = items.catalog[item].get_cost() * amount
+            if selling or haggling:
                 if item == self.weapon or item == self.armor:
-                    if not self.inv_remove(item, amount, discarding=True, notify=False):
-                        self.inv_remove(item, dropping=True, notify=False)
-                elif not self.inv_remove(item, amount, discarding=True, notify=False):
-                    raise KeyError
+                    # trying to sell what's in inv + what's equipped OR selling what's equipped (take it off first)
+                    if amount == 1 and item not in self.inventory.keys():
+                        self.inv_dequip(item)
+                    elif amount == self.inventory[item] + 1:
+                        self.inv_dequip(item)
 
+                if amount > self.inventory[item] or amount <= 0:
+                    print("[ER] You can't sell that amount!")
+
+                if selling:
+                    earnings = items.catalog[item].get_cost() * amount
+                elif haggling:
+                    earnings = haggle_cost * amount
+
+                self.inventory[item] -= amount
+                if self.inventory[item] <= 0:
+                    del self.inventory[item]
                 self.money_add(copper=earnings)
 
             elif dropping:
@@ -204,8 +235,15 @@ class Player(Animate):
 
             elif discarding or using:
                 if amount > self.inventory[item] or amount <= 0:
-                    print("[ER] You can't discard that amount!")
+                    print("[ER] You can't use/discard that amount!")
                     return False
+
+                elif using and not items.catalog[item].is_consumable:
+                    print("[ER] You can not use the {}!".format(item))
+                    return False
+
+                elif discarding and item == self.weapon:
+                    self.weapon = None
 
                 self.inventory[item] -= amount
                 if self.inventory[item] <= 0:
