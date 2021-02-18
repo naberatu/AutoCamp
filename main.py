@@ -3,7 +3,7 @@
 import os
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
-# from display import Display
+from display import Display
 from cencounter import CEncounter
 from player import Player
 from statblock import StatBlock
@@ -11,6 +11,10 @@ from enemy import Enemy
 import items
 import random
 import pickle
+
+disp = Display()
+disp.page_startup()
+exit()
 
 
 commands = {
