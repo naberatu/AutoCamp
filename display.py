@@ -20,7 +20,6 @@ TILE_SIZE = int(HEIGHT / MAP_MAX_Y)      # Usually would be 32
 # Base Colors:
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-BLUE = (115, 215, 255)
 DIRT = (197, 145, 84)
 
 # Button Dimensions:
@@ -65,20 +64,19 @@ class TileButton:
 
 
 class TextButton:
-    def __init__(self, parent=None, text="test", t_size=20, t_color=WHITE, t_font="scaly",
+    def __init__(self, parent=None, path="./assets/button.png", text="test", t_size=20, t_color=WHITE, t_font="scaly",
                  left=0, top=0, width=100, height=50):
 
         self.t_size, self.t_color = t_size, t_color
         self.t_font = use_font(size=t_size, font=t_font)
 
-        self.box = load_image("./assets/button.png", B_WIDTH, B_HEIGHT)
+        self.box = load_image(path, B_WIDTH, B_HEIGHT)
 
         self.rect = pygame.Rect(left, top, width, height)
 
         self.text, self.textbox = text_objects(text, self.t_font, t_color)
         self.textbox.center = self.rect.center
 
-        # pygame.draw.rect(parent, color, self.rect)
         parent.blit(self.box, self.rect)
         parent.blit(self.text, self.textbox)
 
@@ -181,6 +179,7 @@ class Display():
 
         while True:
             self.SCREEN.fill(DIRT)
+            # self.SCREEN.blit(load_image("./assets/button.png", 800, 480), ORIGIN)
             tile_coors = "Tile: "
             if x >= 0 and y >= 0:
                 tile_coors += "(" + str(x) + ", " + str(y) + ")"
@@ -239,10 +238,10 @@ class Display():
             tb_wizards = TextBox(parent=self.SCREEN, text="Wizards of the Coast", t_font="hylia", t_size=20,
                                  center=True, top=tb_game.textbox.top + tb_game.textbox.height)
 
-            b_back = TextButton(parent=self.SCREEN, text="Back", left=B_CENTER, top=B_YPOS + 50, width=B_WIDTH, height=B_HEIGHT)
+            b_back = TextButton(parent=self.SCREEN, path="./assets/b_credits.png", text="Back", left=B_CENTER,
+                                top=B_YPOS + 50, width=B_WIDTH, height=B_HEIGHT)
 
             if b_back.rect.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
-                # self.CLICK = False
                 return
 
             # Click Event Monitor
