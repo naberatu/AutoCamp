@@ -79,21 +79,21 @@ def save():
     pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
 
 
-# class QuitBox:
-#     def __init__(self, parent, width, height, t_font, rect):
-#         box = load_image("./assets/button.png", width, height)
-#
-#         text1, textbox1 = text_objects("Would you like to", t_font, WHITE)
-#         textbox1.center = rect.center
-#         textbox1.top = rect.top + 10
-#
-#         text2, textbox2 = text_objects("save the game?", t_font, WHITE)
-#         textbox2.center = rect.center
-#         textbox2.top = textbox1.bottom
-#
-#         parent.blit(box, rect)
-#         parent.blit(text1, textbox1)
-#         parent.blit(text2, textbox2)
+class QuitBox:
+    def __init__(self, parent, width, height, t_font, rect):
+        box = load_image("./assets/button.png", width, height)
+
+        text1, textbox1 = text_objects("Would you like to", t_font, WHITE)
+        textbox1.center = rect.center
+        textbox1.top = rect.top + 10
+
+        text2, textbox2 = text_objects("save the game?", t_font, WHITE)
+        textbox2.center = rect.center
+        textbox2.top = textbox1.bottom
+
+        parent.blit(box, rect)
+        parent.blit(text1, textbox1)
+        parent.blit(text2, textbox2)
 
 
 class TileButton:
@@ -246,7 +246,7 @@ class Display:
                 elif MODE == "Explore":
                     self.page_explore()
             elif b_quit.rect.collidepoint(mouse) and self.CLICK:
-                save()
+                # save()
                 sys.exit()
             elif b_credits.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
@@ -312,6 +312,7 @@ class Display:
 
             mouse = pygame.mouse.get_pos()
             if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
+                self.prompt_quit()
                 return
             if mouse[0] <= (MAP_MAX_Y + 1) * TILE_SIZE and self.CLICK:
                 x = int(mouse[0] / TILE_SIZE)
@@ -380,7 +381,7 @@ class Display:
 
             mouse = pygame.mouse.get_pos()
             if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
-                # self.prompt_quit()
+                self.prompt_quit()
                 return
 
             # Click Event Monitor
@@ -396,21 +397,35 @@ class Display:
             pygame.display.update()
             self.CLK.tick(15)
 
-    # def prompt_quit(self):
-    #     width, height = 200, 150
-    #     t_font = use_font(size=20, font="scaly")
-    #     rect = pygame.Rect(B_CENTER, int(HEIGHT * 0.33), width, height)
-    #
-    #     while True:
-    #         quit_box = QuitBox(self.SCREEN, width, height, t_font, rect)
-    #         b_yes = TextButton(parent=self.SCREEN, text="Yes", left=int(width / 4), top=int(height / 2), width=50, height=30)
-    #         b_no = TextButton(parent=self.SCREEN, text="No", left=int(width / 2), top=int(height / 2), width=50, height=30)
-    #
-    #         self.SCREEN.blit(b_yes, rect)
-    #         self.SCREEN.blit(b_no, rect)
-    #
-    #         pygame.display.update()
-    #         self.CLK.tick(15)
+    def prompt_quit(self):
+        width, height = 200, 100
+        t_font = use_font(size=20, font="scaly")
+        rect = pygame.Rect(B_CENTER, int(HEIGHT * 0.33), width, height)
+
+        while True:
+            quit_box = QuitBox(self.SCREEN, width, height, t_font, rect)
+            b_yes = TextButton(parent=self.SCREEN, text="Yes", left=rect.center[0]-50, top=rect.center[1]+10, width=50, height=30)
+            b_no = TextButton(parent=self.SCREEN, text="No", left=rect.center[0], top=rect.center[1]+10, width=50, height=30)
+
+            mouse = pygame.mouse.get_pos()
+            if b_yes.rect.collidepoint(mouse) and self.CLICK:
+                self.CLICK = False
+                save()
+                return
+            if b_no.rect.collidepoint(mouse) and self.CLICK:
+                self.CLICK = False
+                return
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.CLICK = True
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    self.CLICK = False
+
+            pygame.display.update()
+            self.CLK.tick(15)
 
 
 
