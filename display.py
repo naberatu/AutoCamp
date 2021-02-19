@@ -226,15 +226,16 @@ class Display:
     # Pages and Menus
     # ==================================
     def page_startup(self):
-        while True:
+        st_font = "hylia"
 
+        while True:
             # Graphics Generation
             # ==================================
             self.SCREEN.blit(self.BG_STARTUP, ORIGIN)
-            b_start = TextButton(parent=self.SCREEN, text="Start", left=B_CENTER, top=B_YPOS - (2 * B_HEIGHT), width=B_WIDTH, height=B_HEIGHT)
-            b_credits = TextButton(parent=self.SCREEN, text="Credits", left=B_CENTER, top=B_YPOS - B_HEIGHT, width=B_WIDTH, height=B_HEIGHT)
-            b_quit = TextButton(parent=self.SCREEN, text="Exit", left=B_CENTER, top=B_YPOS, width=B_WIDTH, height=B_HEIGHT)
-            b_encmode = TextButton(parent=self.SCREEN, text=MODE, left=int(WIDTH * 0.75), top=B_YPOS - B_HEIGHT, width=int(B_WIDTH/2), height=B_HEIGHT)
+            b_start = TextButton(parent=self.SCREEN, text="Start", t_font=st_font, left=B_CENTER, top=B_YPOS - (2 * B_HEIGHT), width=B_WIDTH, height=B_HEIGHT)
+            b_credits = TextButton(parent=self.SCREEN, text="Credits", t_font=st_font, left=B_CENTER, top=B_YPOS - B_HEIGHT, width=B_WIDTH, height=B_HEIGHT)
+            b_encmode = TextButton(parent=self.SCREEN, text=MODE, t_font=st_font, left=int(WIDTH * 0.75), top=B_YPOS - B_HEIGHT, width=int(B_WIDTH/2), height=B_HEIGHT)
+            b_quit = TextButton(parent=self.SCREEN, text="Exit", t_font=st_font, left=B_CENTER, top=B_YPOS, width=B_WIDTH, height=B_HEIGHT)
 
             # Button Functions
             # ==================================
@@ -258,18 +259,7 @@ class Display:
                 elif ENCOUNTER_INDEX == 2:
                     change_enc(1)
 
-            # ico = pygame.transform.scale(self.ICON, (B_HEIGHT, B_HEIGHT))
-            # ltest = [ico, t_start]
-            # for item in ltest:
-            #     if item == ico:
-            #         self.SCREEN.blit(item, (start_button.left - B_HEIGHT/2 + start_button.width / 2, start_button.top))
-            #     else:
-            #         self.SCREEN.blit(item, r_start)
-            # self.SCREEN.blit(t_credits, r_credits)
-
-            self.click_monitor()
-            pygame.display.update()
-            self.CLK.tick(15)
+            self.end_page()
 
     def page_map(self):
         tile_list = list()
@@ -293,10 +283,7 @@ class Display:
             tb_coors = TextBox(parent=self.SCREEN, text=tile_coors,
                                left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=(MAP_MAX_X * TILE_SIZE) + 20,
-                                    top=int(0.8 * HEIGHT))
-
-            r_test = pygame.Rect((MAP_MAX_X * TILE_SIZE) + 20, int(0.2 * HEIGHT), 50, 50)
-            pygame.draw.rect(self.SCREEN, (0, 0, 0, 0), r_test)
+                                    top=int(0.8 * HEIGHT), width=120)
 
             for tile in tile_list:
                 tile[0] = TileButton(parent=self.SCREEN, left=tile[1][0], top=tile[1][1], color=DIRT)
@@ -309,9 +296,7 @@ class Display:
                 x = int(mouse[0] / TILE_SIZE)
                 y = int(mouse[1] / TILE_SIZE)
 
-            self.click_monitor()
-            pygame.display.update()
-            self.CLK.tick(15)
+            self.end_page()
 
     def page_credits(self):
         while True:
@@ -342,14 +327,18 @@ class Display:
             if b_back.rect.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
                 return
 
-            self.click_monitor()
-            pygame.display.update()
-            self.CLK.tick(15)
+            self.end_page()
 
     def page_explore(self):
+        exp_top = 420
+        exp_left = 670
+        cwid = 120
+        offs = cwid + 10
         while True:
             self.SCREEN.blit(self.BG_TAVERN, ORIGIN)
-            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=630, top=400, width=120)
+            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=exp_left, top=exp_top, width=cwid)
+            b_move = TextButton(parent=self.SCREEN, text="Move", left=exp_left - offs, top=exp_top, width=cwid)
+            b_roll = TextButton(parent=self.SCREEN, text="Roll", left=exp_left - (2 * offs), top=exp_top, width=cwid)
 
             # Mouse Monitor
             # ==================================
@@ -358,9 +347,7 @@ class Display:
                 self.prompt_quit()
                 return
 
-            self.click_monitor()
-            pygame.display.update()
-            self.CLK.tick(15)
+            self.end_page()
 
     def prompt_quit(self):
         width, height = 200, 100
@@ -392,7 +379,7 @@ class Display:
             pygame.display.update()
             self.CLK.tick(15)
 
-    def click_monitor(self):
+    def end_page(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -401,7 +388,6 @@ class Display:
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 self.CLICK = False
 
-
-
-
+        pygame.display.update()
+        self.CLK.tick(15)
 
