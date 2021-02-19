@@ -258,16 +258,6 @@ class Display:
                 elif ENCOUNTER_INDEX == 2:
                     change_enc(1)
 
-            # Click Event Monitor
-            # ==================================
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    self.CLICK = True
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.CLICK = False
-
             # ico = pygame.transform.scale(self.ICON, (B_HEIGHT, B_HEIGHT))
             # ltest = [ico, t_start]
             # for item in ltest:
@@ -277,6 +267,7 @@ class Display:
             #         self.SCREEN.blit(item, r_start)
             # self.SCREEN.blit(t_credits, r_credits)
 
+            self.click_monitor()
             pygame.display.update()
             self.CLK.tick(15)
 
@@ -318,16 +309,7 @@ class Display:
                 x = int(mouse[0] / TILE_SIZE)
                 y = int(mouse[1] / TILE_SIZE)
 
-            # Click Event Monitor
-            # ==================================
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    self.CLICK = True
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.CLICK = False
-
+            self.click_monitor()
             pygame.display.update()
             self.CLK.tick(15)
 
@@ -360,40 +342,23 @@ class Display:
             if b_back.rect.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
                 return
 
-            # Click Event Monitor
-            # ==================================
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    self.CLICK = True
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.CLICK = False
-
+            self.click_monitor()
             pygame.display.update()
             self.CLK.tick(15)
 
     def page_explore(self):
         while True:
             self.SCREEN.blit(self.BG_TAVERN, ORIGIN)
-            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=(MAP_MAX_X * TILE_SIZE) + 20,
-                                    top=int(0.8 * HEIGHT))
+            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=630, top=400, width=120)
 
+            # Mouse Monitor
+            # ==================================
             mouse = pygame.mouse.get_pos()
             if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
                 self.prompt_quit()
                 return
 
-            # Click Event Monitor
-            # ==================================
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    self.CLICK = True
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.CLICK = False
-
+            self.click_monitor()
             pygame.display.update()
             self.CLK.tick(15)
 
@@ -426,6 +391,15 @@ class Display:
 
             pygame.display.update()
             self.CLK.tick(15)
+
+    def click_monitor(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                self.CLICK = True
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                self.CLICK = False
 
 
 
