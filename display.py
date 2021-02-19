@@ -1,6 +1,12 @@
 import random
 import time
 import pygame
+import pickle
+from player import Player
+from enemy import Enemy
+from cencounter import CEncounter
+from encounter import Encounter
+
 from os import environ
 import sys
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
@@ -16,7 +22,6 @@ MAP_MAX_Y = 15
 
 TILE_SIZE = int(HEIGHT / MAP_MAX_Y)      # Usually would be 32
 
-
 # Base Colors:
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -27,6 +32,13 @@ B_WIDTH = 200
 B_HEIGHT = 50
 B_CENTER = 300
 B_YPOS = 330
+
+# Encounter & Player Data
+MODE = "Battle"         # Can also be "Explore"
+EMPTY_LIST = list()
+PLAYERS = list()
+ENCOUNTERS = list()
+ENCOUNTER_INDEX = 1         # Can never be 0, since that's its own index
 
 
 def use_font(size=12, font="hylia"):
@@ -49,6 +61,41 @@ def load_image(path="./assets", x=1, y=1):
     return IMAGE
 
 
+def change_enc(index):
+    global ENCOUNTERS, ENCOUNTER_INDEX, MODE
+    ENCOUNTER_INDEX = index
+    ENCOUNTERS[0] = ENCOUNTER_INDEX
+    if ENCOUNTERS[ENCOUNTER_INDEX].is_combat:
+        MODE = "Battle"
+    else:
+        MODE = "Explore"
+
+
+def save():
+    global PLAYERS, ENCOUNTERS
+    pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
+    pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
+    pickle.dump(PLAYERS, open("players.camp", "wb"))
+    pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
+
+
+# class QuitBox:
+#     def __init__(self, parent, width, height, t_font, rect):
+#         box = load_image("./assets/button.png", width, height)
+#
+#         text1, textbox1 = text_objects("Would you like to", t_font, WHITE)
+#         textbox1.center = rect.center
+#         textbox1.top = rect.top + 10
+#
+#         text2, textbox2 = text_objects("save the game?", t_font, WHITE)
+#         textbox2.center = rect.center
+#         textbox2.top = textbox1.bottom
+#
+#         parent.blit(box, rect)
+#         parent.blit(text1, textbox1)
+#         parent.blit(text2, textbox2)
+
+
 class TileButton:
     def __init__(self, parent=None, left=0, top=0, width=TILE_SIZE, height=TILE_SIZE, color=DIRT):
         self.color = color
@@ -65,12 +112,12 @@ class TileButton:
 
 class TextButton:
     def __init__(self, parent=None, path="./assets/button.png", text="test", t_size=20, t_color=WHITE, t_font="scaly",
-                 left=0, top=0, width=100, height=50):
+                 left=0, top=0, width=B_WIDTH, height=B_HEIGHT):
 
         self.t_size, self.t_color = t_size, t_color
         self.t_font = use_font(size=t_size, font=t_font)
 
-        self.box = load_image(path, B_WIDTH, B_HEIGHT)
+        self.box = load_image(path, width, height)
 
         self.rect = pygame.Rect(left, top, width, height)
 
@@ -100,7 +147,7 @@ class TextBox:
 
 
 # test comment
-class Display():
+class Display:
     pygame.init()
 
     # Window Creation
@@ -116,6 +163,65 @@ class Display():
     BG_TAVERN = load_image("./assets/tavern.jpg", WIDTH, HEIGHT)
     CLICK = False
     CLK = pygame.time.Clock()
+    PLAYERS_OK = False
+    ENCOUNTERS_OK = False
+
+    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, MODE, EMPTY_LIST
+
+    # Load Data
+    # ==================================
+    try:
+        # global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX
+        PLAYERS = pickle.load(open("players.camp", "rb"))
+        PLAYERS_OK = True
+        ENCOUNTERS = pickle.load(open("savegame.camp", "rb"))
+        ENCOUNTERS_OK = True
+    except:
+        if not PLAYERS_OK:
+            PLAYERS.append(Player("Fjord", "Orc", "Warlock"))
+            PLAYERS.append(Player("Jester Lavorre", "Tiefling", "Cleric"))
+            PLAYERS.append(Player("Caleb Widowgast", "Human", "Wizard"))
+            PLAYERS.append(Player("Yasha Nyoodrin", "Aasimar", "Barbarian"))
+            PLAYERS.append(Player("Veth Brenatto", "Goblin", "Rogue"))
+
+            for hero in PLAYERS:
+                hero.set_weapon("Shortsword")
+                hero.set_armor("Chain Mail")
+                hero.inv_add("Mana Potion", random.randint(1, 6))
+
+            pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
+            pickle.dump(PLAYERS, open("players.camp", "wb"))
+            ENCOUNTERS_OK = False
+
+        if not ENCOUNTERS_OK:
+            e_town = Encounter("Tavern")
+            e_battle = CEncounter("Grassy Plain")
+            e_battle.enc_fill_map()
+
+            # Example Entities
+            e_battle.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+            e_battle.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+            e_battle.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
+            # for player in PLAYERS:            # TODO Only add players when starting this encounter.
+            #     e_battle.add_entity(player)
+            # e_battle.start_encounter()
+
+            # Populator Loop
+            # for index in range(e_battle.get_al_size()):
+            #     entity = e_battle.get_entity(True, index)
+            #
+            #     while e_battle.enc_move(entity, max(MAP_MAX_X, MAP_MAX_Y) * 5,
+            #                        random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
+            #         pass
+
+            ENCOUNTERS.append(1)                # Encounter tracker.
+            ENCOUNTERS.append(e_battle)         # Encounter 1
+            ENCOUNTERS.append(e_town)           # Encounter 2
+            pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
+            pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
+
+    change_enc(ENCOUNTERS[0])
+    CURRENT_ENCOUNTER = ENCOUNTERS[ENCOUNTER_INDEX]
 
     # Pages and Menus
     # ==================================
@@ -128,18 +234,29 @@ class Display():
             b_start = TextButton(parent=self.SCREEN, text="Start", left=B_CENTER, top=B_YPOS - (2 * B_HEIGHT), width=B_WIDTH, height=B_HEIGHT)
             b_credits = TextButton(parent=self.SCREEN, text="Credits", left=B_CENTER, top=B_YPOS - B_HEIGHT, width=B_WIDTH, height=B_HEIGHT)
             b_quit = TextButton(parent=self.SCREEN, text="Exit", left=B_CENTER, top=B_YPOS, width=B_WIDTH, height=B_HEIGHT)
+            b_encmode = TextButton(parent=self.SCREEN, text=MODE, left=int(WIDTH * 0.75), top=B_YPOS - B_HEIGHT, width=int(B_WIDTH/2), height=B_HEIGHT)
 
             # Button Functions
             # ==================================
             mouse = pygame.mouse.get_pos()
             if b_start.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
-                self.page_map()
+                if MODE == "Battle":
+                    self.page_map()
+                elif MODE == "Explore":
+                    self.page_explore()
             elif b_quit.rect.collidepoint(mouse) and self.CLICK:
+                save()
                 sys.exit()
             elif b_credits.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 self.page_credits()
+            elif b_encmode.rect.collidepoint(mouse) and self.CLICK:
+                self.CLICK = False
+                if ENCOUNTER_INDEX == 1:
+                    change_enc(2)
+                elif ENCOUNTER_INDEX == 2:
+                    change_enc(1)
 
             # Click Event Monitor
             # ==================================
@@ -163,8 +280,6 @@ class Display():
             pygame.display.update()
             self.CLK.tick(15)
 
-        # pygame.quit()
-
     def page_map(self):
         tile_list = list()
         x, y = 0, 0
@@ -186,8 +301,8 @@ class Display():
 
             tb_coors = TextBox(parent=self.SCREEN, text=tile_coors,
                                left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
-            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game",
-                                    left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(0.8 * HEIGHT))
+            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=(MAP_MAX_X * TILE_SIZE) + 20,
+                                    top=int(0.8 * HEIGHT))
 
             r_test = pygame.Rect((MAP_MAX_X * TILE_SIZE) + 20, int(0.2 * HEIGHT), 50, 50)
             pygame.draw.rect(self.SCREEN, (0, 0, 0, 0), r_test)
@@ -254,10 +369,48 @@ class Display():
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.CLICK = False
 
-            self.CLK.tick(15)
             pygame.display.update()
+            self.CLK.tick(15)
 
+    def page_explore(self):
+        while True:
+            self.SCREEN.blit(self.BG_TAVERN, ORIGIN)
+            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=(MAP_MAX_X * TILE_SIZE) + 20,
+                                    top=int(0.8 * HEIGHT))
 
+            mouse = pygame.mouse.get_pos()
+            if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
+                # self.prompt_quit()
+                return
+
+            # Click Event Monitor
+            # ==================================
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.CLICK = True
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    self.CLICK = False
+
+            pygame.display.update()
+            self.CLK.tick(15)
+
+    # def prompt_quit(self):
+    #     width, height = 200, 150
+    #     t_font = use_font(size=20, font="scaly")
+    #     rect = pygame.Rect(B_CENTER, int(HEIGHT * 0.33), width, height)
+    #
+    #     while True:
+    #         quit_box = QuitBox(self.SCREEN, width, height, t_font, rect)
+    #         b_yes = TextButton(parent=self.SCREEN, text="Yes", left=int(width / 4), top=int(height / 2), width=50, height=30)
+    #         b_no = TextButton(parent=self.SCREEN, text="No", left=int(width / 2), top=int(height / 2), width=50, height=30)
+    #
+    #         self.SCREEN.blit(b_yes, rect)
+    #         self.SCREEN.blit(b_no, rect)
+    #
+    #         pygame.display.update()
+    #         self.CLK.tick(15)
 
 
 
