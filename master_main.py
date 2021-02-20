@@ -2,9 +2,15 @@ from statblock import StatBlock
 from random import randint
 from campaign import Campaign
 from enemy import Enemy
+from display import Display
 import player
 import cencounter
 import copy
+
+# Parameters & CEncounter init.
+disp = Display()
+disp.page_startup()
+
 # ===============================================================================
 # NCE Setup
 # ===============================================================================
@@ -61,9 +67,6 @@ commands = {
             "use": "Uses an item from inventory."
 }
 
-# Parameters & CEncounter init.
-#disp = Display()
-# disp.page_startup()
 player_list = list()
 MAP_MAX_X = 15
 MAP_MAX_Y = 10
