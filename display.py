@@ -394,14 +394,13 @@ class Display:
     def dice_prompt(self):
         width, height = 400, 200
         rect = pygame.Rect(int(width / 2), int(HEIGHT * 0.2), width, height)
+        cl_left = rect.left + width - 30
         result = ""
-        cl_left = rect.left + 370
 
         while True:
-            dice_box = DiceBox(self.SCREEN, width, height, result, rect)
+            DiceBox(self.SCREEN, width, height, result, rect)
             b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
                                  width=30, height=30)
-
 
             mouse = pygame.mouse.get_pos()
             if b_close.rect.collidepoint(mouse) and self.CLICK:
@@ -414,12 +413,17 @@ class Display:
         t_font = use_font(size=20, font="hylia")
         rect = pygame.Rect(B_CENTER, int(HEIGHT * 0.33), width, height)
         b_top = rect.center[1] + 10
+        ch_width = 70
+        cl_left = rect.left + width - 30
 
         while True:
-            quit_box = QuitBox(self.SCREEN, width, height, t_font, rect)
-            b_yes = TextButton(parent=self.SCREEN, text="Accept", t_size=16, left=rect.center[0]-95, top=b_top, width=60, height=30)
-            b_no = TextButton(parent=self.SCREEN, text="Decline", t_size=16, left=rect.center[0]-30, top=b_top, width=60, height=30)
-            b_cancel = TextButton(parent=self.SCREEN, text="Cancel", t_size=16, left=rect.center[0]+35, top=b_top, width=60, height=30)
+            QuitBox(self.SCREEN, width, height, t_font, rect)
+            b_yes = TextButton(parent=self.SCREEN, text="Accept", t_size=20,
+                               left=rect.center[0]-ch_width-5, top=b_top, width=ch_width, height=30)
+            b_no = TextButton(parent=self.SCREEN, text="Decline", t_size=20,
+                              left=rect.center[0]+5, top=b_top, width=ch_width, height=30)
+            b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
+                                 width=30, height=30)
 
             mouse = pygame.mouse.get_pos()
             if b_yes.rect.collidepoint(mouse) and self.CLICK:
@@ -429,7 +433,8 @@ class Display:
             if b_no.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 return True         # As in, yes please quit
-            if b_cancel.rect.collidepoint(mouse) and self.CLICK:
+            # if b_cancel.rect.collidepoint(mouse) and self.CLICK:
+            if b_close.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 return False        # As in, no don't quit
 
