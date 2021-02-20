@@ -393,18 +393,22 @@ class Display:
             self.end_page()
 
     def dice_prompt(self):
-        width, height = 400, 300
+        dice_options = ["d4", "d6", "d8", "d10", "d12", "d20"]
+        width, height = 340, 300
         rect = pygame.Rect(int(width / 2), int(HEIGHT * 0.2), width, height)
         cl_left = rect.left + width - 30
         kp_dim = 50
+        can_clr = False
         result = ""
 
         while True:
             dice_box = DiceBox(self.SCREEN, width, height, result, rect)
             kp_top = dice_box.bottom + 10
             kp_left = rect.left + 10
+            dp_left = kp_left + 30 + (3 * kp_dim)
             b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
                                  width=30, height=30)
+
             keypad = list()
             for num in range(1, 11):
                 if num == 10:
@@ -419,18 +423,51 @@ class Display:
                 else:
                     kp_left += kp_dim + 5
 
+            dicepad = list()
+            kp_top = dice_box.bottom + 10
+            for num in range(6):
+                dicepad.append(TextButton(parent=self.SCREEN, text=dice_options[num], t_font="hylia", t_size=20,
+                                         left=dp_left, top=kp_top, width=60, height=kp_dim))
+                if num == 2:
+                    kp_top += kp_dim + 5
+                    b_set = TextButton(parent=self.SCREEN, text="Set", t_font="hylia", t_size=24, left=dp_left,
+                                       top=kp_top, width=60, height=kp_dim)
+                    dp_left += 65
+                    kp_top = dice_box.bottom + 10
+                else:
+                    kp_top += kp_dim + 5
+                    if num == 5:
+                        b_sum = TextButton(parent=self.SCREEN, text="Sum", t_font="hylia", t_size=24, left=dp_left,
+                                           top=kp_top, width=60, height=kp_dim)
+
+            # Mouse Events
             mouse = pygame.mouse.get_pos()
             if b_close.rect.collidepoint(mouse) and self.CLICK:
                 return
+            if b_sum.rect.collidepoint(mouse) and self.CLICK:
+                num_dice, diceface = result.split("d")
+                result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), False))
+                can_clr = True
+            # if b_set.rect.collidepoint(mouse) and self.CLICK:
+
             for num, key in enumerate(keypad):
                 if key.rect.collidepoint(mouse) and self.CLICK:
+                    if can_clr:
+                        result = ""
+                        can_clr = False
                     key_val = num + 1
                     if key_val == 10:
                         result += "0"
                     else:
                         result += str(key_val)
                     self.CLICK = False
-
+            for num, diceface in enumerate(dicepad):
+                if diceface.rect.collidepoint(mouse) and self.CLICK:
+                    if can_clr:
+                        result = ""
+                        can_clr = False
+                    result += dice_options[num]
+                    self.CLICK = False
 
             self.end_page()
 
