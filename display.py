@@ -96,6 +96,24 @@ class QuitBox:
         parent.blit(text2, textbox2)
 
 
+class DiceBox:
+    def __init__(self, parent, width, height, t_res, rect):
+        box = load_image("./assets/button.png", width, height)
+
+        text1, textbox1 = text_objects("Dice Tray", use_font(20, "hylia"), WHITE)
+        textbox1.center = rect.center
+        textbox1.top = rect.top + 10
+
+        results, res_rect = text_objects(t_res, use_font(10, "scaly"), BLACK)
+        result_field = pygame.Rect(rect.center[0]-100, textbox1.bottom + 10, 200, 25)
+        res_rect = result_field
+
+        parent.blit(box, rect)
+        parent.blit(text1, textbox1)
+        pygame.draw.rect(parent, WHITE, result_field)
+        parent.blit(results, res_rect)
+
+
 class TileButton:
     def __init__(self, parent=None, left=0, top=0, width=TILE_SIZE, height=TILE_SIZE, color=DIRT):
         self.color = color
@@ -365,9 +383,29 @@ class Display:
             if b_move.rect.collidepoint(mouse) and self.CLICK:
                 change_enc(1)
                 return self.CURRENT_ENCOUNTER.name
+            if b_roll.rect.collidepoint(mouse) and self.CLICK:
+                self.dice_prompt()
             for index, button in enumerate(exp_buttons):
                 if button.rect.collidepoint(mouse) and self.CLICK:
                     player_index = index
+
+            self.end_page()
+
+    def dice_prompt(self):
+        width, height = 400, 200
+        rect = pygame.Rect(int(width / 2), int(HEIGHT * 0.2), width, height)
+        result = ""
+        cl_left = rect.left + 370
+
+        while True:
+            dice_box = DiceBox(self.SCREEN, width, height, result, rect)
+            b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
+                                 width=30, height=30)
+
+
+            mouse = pygame.mouse.get_pos()
+            if b_close.rect.collidepoint(mouse) and self.CLICK:
+                return
 
             self.end_page()
 
