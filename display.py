@@ -112,6 +112,7 @@ class DiceBox:
         parent.blit(text1, textbox1)
         pygame.draw.rect(parent, WHITE, result_field)
         parent.blit(results, res_rect)
+        self.bottom = res_rect.bottom
 
 
 class TileButton:
@@ -392,15 +393,32 @@ class Display:
             self.end_page()
 
     def dice_prompt(self):
-        width, height = 400, 200
+        width, height = 400, 300
         rect = pygame.Rect(int(width / 2), int(HEIGHT * 0.2), width, height)
         cl_left = rect.left + width - 30
+        kp_dim = 50
         result = ""
 
         while True:
-            DiceBox(self.SCREEN, width, height, result, rect)
+            dice_box = DiceBox(self.SCREEN, width, height, result, rect)
+            kp_top = dice_box.bottom + 10
+            kp_left = rect.left + 10
             b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
                                  width=30, height=30)
+            keypad = list()
+            for num in range(1, 11):
+                if num == 10:
+                    keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
+                                             left=kp_left+kp_dim + 5, top=kp_top, width=kp_dim, height=kp_dim))
+                else:
+                    keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
+                                             left=kp_left, top=kp_top, width=kp_dim, height=kp_dim))
+
+                if num % 3 == 0:
+                    kp_left, kp_top = rect.left + 10, kp_top + kp_dim + 5
+                else:
+                    kp_left += kp_dim + 5
+
 
             mouse = pygame.mouse.get_pos()
             if b_close.rect.collidepoint(mouse) and self.CLICK:
