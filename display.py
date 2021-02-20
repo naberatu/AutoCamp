@@ -104,9 +104,9 @@ class DiceBox:
         textbox1.center = rect.center
         textbox1.top = rect.top + 10
 
-        results, res_rect = text_objects(t_res, use_font(10, "scaly"), BLACK)
+        results, res_rect = text_objects(t_res, use_font(20, "nodesto"), BLACK)
         result_field = pygame.Rect(rect.center[0]-100, textbox1.bottom + 10, 200, 25)
-        res_rect = result_field
+        res_rect.center = result_field.center
 
         parent.blit(box, rect)
         parent.blit(text1, textbox1)
@@ -419,10 +419,18 @@ class Display:
                 else:
                     kp_left += kp_dim + 5
 
-
             mouse = pygame.mouse.get_pos()
             if b_close.rect.collidepoint(mouse) and self.CLICK:
                 return
+            for num, key in enumerate(keypad):
+                if key.rect.collidepoint(mouse) and self.CLICK:
+                    key_val = num + 1
+                    if key_val == 10:
+                        result += "0"
+                    else:
+                        result += str(key_val)
+                    self.CLICK = False
+
 
             self.end_page()
 
