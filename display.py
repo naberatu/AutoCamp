@@ -344,29 +344,34 @@ class Display:
             # ==================================
             mouse = pygame.mouse.get_pos()
             if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
-                self.prompt_quit()
-                return
+                if self.prompt_quit():
+                    return
 
             self.end_page()
 
     def prompt_quit(self):
-        width, height = 200, 100
-        t_font = use_font(size=20, font="scaly")
+        width, height = 280, 120
+        t_font = use_font(size=20, font="hylia")
         rect = pygame.Rect(B_CENTER, int(HEIGHT * 0.33), width, height)
+        b_top = rect.center[1] + 10
 
         while True:
             quit_box = QuitBox(self.SCREEN, width, height, t_font, rect)
-            b_yes = TextButton(parent=self.SCREEN, text="Yes", left=rect.center[0]-50, top=rect.center[1]+10, width=50, height=30)
-            b_no = TextButton(parent=self.SCREEN, text="No", left=rect.center[0], top=rect.center[1]+10, width=50, height=30)
+            b_yes = TextButton(parent=self.SCREEN, text="Accept", t_size=16, left=rect.center[0]-95, top=b_top, width=60, height=30)
+            b_no = TextButton(parent=self.SCREEN, text="Decline", t_size=16, left=rect.center[0]-30, top=b_top, width=60, height=30)
+            b_cancel = TextButton(parent=self.SCREEN, text="Cancel", t_size=16, left=rect.center[0]+35, top=b_top, width=60, height=30)
 
             mouse = pygame.mouse.get_pos()
             if b_yes.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 save()
-                return
+                return True         # As in, yes please quit
             if b_no.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
-                return
+                return True         # As in, yes please quit
+            if b_cancel.rect.collidepoint(mouse) and self.CLICK:
+                self.CLICK = False
+                return False        # As in, no don't quit
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
