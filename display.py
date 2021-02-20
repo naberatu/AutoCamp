@@ -247,7 +247,6 @@ class Display:
                 elif MODE == "Explore":
                     self.page_explore()
             elif b_quit.rect.collidepoint(mouse) and self.CLICK:
-                # save()
                 sys.exit()
             elif b_credits.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
@@ -346,6 +345,9 @@ class Display:
             if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
                 if self.prompt_quit():
                     return
+            if b_move.rect.collidepoint(mouse) and self.CLICK:
+                change_enc(1)
+                return
 
             self.end_page()
 
@@ -373,16 +375,7 @@ class Display:
                 self.CLICK = False
                 return False        # As in, no don't quit
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    self.CLICK = True
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.CLICK = False
-
-            pygame.display.update()
-            self.CLK.tick(15)
+            self.end_page()
 
     def end_page(self):
         for event in pygame.event.get():
