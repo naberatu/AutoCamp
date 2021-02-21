@@ -98,21 +98,28 @@ class QuitBox:
 
 class DiceBox:
     def __init__(self, parent, width, height, t_res, rect):
-        box = load_image("./assets/button.png", width, height)
+        self.backgd = load_image("./assets/button.png", width, height)
+        self.parent = parent
 
-        text1, textbox1 = text_objects("Dice Tray", use_font(20, "hylia"), WHITE)
-        textbox1.center = rect.center
-        textbox1.top = rect.top + 10
+        title, title_box = text_objects("Dice Tray", use_font(20, "hylia"), WHITE)
+        title_box.center = rect.center
+        title_box.top = rect.top + 10
 
-        results, res_rect = text_objects(t_res, use_font(20, "nodesto"), BLACK)
-        result_field = pygame.Rect(rect.center[0]-100, textbox1.bottom + 10, 200, 25)
-        res_rect.center = result_field.center
+        self.results, self.res_rect = text_objects(t_res, use_font(20, "nodesto"), BLACK)
+        self.result_field = pygame.Rect(rect.center[0]-100, title_box.bottom + 10, 200, 25)
+        self.res_rect.center = self.result_field.center
 
-        parent.blit(box, rect)
-        parent.blit(text1, textbox1)
-        pygame.draw.rect(parent, WHITE, result_field)
-        parent.blit(results, res_rect)
-        self.bottom = res_rect.bottom
+        self.parent.blit(self.backgd, rect)
+        self.parent.blit(title, title_box)
+        pygame.draw.rect(self.parent, WHITE, self.result_field)
+        self.parent.blit(self.results, self.res_rect)
+        self.bottom = self.res_rect.bottom
+
+    def update_result(self, result):
+        self.results, self.res_rect = text_objects(result, use_font(20, "nodesto"), BLACK)
+        self.res_rect.center = self.result_field.center
+        pygame.draw.rect(self.parent, WHITE, self.result_field)
+        self.parent.blit(self.results, self.res_rect)
 
 
 class TileButton:
@@ -400,76 +407,84 @@ class Display:
         kp_dim = 50
         can_clr = False
         result = ""
+        keypad = list()
+        dicepad = list()
+        dice_box = DiceBox(self.SCREEN, width, height, result, rect)
+        kp_top = dice_box.bottom + 10
+        kp_left = rect.left + 10
+        dp_left = kp_left + 30 + (3 * kp_dim)
+
+        b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
+                             width=30, height=30)
+
+        for num in range(1, 11):
+            if num == 10:
+                keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
+                                         left=kp_left+kp_dim + 5, top=kp_top, width=kp_dim, height=kp_dim))
+            else:
+                keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
+                                         left=kp_left, top=kp_top, width=kp_dim, height=kp_dim))
+
+            if num % 3 == 0:
+                kp_left, kp_top = rect.left + 10, kp_top + kp_dim + 5
+            else:
+                kp_left += kp_dim + 5
+
+        kp_top = dice_box.bottom + 10
+        for num in range(6):
+            dicepad.append(TextButton(parent=self.SCREEN, text=dice_options[num], t_font="hylia", t_size=20,
+                                      left=dp_left, top=kp_top, width=60, height=kp_dim))
+            if num == 2:
+                kp_top += kp_dim + 5
+                b_set = TextButton(parent=self.SCREEN, text="Set", t_font="hylia", t_size=24, left=dp_left,
+                                   top=kp_top, width=60, height=kp_dim)
+                dp_left += 65
+                kp_top = dice_box.bottom + 10
+            else:
+                kp_top += kp_dim + 5
+                if num == 5:
+                    b_sum = TextButton(parent=self.SCREEN, text="Sum", t_font="hylia", t_size=24, left=dp_left,
+                                       top=kp_top, width=60, height=kp_dim)
 
         while True:
-            dice_box = DiceBox(self.SCREEN, width, height, result, rect)
-            kp_top = dice_box.bottom + 10
-            kp_left = rect.left + 10
-            dp_left = kp_left + 30 + (3 * kp_dim)
-            b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
-                                 width=30, height=30)
-
-            keypad = list()
-            for num in range(1, 11):
-                if num == 10:
-                    keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
-                                             left=kp_left+kp_dim + 5, top=kp_top, width=kp_dim, height=kp_dim))
-                else:
-                    keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
-                                             left=kp_left, top=kp_top, width=kp_dim, height=kp_dim))
-
-                if num % 3 == 0:
-                    kp_left, kp_top = rect.left + 10, kp_top + kp_dim + 5
-                else:
-                    kp_left += kp_dim + 5
-
-            dicepad = list()
-            kp_top = dice_box.bottom + 10
-            for num in range(6):
-                dicepad.append(TextButton(parent=self.SCREEN, text=dice_options[num], t_font="hylia", t_size=20,
-                                         left=dp_left, top=kp_top, width=60, height=kp_dim))
-                if num == 2:
-                    kp_top += kp_dim + 5
-                    b_set = TextButton(parent=self.SCREEN, text="Set", t_font="hylia", t_size=24, left=dp_left,
-                                       top=kp_top, width=60, height=kp_dim)
-                    dp_left += 65
-                    kp_top = dice_box.bottom + 10
-                else:
-                    kp_top += kp_dim + 5
-                    if num == 5:
-                        b_sum = TextButton(parent=self.SCREEN, text="Sum", t_font="hylia", t_size=24, left=dp_left,
-                                           top=kp_top, width=60, height=kp_dim)
-
             # Mouse Events
+            # ==================================
             mouse = pygame.mouse.get_pos()
             if b_close.rect.collidepoint(mouse) and self.CLICK:
                 return
             if b_sum.rect.collidepoint(mouse) and self.CLICK:
-                num_dice, diceface = result.split("d")
-                result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), False))
-                can_clr = True
-            # if b_set.rect.collidepoint(mouse) and self.CLICK:
+                try:
+                    num_dice, diceface = result.split("d")
+                    result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), False))
+                except:
+                    result = "ERROR"
 
-            if mouse[0] < rect.left + 180:
-                for num, key in enumerate(keypad):
-                    if key.rect.collidepoint(mouse) and self.CLICK:
-                        if can_clr:
-                            result = ""
-                            can_clr = False
-                        key_val = num + 1
-                        if key_val == 10:
-                            result += "0"
-                        else:
-                            result += str(key_val)
-                        self.CLICK = False
-            else:
-                for num, diceface in enumerate(dicepad):
-                    if diceface.rect.collidepoint(mouse) and self.CLICK:
-                        if can_clr:
-                            result = ""
-                            can_clr = False
-                        result += dice_options[num]
-                        self.CLICK = False
+                # del dice_box
+                # dice_box = DiceBox(self.SCREEN, width, height, result, rect)
+                dice_box.update_result(result)
+                can_clr = True
+
+            for num, key in enumerate(keypad):
+                if key.rect.collidepoint(mouse) and self.CLICK:
+                    if can_clr:
+                        result = ""
+                        can_clr = False
+                    key_val = num + 1
+                    if key_val == 10:
+                        result += "0"
+                    else:
+                        result += str(key_val)
+                        dice_box.update_result(result)
+                    self.CLICK = False
+
+            for num, diceface in enumerate(dicepad):
+                if diceface.rect.collidepoint(mouse) and self.CLICK:
+                    if can_clr:
+                        result = ""
+                        can_clr = False
+                    result += dice_options[num]
+                    dice_box.update_result(result)
+                    self.CLICK = False
 
             self.end_page()
 
@@ -481,15 +496,14 @@ class Display:
         ch_width = 70
         cl_left = rect.left + width - 30
 
+        QuitBox(self.SCREEN, width, height, t_font, rect)
+        b_yes = TextButton(parent=self.SCREEN, text="Accept", t_size=20,
+                           left=rect.center[0]-ch_width-5, top=b_top, width=ch_width, height=30)
+        b_no = TextButton(parent=self.SCREEN, text="Decline", t_size=20,
+                          left=rect.center[0]+5, top=b_top, width=ch_width, height=30)
+        b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
+                             width=30, height=30)
         while True:
-            QuitBox(self.SCREEN, width, height, t_font, rect)
-            b_yes = TextButton(parent=self.SCREEN, text="Accept", t_size=20,
-                               left=rect.center[0]-ch_width-5, top=b_top, width=ch_width, height=30)
-            b_no = TextButton(parent=self.SCREEN, text="Decline", t_size=20,
-                              left=rect.center[0]+5, top=b_top, width=ch_width, height=30)
-            b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
-                                 width=30, height=30)
-
             mouse = pygame.mouse.get_pos()
             if b_yes.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
@@ -498,7 +512,6 @@ class Display:
             if b_no.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 return True         # As in, yes please quit
-            # if b_cancel.rect.collidepoint(mouse) and self.CLICK:
             if b_close.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 return False        # As in, no don't quit
