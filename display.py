@@ -450,24 +450,26 @@ class Display:
                 can_clr = True
             # if b_set.rect.collidepoint(mouse) and self.CLICK:
 
-            for num, key in enumerate(keypad):
-                if key.rect.collidepoint(mouse) and self.CLICK:
-                    if can_clr:
-                        result = ""
-                        can_clr = False
-                    key_val = num + 1
-                    if key_val == 10:
-                        result += "0"
-                    else:
-                        result += str(key_val)
-                    self.CLICK = False
-            for num, diceface in enumerate(dicepad):
-                if diceface.rect.collidepoint(mouse) and self.CLICK:
-                    if can_clr:
-                        result = ""
-                        can_clr = False
-                    result += dice_options[num]
-                    self.CLICK = False
+            if mouse[0] < rect.left + 180:
+                for num, key in enumerate(keypad):
+                    if key.rect.collidepoint(mouse) and self.CLICK:
+                        if can_clr:
+                            result = ""
+                            can_clr = False
+                        key_val = num + 1
+                        if key_val == 10:
+                            result += "0"
+                        else:
+                            result += str(key_val)
+                        self.CLICK = False
+            else:
+                for num, diceface in enumerate(dicepad):
+                    if diceface.rect.collidepoint(mouse) and self.CLICK:
+                        if can_clr:
+                            result = ""
+                            can_clr = False
+                        result += dice_options[num]
+                        self.CLICK = False
 
             self.end_page()
 
