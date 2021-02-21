@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+
 from statblock import StatBlock
 from random import randint
 from campaign import Campaign
