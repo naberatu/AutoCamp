@@ -140,6 +140,8 @@ class TextButton:
     def __init__(self, parent=None, path="./assets/button.png", text="test", t_size=20, t_color=WHITE, t_font="scaly",
                  left=0, top=0, width=B_WIDTH, height=B_HEIGHT):
 
+        self.textstr = text
+        self.parent = parent
         self.t_size, self.t_color = t_size, t_color
         self.t_font = use_font(size=t_size, font=t_font)
 
@@ -147,12 +149,18 @@ class TextButton:
 
         self.rect = pygame.Rect(left, top, width, height)
 
-        self.text, self.textbox = text_objects(text, self.t_font, t_color)
+        self.text, self.textbox = text_objects(self.textstr, self.t_font, t_color)
         self.textbox.center = self.rect.center
 
         parent.blit(self.box, self.rect)
         parent.blit(self.text, self.textbox)
 
+    def highlight(self, size=20, font="nodesto", color=(241, 194, 50)):
+        self.text, self.textbox = text_objects(self.textstr, use_font(size, font), color)
+        self.textbox.center = self.rect.center
+
+        self.parent.blit(self.box, self.rect)
+        self.parent.blit(self.text, self.textbox)
 
 class TextBox:
     def __init__(self, parent=None, center=False, text="test", t_size=20, t_color=WHITE, t_font="scaly", left=0, top=0):
@@ -365,23 +373,29 @@ class Display:
 
         while True:
             self.SCREEN.blit(background, ORIGIN)
+            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=menu_left, top=menu_top, width=cwid)
+            b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top - B_HEIGHT - 10,
+                                  width=cwid)
+            b_move = TextButton(parent=self.SCREEN, text="Move", left=menu_left - offs, top=menu_top, width=cwid)
+            b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top - B_HEIGHT - 10,
+                                width=cwid)
+
             p_top = 10
             exp_buttons = list()
-            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=menu_left, top=menu_top, width=cwid)
-            b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top-B_HEIGHT-10, width=cwid)
-            b_move = TextButton(parent=self.SCREEN, text="Move", left=menu_left - offs, top=menu_top, width=cwid)
-            b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top-B_HEIGHT-10, width=cwid)
-
             for index, player in enumerate(PLAYERS):
                 if index == player_index:
-                    exp_buttons.append(TextButton(parent=self.SCREEN, text=player.get_name(), t_size=20, t_font="nodesto",
-                                                  left=10, top=p_top, width=cwid, t_color=(241, 194, 50)))
+                    exp_buttons.append(
+                        TextButton(parent=self.SCREEN, text=player.get_name(), t_size=20, t_font="nodesto",
+                                   left=10, top=p_top, width=cwid, t_color=(241, 194, 50)))
+                    exp_buttons[index].highlight()
                     current_player = PLAYERS[index]
                 else:
-                    exp_buttons.append(TextButton(parent=self.SCREEN, text=player.get_name(), t_size=16, t_font="nodesto",
-                                                  left=10, top=p_top, width=cwid))
+                    exp_buttons.append(
+                        TextButton(parent=self.SCREEN, text=player.get_name(), t_size=16, t_font="nodesto",
+                                   left=10, top=p_top, width=cwid))
                 p_top += B_HEIGHT + 10
 
+            # ==================================
             # Mouse Monitor
             # ==================================
             mouse = pygame.mouse.get_pos()
@@ -401,7 +415,7 @@ class Display:
 
     def dice_prompt(self):
         dice_options = ["d4", "d6", "d8", "d10", "d12", "d20"]
-        width, height = 340, 300
+        width, height = 335, 320
         rect = pygame.Rect(int(width / 2), int(HEIGHT * 0.2), width, height)
         cl_left = rect.left + width - 30
         kp_dim = 50
@@ -412,14 +426,16 @@ class Display:
         dice_box = DiceBox(self.SCREEN, width, height, result, rect)
         kp_top = dice_box.bottom + 10
         kp_left = rect.left + 10
-        dp_left = kp_left + 30 + (3 * kp_dim)
+        dp_size = 60
+        dp_left = rect.right - 20 - (2 * dp_size)
+        b_sum = 0       # Just to start it off.
 
         b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
                              width=30, height=30)
 
         for num in range(1, 11):
             if num == 10:
-                keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
+                keypad.append(TextButton(parent=self.SCREEN, text="0", t_font="hylia", t_size=24,
                                          left=kp_left+kp_dim + 5, top=kp_top, width=kp_dim, height=kp_dim))
             else:
                 keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
@@ -433,34 +449,36 @@ class Display:
         kp_top = dice_box.bottom + 10
         for num in range(6):
             dicepad.append(TextButton(parent=self.SCREEN, text=dice_options[num], t_font="hylia", t_size=20,
-                                      left=dp_left, top=kp_top, width=60, height=kp_dim))
+                                      left=dp_left, top=kp_top, width=dp_size, height=kp_dim))
             if num == 2:
                 kp_top += kp_dim + 5
                 b_set = TextButton(parent=self.SCREEN, text="Set", t_font="hylia", t_size=24, left=dp_left,
-                                   top=kp_top, width=60, height=kp_dim)
+                                   top=kp_top, width=dp_size, height=kp_dim)
                 dp_left += 65
                 kp_top = dice_box.bottom + 10
             else:
                 kp_top += kp_dim + 5
                 if num == 5:
                     b_sum = TextButton(parent=self.SCREEN, text="Sum", t_font="hylia", t_size=24, left=dp_left,
-                                       top=kp_top, width=60, height=kp_dim)
+                                       top=kp_top, width=dp_size, height=kp_dim)
 
+        # ==================================
+        # Mouse Events
+        # ==================================
         while True:
-            # Mouse Events
-            # ==================================
             mouse = pygame.mouse.get_pos()
             if b_close.rect.collidepoint(mouse) and self.CLICK:
                 return
             if b_sum.rect.collidepoint(mouse) and self.CLICK:
                 try:
-                    num_dice, diceface = result.split("d")
-                    result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), False))
+                    int(result) == int
                 except:
-                    result = "ERROR"
+                    try:
+                        num_dice, diceface = result.split("d")
+                        result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), False))
+                    except:
+                        result = "ERROR"
 
-                # del dice_box
-                # dice_box = DiceBox(self.SCREEN, width, height, result, rect)
                 dice_box.update_result(result)
                 can_clr = True
 
@@ -474,7 +492,7 @@ class Display:
                         result += "0"
                     else:
                         result += str(key_val)
-                        dice_box.update_result(result)
+                    dice_box.update_result(result)
                     self.CLICK = False
 
             for num, diceface in enumerate(dicepad):
