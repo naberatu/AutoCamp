@@ -424,7 +424,7 @@ class Display:
     def dice_prompt(self):
         dice_options = ["d4", "d6", "d8", "d10", "d12", "d20"]
         width, height = 335, 320
-        rect = pygame.Rect(int(width / 2), int(HEIGHT * 0.2), width, height)
+        rect = pygame.Rect(int(WIDTH/2) - int(width / 2), int(HEIGHT * 0.2), width, height)
         cl_left = rect.left + width - 30
         kp_dim = 50
         can_clr = False
@@ -437,14 +437,18 @@ class Display:
         dp_size = 60
         dp_left = rect.right - 20 - (2 * dp_size)
         b_sum = 0       # Just to start it off.
+        b_set = 0       # Just to start it off.
 
         b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
                              width=30, height=30)
 
-        for num in range(1, 11):
+        for num in range(1, 12):
             if num == 10:
-                keypad.append(TextButton(parent=self.SCREEN, text="0", t_font="hylia", t_size=24,
-                                         left=kp_left+kp_dim + 5, top=kp_top, width=kp_dim, height=kp_dim))
+                keypad.append(TextButton(parent=self.SCREEN, text="0", t_font="hylia", t_size=20,
+                                         left=kp_left + kp_dim + 5, top=kp_top, width=kp_dim, height=kp_dim))
+            elif num == 11:
+                keypad.append(TextButton(parent=self.SCREEN, text="clr", t_font="hylia", t_size=24,
+                                         left=kp_left + kp_dim + 5, top=kp_top, width=kp_dim, height=kp_dim))
             else:
                 keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
                                          left=kp_left, top=kp_top, width=kp_dim, height=kp_dim))
@@ -478,40 +482,58 @@ class Display:
             if self.CLICK:
                 if b_close.rect.collidepoint(mouse):
                     return
+
                 if b_sum.rect.collidepoint(mouse):
                     try:
                         int(result) == int
                     except:
                         try:
                             num_dice, diceface = result.split("d")
-                            result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), False))
+                            result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), print_results=False))
                         except:
                             result = "ERROR"
 
                     dice_box.update_result(result)
                     can_clr = True
 
-            for num, key in enumerate(keypad):
-                if key.rect.collidepoint(mouse) and self.CLICK:
-                    if can_clr:
-                        result = ""
-                        can_clr = False
-                    key_val = num + 1
-                    if key_val == 10:
-                        result += "0"
-                    else:
-                        result += str(key_val)
-                    dice_box.update_result(result)
-                    self.CLICK = False
+                if b_set.rect.collidepoint(mouse):
+                    try:
+                        int(result) == int
+                    except:
+                        try:
+                            num_dice, diceface = result.split("d")
+                            result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface),
+                                                                         print_results=False, set_form=True))
+                        except:
+                            result = "ERROR"
 
-            for num, diceface in enumerate(dicepad):
-                if diceface.rect.collidepoint(mouse) and self.CLICK:
-                    if can_clr:
-                        result = ""
-                        can_clr = False
-                    result += dice_options[num]
                     dice_box.update_result(result)
-                    self.CLICK = False
+                    can_clr = True
+
+                for num, key in enumerate(keypad):
+                    if key.rect.collidepoint(mouse):
+                        key_val = num + 1
+
+                        if can_clr:
+                            result = ""
+                            can_clr = False
+                        if key_val == 10:
+                            result += "0"
+                        if key_val == 11:
+                            result = ""
+                        else:
+                            result += str(key_val)
+                        dice_box.update_result(result)
+                        self.CLICK = False
+
+                for num, diceface in enumerate(dicepad):
+                    if diceface.rect.collidepoint(mouse):
+                        if can_clr:
+                            result = ""
+                            can_clr = False
+                        result += dice_options[num]
+                        dice_box.update_result(result)
+                        self.CLICK = False
 
             self.end_page()
 

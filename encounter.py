@@ -99,8 +99,9 @@ class Encounter:
     # Dice Rolling Methods
     # ===============================================================================
     @staticmethod
-    def rollDice(rolls, number_of_faces, print_results=True) -> int:
+    def rollDice(rolls, number_of_faces, print_results=True, set_form=False):
         total = 0
+        values = list()
 
         if (rolls < 1) or (type(rolls) != int):
             print("Rolls must be whole numbers > 1!!")
@@ -114,11 +115,16 @@ class Encounter:
 
         for roll in range(rolls):
             result = randint(1, number_of_faces)
+            if set_form:
+                values.append(result)
             total += result
 
             if print_results:
                 print("Rolling D{} {} of {}... Result is {}".format(number_of_faces, roll + 1, rolls, result))
-        if print_results:
+
+        if set_form:
+            return values
+        elif print_results:
             print("Final total is... {}!!".format(total))
         return total
 
