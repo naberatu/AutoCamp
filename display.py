@@ -268,22 +268,22 @@ class Display:
             # Button Functions
             # ==================================
             mouse = pygame.mouse.get_pos()
-            if b_start.rect.collidepoint(mouse) and self.CLICK:
-                self.CLICK = False
-                while True:
-                    if self.TO_MAIN_MENU:
-                        self.TO_MAIN_MENU = False
-                        break
-                    if ENCOUNTERS[ENCOUNTER_INDEX].is_combat:
-                        self.page_map()
-                    else:
-                        self.page_nce()
-
-            elif b_quit.rect.collidepoint(mouse) and self.CLICK:
-                sys.exit()
-            elif b_credits.rect.collidepoint(mouse) and self.CLICK:
-                self.CLICK = False
-                self.page_credits()
+            if self.CLICK:
+                if b_start.rect.collidepoint(mouse):
+                    self.CLICK = False
+                    while True:
+                        if self.TO_MAIN_MENU:
+                            self.TO_MAIN_MENU = False
+                            break
+                        if ENCOUNTERS[ENCOUNTER_INDEX].is_combat:
+                            self.page_map()
+                        else:
+                            self.page_nce()
+                elif b_quit.rect.collidepoint(mouse):
+                    sys.exit()
+                elif b_credits.rect.collidepoint(mouse):
+                    self.CLICK = False
+                    self.page_credits()
 
             self.end_page()
 
@@ -321,15 +321,16 @@ class Display:
             # Mouse Events
             # ==================================
             mouse = pygame.mouse.get_pos()
-            if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
-                if self.prompt_quit():
+            if self.CLICK:
+                if b_quitgame.rect.collidepoint(mouse):
+                    if self.prompt_quit():
+                        return
+                if mouse[0] <= (MAP_MAX_Y + 1) * TILE_SIZE:
+                    x = int(mouse[0] / TILE_SIZE)
+                    y = int(mouse[1] / TILE_SIZE)
+                if b_move.rect.collidepoint(mouse):
+                    change_enc(2)
                     return
-            if mouse[0] <= (MAP_MAX_Y + 1) * TILE_SIZE and self.CLICK:
-                x = int(mouse[0] / TILE_SIZE)
-                y = int(mouse[1] / TILE_SIZE)
-            if b_move.rect.collidepoint(mouse) and self.CLICK:
-                change_enc(2)
-                return
 
             self.end_page()
 
@@ -344,6 +345,8 @@ class Display:
 
         while True:
             self.SCREEN.blit(background, ORIGIN)
+            title = TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENCOUNTER_INDEX].get_name(), t_size=24, t_font="hylia",
+                               left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=menu_left, top=menu_top, width=cwid)
             b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top - B_HEIGHT - 10,
                                   width=cwid)
@@ -372,17 +375,18 @@ class Display:
             # Mouse Monitor
             # ==================================
             mouse = pygame.mouse.get_pos()
-            if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
-                if self.prompt_quit():
-                    return False
-            if b_move.rect.collidepoint(mouse) and self.CLICK:
-                change_enc(1)
-                return
-            if b_roll.rect.collidepoint(mouse) and self.CLICK:
-                self.dice_prompt()
-            for index, button in enumerate(exp_buttons):
-                if button.rect.collidepoint(mouse) and self.CLICK:
-                    player_index = index
+            if self.CLICK:
+                if b_quitgame.rect.collidepoint(mouse):
+                    if self.prompt_quit():
+                        return False
+                if b_move.rect.collidepoint(mouse):
+                    change_enc(1)
+                    return
+                if b_roll.rect.collidepoint(mouse):
+                    self.dice_prompt()
+                for index, button in enumerate(exp_buttons):
+                    if button.rect.collidepoint(mouse):
+                        player_index = index
 
             self.end_page()
 
@@ -471,20 +475,21 @@ class Display:
         # ==================================
         while True:
             mouse = pygame.mouse.get_pos()
-            if b_close.rect.collidepoint(mouse) and self.CLICK:
-                return
-            if b_sum.rect.collidepoint(mouse) and self.CLICK:
-                try:
-                    int(result) == int
-                except:
+            if self.CLICK:
+                if b_close.rect.collidepoint(mouse):
+                    return
+                if b_sum.rect.collidepoint(mouse):
                     try:
-                        num_dice, diceface = result.split("d")
-                        result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), False))
+                        int(result) == int
                     except:
-                        result = "ERROR"
+                        try:
+                            num_dice, diceface = result.split("d")
+                            result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), False))
+                        except:
+                            result = "ERROR"
 
-                dice_box.update_result(result)
-                can_clr = True
+                    dice_box.update_result(result)
+                    can_clr = True
 
             for num, key in enumerate(keypad):
                 if key.rect.collidepoint(mouse) and self.CLICK:
@@ -527,18 +532,19 @@ class Display:
                              width=30, height=30)
         while True:
             mouse = pygame.mouse.get_pos()
-            if b_yes.rect.collidepoint(mouse) and self.CLICK:
-                self.CLICK = False
-                save()
-                self.TO_MAIN_MENU = True
-                return True         # As in, yes please quit
-            if b_no.rect.collidepoint(mouse) and self.CLICK:
-                self.CLICK = False
-                self.TO_MAIN_MENU = True
-                return True         # As in, yes please quit
-            if b_close.rect.collidepoint(mouse) and self.CLICK:
-                self.CLICK = False
-                return False        # As in, no don't quit
+            if self.CLICK:
+                if b_yes.rect.collidepoint(mouse):
+                    self.CLICK = False
+                    save()
+                    self.TO_MAIN_MENU = True
+                    return True
+                if b_no.rect.collidepoint(mouse):
+                    self.CLICK = False
+                    self.TO_MAIN_MENU = True
+                    return True
+                if b_close.rect.collidepoint(mouse):
+                    self.CLICK = False
+                    return False
 
             self.end_page()
 
