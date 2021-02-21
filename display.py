@@ -65,7 +65,7 @@ def change_enc(index):
     global ENCOUNTERS, ENCOUNTER_INDEX, MODE
     ENCOUNTER_INDEX = index
     ENCOUNTERS[0] = ENCOUNTER_INDEX
-    if ENCOUNTERS[ENCOUNTER_INDEX].is_combat:
+    if type(ENCOUNTERS[ENCOUNTER_INDEX]) == CEncounter:
         MODE = "Battle"
     else:
         MODE = "Explore"
@@ -263,7 +263,6 @@ class Display:
             self.SCREEN.blit(self.BG_STARTUP, ORIGIN)
             b_start = TextButton(parent=self.SCREEN, text="Start", t_font=st_font, left=B_CENTER, top=B_YPOS - (2 * B_HEIGHT), width=B_WIDTH, height=B_HEIGHT)
             b_credits = TextButton(parent=self.SCREEN, text="Credits", t_font=st_font, left=B_CENTER, top=B_YPOS - B_HEIGHT, width=B_WIDTH, height=B_HEIGHT)
-            b_encmode = TextButton(parent=self.SCREEN, text=MODE, t_font=st_font, left=int(WIDTH * 0.75), top=B_YPOS - B_HEIGHT, width=int(B_WIDTH/2), height=B_HEIGHT)
             b_quit = TextButton(parent=self.SCREEN, text="Exit", t_font=st_font, left=B_CENTER, top=B_YPOS, width=B_WIDTH, height=B_HEIGHT)
 
             # Button Functions
@@ -285,12 +284,6 @@ class Display:
             elif b_credits.rect.collidepoint(mouse) and self.CLICK:
                 self.CLICK = False
                 self.page_credits()
-            elif b_encmode.rect.collidepoint(mouse) and self.CLICK:
-                self.CLICK = False
-                if ENCOUNTER_INDEX == 1:
-                    change_enc(2)
-                elif ENCOUNTER_INDEX == 2:
-                    change_enc(1)
 
             self.end_page()
 
@@ -305,29 +298,38 @@ class Display:
                 tile_list.append([b_tile, (x, y)])
 
         x, y = -1, -1
+        mb_width = 60
 
         while True:
             self.SCREEN.fill(DIRT)
-            # self.SCREEN.blit(load_image("./assets/button.png", 800, 480), ORIGIN)
             tile_coors = "Tile: "
             if x >= 0 and y >= 0:
                 tile_coors += "(" + str(x) + ", " + str(y) + ")"
 
+            # Control Buttons
+            # ==================================
             tb_coors = TextBox(parent=self.SCREEN, text=tile_coors,
                                left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=(MAP_MAX_X * TILE_SIZE) + 20,
                                     top=int(0.8 * HEIGHT), width=120)
+            b_move = TextButton(parent=self.SCREEN, text="Move", left=WIDTH - mb_width - 10,
+                                top=b_quitgame.rect.top, width=mb_width)
 
             for tile in tile_list:
                 tile[0] = TileButton(parent=self.SCREEN, left=tile[1][0], top=tile[1][1], color=DIRT)
 
+            # Mouse Events
+            # ==================================
             mouse = pygame.mouse.get_pos()
             if b_quitgame.rect.collidepoint(mouse) and self.CLICK:
-                self.prompt_quit()
-                return
+                if self.prompt_quit():
+                    return
             if mouse[0] <= (MAP_MAX_Y + 1) * TILE_SIZE and self.CLICK:
                 x = int(mouse[0] / TILE_SIZE)
                 y = int(mouse[1] / TILE_SIZE)
+            if b_move.rect.collidepoint(mouse) and self.CLICK:
+                change_enc(2)
+                return
 
             self.end_page()
 
