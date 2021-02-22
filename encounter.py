@@ -9,12 +9,14 @@ import items
 
 class Encounter:
 
-    def __init__(self, name, is_shop=False, is_combat=False, anim=None, vendor=None):
+    def __init__(self, name, is_shop=False, is_combat=False, anim=None, bkgd="./assets/tavern.jpg", vendor=None):
         self.name = name
         if anim:
             self.animateList = anim
         else:
             self.animateList = list()
+
+        self.bkgd = bkgd
         self.currentEntity = None
         self.is_shop = is_shop
         self.vendor = vendor
@@ -50,6 +52,28 @@ class Encounter:
 
     def get_name(self):
         return self.name
+
+    def get_bg(self):
+        return self.bkgd
+
+    def load_players(self, player_list):
+        for ent in self.animateList:
+            if type(ent) == Player:
+                return
+
+        for pl in player_list:
+            self.animateList.append(pl)
+
+    def save_players(self):
+        returning = list()
+        non_player = list()
+        for ent in self.animateList:
+            if type(ent) == Player:
+                returning.append(ent)
+            else:
+                non_player.append(ent)
+        self.animateList = non_player
+        return returning
 
     # ===============================================================================
     # Misc Helper Methods

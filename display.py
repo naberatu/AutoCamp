@@ -67,17 +67,20 @@ def load_image(path="./assets", x=1, y=1):
 
 
 def change_enc(index):
-    global ENCOUNTERS, ENCOUNTER_INDEX, MODE
+    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, MODE
+
+    if index == ENCOUNTER_INDEX:
+        return
+
+    PLAYERS = ENCOUNTERS[ENCOUNTER_INDEX].save_players()
+
     ENCOUNTER_INDEX = index
-    ENCOUNTERS[0] = ENCOUNTER_INDEX
-    if type(ENCOUNTERS[ENCOUNTER_INDEX]) == CEncounter:
-        MODE = "Battle"
-    else:
-        MODE = "Explore"
+    ENCOUNTERS[ENCOUNTER_INDEX].load_players(PLAYERS)
 
 
 def save():
-    global PLAYERS, ENCOUNTERS
+    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX
+    ENCOUNTERS[0] = ENCOUNTER_INDEX
     pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
     pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
     pickle.dump(PLAYERS, open("players.camp", "wb"))
@@ -128,17 +131,14 @@ class DiceBox:
 
 
 class TileButton:
-    def __init__(self, parent=None, left=0, top=0, width=TILE_SIZE, height=TILE_SIZE, color=DIRT):
-        self.color = color
+    def __init__(self, parent=None, img=None, left=0, top=0, width=TILE_SIZE, height=TILE_SIZE):
         self.rect = pygame.Rect(left, top, width, height)
-        pygame.draw.rect(parent, self.color, self.rect)
+        self.img = img
 
-        IMAGE = pygame.image.load("./assets/grasstile.png").convert()
-        IMAGE = pygame.transform.scale(IMAGE, (TILE_SIZE, TILE_SIZE))
-        self.img_rect = IMAGE.get_rect()
+        self.img_rect = self.img.get_rect()
         self.img_rect.center = self.rect.center
 
-        parent.blit(IMAGE, self.img_rect)
+        parent.blit(self.img, self.img_rect)
 
 
 class TextButton:
@@ -229,27 +229,18 @@ class Display:
             ENCOUNTERS_OK = False
 
         if not ENCOUNTERS_OK:
-            # # for player in PLAYERS:            # TODO Only add players when starting this encounter.
-            # #     e_battle.add_entity(player)
-            # # e_battle.start_encounter()
-            #
-            # # Populator Loop
             # # for index in range(e_battle.get_al_size()):
             # #     entity = e_battle.get_entity(True, index)
             # #
             # #     while e_battle.enc_move(entity, max(MAP_MAX_X, MAP_MAX_Y) * 5,
             # #                        random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
             # #         pass
-            #
-            # ENCOUNTERS.append(1)                # Encounter tracker.
-            # ENCOUNTERS.append(e_battle)         # Encounter 1
-            # ENCOUNTERS.append(e_town)           # Encounter 2
             ENCOUNTERS = load_default_camp()
             pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
             pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
 
-    change_enc(1)
-    CURRENT_ENCOUNTER = ENCOUNTERS[ENCOUNTER_INDEX]
+    ENCOUNTER_INDEX = ENCOUNTERS[0]
+    change_enc(ENCOUNTER_INDEX)
 
     # Pages and Menus
     # ==================================
@@ -273,6 +264,7 @@ class Display:
             if self.CLICK:
                 if b_start.rect.collidepoint(mouse):
                     self.CLICK = False
+                    ENCOUNTERS[ENCOUNTER_INDEX].load_players(PLAYERS)
                     while True:
                         if self.TO_MAIN_MENU:
                             self.TO_MAIN_MENU = False
@@ -294,17 +286,19 @@ class Display:
     def page_map(self):
         tile_list = list()
         x, y = 0, 0
+        tile_img = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_tile_img(), TILE_SIZE, TILE_SIZE)
+        self.SCREEN.blit(tile_img, ORIGIN)
         for y_tile in range(MAP_MAX_Y):
             y = int(TILE_SIZE * y_tile)
             for x_tile in range(MAP_MAX_X):
                 x = int(TILE_SIZE * x_tile)
-                b_tile = TileButton(parent=self.SCREEN, left=x, top=y, color=DIRT)
+                b_tile = TileButton(parent=self.SCREEN, img=tile_img, left=x, top=y)
                 tile_list.append([b_tile, (x, y)])
 
         x, y = -1, -1
 
         while True:
-            self.SCREEN.fill(DIRT)
+            self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
             tile_coors = "Tile: "
             if x >= 0 and y >= 0:
                 tile_coors += "(" + str(x) + ", " + str(y) + ")"
@@ -324,7 +318,7 @@ class Display:
                                   top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
 
             for tile in tile_list:
-                tile[0] = TileButton(parent=self.SCREEN, left=tile[1][0], top=tile[1][1], color=DIRT)
+                tile[0] = TileButton(parent=self.SCREEN, img=tile_img, left=tile[1][0], top=tile[1][1])
 
             # Mouse Events
             # ==================================
@@ -347,7 +341,7 @@ class Display:
         menu_left = 670
         cwid = 120
         offs = cwid + 10
-        background = self.BG_TAVERN
+        background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bg(), WIDTH, HEIGHT)
         player_index = 0
         current_player = PLAYERS[0]
 

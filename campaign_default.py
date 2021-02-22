@@ -28,17 +28,17 @@ def load_default_camp():
         foe_lists[2].append(c_monsters["Aarakocra"])
 
     # Non-combat Encounters
-    DEFAULT_ENC.append(Encounter("[Zinnia] The Leaky Tap"))
-    DEFAULT_ENC.append(Encounter("[Zinnia] Al's Apothecary"))
-    DEFAULT_ENC.append(Encounter("[Zinnia] The Bazaar"))
+    DEFAULT_ENC.append(Encounter("[Zinnia] The Leaky Tap", bkgd="./assets/tavern.jpg"))
+    DEFAULT_ENC.append(Encounter("[Zinnia] Al's Apothecary", bkgd="./assets/apothecary.jpg"))
+    DEFAULT_ENC.append(Encounter("[Zinnia] The Bazaar", bkgd="./assets/bazaar.jpg"))
 
-    DEFAULT_ENC.append(Encounter("[Adgard] Coral Inn"))
-    DEFAULT_ENC.append(Encounter("[Adgard] Bard's Den"))
-    DEFAULT_ENC.append(Encounter("[Adgard] Crownguard HQ"))
+    DEFAULT_ENC.append(Encounter("[Adgard] Coral Inn", bkgd="./assets/coralinn.jpg"))
+    DEFAULT_ENC.append(Encounter("[Adgard] Bard's Den", bkgd="./assets/tavern2.jpg"))
+    DEFAULT_ENC.append(Encounter("[Adgard] Crownguard HQ", bkgd="./assets/guardhq.jpg"))
 
     # Combat Encounters
-    DEFAULT_ENC.append(CEncounter("Verdant Wilds", inanim=foe_lists[0]))
-    DEFAULT_ENC.append(CEncounter("Jagged Pass", inanim=foe_lists[1]))
-    DEFAULT_ENC.append(CEncounter("Rivermouth", inanim=foe_lists[2]))
+    DEFAULT_ENC.append(CEncounter("Verdant Wilds", inanim=foe_lists[0], tile="./assets/grasstile.png"))
+    DEFAULT_ENC.append(CEncounter("Jagged Pass", inanim=foe_lists[1], tile="./assets/stonetile.png"))
+    DEFAULT_ENC.append(CEncounter("Rivermouth", inanim=foe_lists[2], tile="./assets/grasstile2.png"))
 
     return DEFAULT_ENC

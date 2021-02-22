@@ -7,13 +7,15 @@ from inanimate import Inanimate
 
 
 class CEncounter(Encounter):
-    def __init__(self, name, is_shop=False, is_combat=True, anim=None, inanim=None, max_inventory="slot"):
+    def __init__(self, name, is_shop=False, is_combat=True, anim=None, inanim=None, tile="./assets/grasstile.png",
+                 max_inventory="slot"):
         super().__init__(name, is_shop, is_combat, anim)
         self.is_combat = is_combat
         if inanim:
             self.inanimateList = inanim
         else:
             self.inanimateList = list()
+        self.tile = tile
         self.mapList = list()
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
         self.turnCounter = 0
@@ -27,6 +29,9 @@ class CEncounter(Encounter):
             if type(ent) == Enemy:
                 return False
         return True
+
+    def get_tile_img(self):
+        return self.tile
 
     def get_entity(self, is_animate, index):
         if is_animate:
