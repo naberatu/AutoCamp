@@ -33,17 +33,17 @@ B_WIDTH = 200
 B_HEIGHT = 50
 B_CENTER = 300
 B_YPOS = 330
-Q_WD = 60
+Q_WD = 70
 Q_HT = 50
 Q_LF = WIDTH - Q_WD - 10
 Q_TP = HEIGHT - Q_HT - 10
 
 # Encounter & Player Data
-MODE = "Battle"         # Can also be "Explore"
 EMPTY_LIST = list()
 PLAYERS = list()
 ENCOUNTERS = list()
 ENCOUNTER_INDEX = 1         # Can never be 0, since that's its own index
+ASK_SAVE = False
 
 
 def use_font(size=12, font="hylia"):
@@ -67,7 +67,7 @@ def load_image(path="./assets", x=1, y=1):
 
 
 def change_enc(index):
-    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, MODE
+    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE
 
     if index == ENCOUNTER_INDEX:
         return
@@ -76,15 +76,17 @@ def change_enc(index):
 
     ENCOUNTER_INDEX = index
     ENCOUNTERS[ENCOUNTER_INDEX].load_players(PLAYERS)
+    ASK_SAVE = True
 
 
 def save():
-    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX
+    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE
     ENCOUNTERS[0] = ENCOUNTER_INDEX
     pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
     pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
     pickle.dump(PLAYERS, open("players.camp", "wb"))
     pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
+    ASK_SAVE = False
 
 
 class QuitBox:
@@ -352,6 +354,7 @@ class Display:
             self.end_page()
 
     def page_nce(self):
+        global ASK_SAVE
         menu_top = 420
         menu_left = 670
         cwid = 120
@@ -361,10 +364,16 @@ class Display:
         current_player = PLAYERS[0]
 
         while True:
+            if ASK_SAVE:
+                save_text = "Save"
+            else:
+                save_text = "Saved!"
+
             self.SCREEN.blit(background, ORIGIN)
             title = TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENCOUNTER_INDEX].get_name(), t_size=24, t_font="hylia",
                                left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
+            b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
             b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=cwid)
             b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=cwid)
             b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=menu_left-(2*offs), top=menu_top, width=cwid)
@@ -394,6 +403,8 @@ class Display:
                 if b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return False
+                if b_save.rect.collidepoint(mouse):
+                    save()
                 if b_travel.rect.collidepoint(mouse):
                     self.TO_TRAVEL = True
                     return
@@ -637,6 +648,10 @@ class Display:
             self.end_page()
 
     def prompt_quit(self):
+        if not ASK_SAVE:
+            self.TO_MAIN_MENU = True
+            return True
+
         width, height = 280, 120
         t_font = use_font(size=20, font="hylia")
         rect = pygame.Rect(B_CENTER, int(HEIGHT * 0.33), width, height)
