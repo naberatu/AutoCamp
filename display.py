@@ -130,6 +130,21 @@ class DiceBox:
         self.parent.blit(self.results, self.res_rect)
 
 
+class InvBox:
+    def __init__(self, parent, width, height, rect, player_name="Player"):
+        self.rect = rect
+        self.bkgd = load_image("./assets/backpack.jpg", width, height)
+        self.parent = parent
+
+        title, title_box = text_objects("~ " + player_name + "'s Inventory ~", use_font(20, "hylia"), WHITE)
+        title_box.center = self.rect.center
+        title_box.top = self.rect.top + 10
+        self.bottom = title_box.bottom
+
+        self.parent.blit(self.bkgd, self.rect)
+        self.parent.blit(title, title_box)
+
+
 class TileButton:
     def __init__(self, parent=None, img=None, left=0, top=0, width=TILE_SIZE, height=TILE_SIZE):
         self.rect = pygame.Rect(left, top, width, height)
@@ -352,6 +367,7 @@ class Display:
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
             b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=cwid)
             b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=cwid)
+            b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=menu_left-(2*offs), top=menu_top, width=cwid)
 
             # ==================================
             # Player Buttons
@@ -383,6 +399,8 @@ class Display:
                     return
                 if b_roll.rect.collidepoint(mouse):
                     self.dice_prompt()
+                if b_inv.rect.collidepoint(mouse):
+                    self.inv_prompt(current_player)
                 for index, button in enumerate(exp_buttons):
                     if button.rect.collidepoint(mouse):
                         player_index = index
@@ -417,6 +435,43 @@ class Display:
 
             if b_back.rect.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
                 return
+
+            self.end_page()
+
+    def inv_prompt(self, player):
+        width, height = 400, 480
+        rect = pygame.Rect(WIDTH - width, 0, width, height)
+        inv_box = InvBox(self.SCREEN, width, height, rect, player_name=player.get_name())
+        b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
+                             top=rect.top, width=30, height=30)
+
+        eq_width, eq_height, eq_top = 100, 30, inv_box.bottom + 20
+        b_weapon = TextButton(parent=self.SCREEN, text=player.get_weapon(), t_font="nodesto", t_size=16,
+                              left=rect.center[0] - eq_width - 5, top=eq_top, width=eq_width, height=eq_height)
+
+        t_weapon, wep_box = text_objects("Weapon:", use_font(16), WHITE)
+        wep_box.center = b_weapon.textbox.center
+        wep_box.left = b_weapon.rect.left - wep_box.width - 5
+
+        t_armor, arm_box = text_objects("Armor:", use_font(16), WHITE)
+        arm_box.center = b_weapon.textbox.center
+        arm_box.left = rect.center[0] + 5
+
+        b_armor = TextButton(parent=self.SCREEN, text=player.get_armor(), t_font="nodesto", t_size=16,
+                             left=arm_box.right + 5, top=eq_top, width=eq_width, height=eq_height)
+
+        self.SCREEN.blit(t_weapon, wep_box)
+        self.SCREEN.blit(t_armor, arm_box)
+
+        # ==================================
+        # Mouse Events
+        # ==================================
+        while True:
+            mouse = pygame.mouse.get_pos()
+            if self.CLICK:
+                if b_close.rect.collidepoint(mouse):
+                    self.CLICK = False
+                    return
 
             self.end_page()
 
