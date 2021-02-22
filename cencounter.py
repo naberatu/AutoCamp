@@ -19,6 +19,12 @@ class CEncounter(Encounter):
         self.map_max_y = 0
         self.death_saves = 0
 
+    def no_enemies(self):
+        for ent in self.animateList:
+            if type(ent) == Enemy:
+                return False
+        return True
+
     def get_entity(self, is_animate, index):
         if is_animate:
             return self.animateList[index]

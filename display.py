@@ -32,6 +32,10 @@ B_WIDTH = 200
 B_HEIGHT = 50
 B_CENTER = 300
 B_YPOS = 330
+Q_WD = 60
+Q_HT = 50
+Q_LF = WIDTH - Q_WD - 10
+Q_TP = HEIGHT - Q_HT - 10
 
 # Encounter & Player Data
 MODE = "Battle"         # Can also be "Explore"
@@ -194,6 +198,7 @@ class Display:
     PLAYERS_OK = False
     ENCOUNTERS_OK = False
     TO_MAIN_MENU = False
+    TO_TRAVEL = False
 
     global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, MODE, EMPTY_LIST
 
@@ -261,9 +266,12 @@ class Display:
             # Graphics Generation
             # ==================================
             self.SCREEN.blit(self.BG_STARTUP, ORIGIN)
-            b_start = TextButton(parent=self.SCREEN, text="Start", t_font=st_font, left=B_CENTER, top=B_YPOS - (2 * B_HEIGHT), width=B_WIDTH, height=B_HEIGHT)
-            b_credits = TextButton(parent=self.SCREEN, text="Credits", t_font=st_font, left=B_CENTER, top=B_YPOS - B_HEIGHT, width=B_WIDTH, height=B_HEIGHT)
-            b_quit = TextButton(parent=self.SCREEN, text="Exit", t_font=st_font, left=B_CENTER, top=B_YPOS, width=B_WIDTH, height=B_HEIGHT)
+            b_start = TextButton(parent=self.SCREEN, text="Start", t_font=st_font, left=B_CENTER,
+                                 top=B_YPOS - (2 * B_HEIGHT) - 5, width=B_WIDTH, height=B_HEIGHT)
+            b_credits = TextButton(parent=self.SCREEN, text="Credits", t_font=st_font, left=B_CENTER,
+                                   top=B_YPOS - B_HEIGHT, width=B_WIDTH, height=B_HEIGHT)
+            b_quit = TextButton(parent=self.SCREEN, text="Exit", t_font=st_font, left=B_CENTER,
+                                top=B_YPOS + 5, width=B_WIDTH, height=B_HEIGHT)
 
             # Button Functions
             # ==================================
@@ -275,7 +283,9 @@ class Display:
                         if self.TO_MAIN_MENU:
                             self.TO_MAIN_MENU = False
                             break
-                        if ENCOUNTERS[ENCOUNTER_INDEX].is_combat:
+                        if self.TO_TRAVEL:
+                            self.travel_prompt()
+                        if type(ENCOUNTERS[ENCOUNTER_INDEX]) == CEncounter:
                             self.page_map()
                         else:
                             self.page_nce()
@@ -298,7 +308,6 @@ class Display:
                 tile_list.append([b_tile, (x, y)])
 
         x, y = -1, -1
-        mb_width = 60
 
         while True:
             self.SCREEN.fill(DIRT)
@@ -306,14 +315,19 @@ class Display:
             if x >= 0 and y >= 0:
                 tile_coors += "(" + str(x) + ", " + str(y) + ")"
 
+            if ENCOUNTERS[ENCOUNTER_INDEX].no_enemies():
+                leave_message = "Travel"
+            else:
+                leave_message = "Flee"
+
             # Control Buttons
             # ==================================
             tb_coors = TextBox(parent=self.SCREEN, text=tile_coors,
                                left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
-            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=(MAP_MAX_X * TILE_SIZE) + 20,
-                                    top=int(0.8 * HEIGHT), width=120)
-            b_move = TextButton(parent=self.SCREEN, text="Move", left=WIDTH - mb_width - 10,
-                                top=b_quitgame.rect.top, width=mb_width)
+            b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF,
+                                    top=Q_TP, width=Q_WD, height=Q_HT)
+            b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=Q_LF - Q_WD - 10,
+                                  top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
 
             for tile in tile_list:
                 tile[0] = TileButton(parent=self.SCREEN, left=tile[1][0], top=tile[1][1], color=DIRT)
@@ -328,8 +342,8 @@ class Display:
                 if mouse[0] <= (MAP_MAX_Y + 1) * TILE_SIZE:
                     x = int(mouse[0] / TILE_SIZE)
                     y = int(mouse[1] / TILE_SIZE)
-                if b_move.rect.collidepoint(mouse):
-                    change_enc(2)
+                if b_travel.rect.collidepoint(mouse):
+                    self.travel_prompt()
                     return
 
             self.end_page()
@@ -347,12 +361,9 @@ class Display:
             self.SCREEN.blit(background, ORIGIN)
             title = TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENCOUNTER_INDEX].get_name(), t_size=24, t_font="hylia",
                                left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
-            b_quitgame = TextButton(parent=self.SCREEN, text="Quit Game", left=menu_left, top=menu_top, width=cwid)
-            b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top - B_HEIGHT - 10,
-                                  width=cwid)
-            b_move = TextButton(parent=self.SCREEN, text="Move", left=menu_left - offs, top=menu_top, width=cwid)
-            b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top - B_HEIGHT - 10,
-                                width=cwid)
+            b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
+            b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=cwid)
+            b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=cwid)
 
             # ==================================
             # Player Buttons
@@ -379,8 +390,8 @@ class Display:
                 if b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return False
-                if b_move.rect.collidepoint(mouse):
-                    change_enc(1)
+                if b_travel.rect.collidepoint(mouse):
+                    self.TO_TRAVEL = True
                     return
                 if b_roll.rect.collidepoint(mouse):
                     self.dice_prompt()
@@ -418,6 +429,51 @@ class Display:
 
             if b_back.rect.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
                 return
+
+            self.end_page()
+
+    def travel_prompt(self):
+        self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
+        e_top = 10
+        e_left = 10
+        cwid = 80
+        cheight = 30
+        max_cols = int(WIDTH / (cwid + 10))
+        col_size = int(HEIGHT / (cheight + 10))
+        go_to_index = ENCOUNTER_INDEX
+
+        encbuttons = list()
+        columns = 1
+        next_page_start = 1
+        for index, enc in enumerate(ENCOUNTERS):
+            if index > 0:
+                # encbuttons.append(TextButton())
+                if index == ENCOUNTER_INDEX:
+                    encbuttons.append(
+                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=20, t_font="nodesto",
+                                   left=e_left, top=e_top, width=cwid, t_color=(241, 194, 50)))
+                else:
+                    encbuttons.append(
+                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=16, t_font="nodesto",
+                                   left=e_left, top=e_top, width=cwid))
+                if index % col_size == 0:
+                    e_top = 10
+                    e_left += cwid + 10
+                    columns += 1
+                else:
+                    e_top += B_HEIGHT + 10
+                if columns % max_cols == 0:
+                    next_page_start = index + 1
+
+        while True:
+            mouse = pygame.mouse.get_pos()
+            if self.CLICK:
+                for index, enc in enumerate(encbuttons, 1):
+                    if enc.rect.collidepoint(mouse):
+                        change_enc(index)
+                        self.CLICK = False
+                        self.TO_TRAVEL = False
+                        return
 
             self.end_page()
 
