@@ -20,8 +20,9 @@ import cencounter
 import copy
 
 # Parameters & CEncounter init.
-disp = Display()
-disp.page_startup()
+# disp = Display()
+# disp.page_startup()
+# exit()
 
 # ===============================================================================
 # NCE Setup

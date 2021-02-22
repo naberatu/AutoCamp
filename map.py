@@ -1,38 +1,44 @@
 import math
 from queue import PriorityQueue
 
-class Map:
 
+class Map:
     tileList = list()
 
-    def __init__(self, initWidth, initHeight):
+    def __init__(self, initWidth, initHeight, anim=None, inanim=None):
         self.width = initWidth
         self.height = initHeight
-        self.animateList = {}
-        self.inanimateList = {}
+        if anim is None:
+            self.animateList = list()
+        else:
+            self.animateList = anim
+        if inanim is None:
+            self.inanimateList = list()
+        else:
+            self.inanimateList = inanim
 
-        for i in range (0, initHeight):
-            for j in range (0, initWidth):
-                newTile = self.MapTile((j, i))
+        for i in range(0, initHeight):
+            for j in range(0, initWidth):
+                newTile = self.MapTile(init_coors=(i, j))
                 self.tileList.append(newTile);
 
-    def objectInAnimateList(self, testX, testY):
-        for i in self.animateList:
-            if self.animateList.get((testX, testY)) != None:
-                return True
-
-    def objectInInanimateList(self, testX, testY):
-        for i in self.inanimateList:
-            if self.inanimateList.get((testX, testY)) != None:
-                return True
+    def object_found(self, testX, testY, animate=True):
+        if animate:
+            for i in self.animateList:
+                if self.animateList.get((testX, testY)) != None:
+                    return True
+        else:
+            for i in self.inanimateList:
+                if self.inanimateList.get((testX, testY)) != None:
+                    return True
 
     def printMap(self):
         row = ""
-        for i in range (0, self.height):
-            for j in range (0, self.width):
+        for i in range(0, self.height):
+            for j in range(0, self.width):
                 row += '|'
-                animateLocation = self.objectInAnimateList(j, i)
-                inanimateLocation = self.objectInInanimateList(j, i)
+                animateLocation = self.object_found(j, i)
+                inanimateLocation = self.object_found(j, i, animate=False)
                 if animateLocation != None:
                     row += self.animateList[j, i]
                 elif (inanimateLocation != None) :
@@ -122,17 +128,19 @@ class Map:
         return path
 
     class MapTile:
-        def __init__(self, initCoordinates):
-            self.coordinates = initCoordinates
+        def __init__(self, init_coors=(0, 0), icon="./assets/grasstile.png"):
+            self.coordinates = init_coors
+            self.icon = icon
 
 
-
-
-testMap = Map(250, 250)
-testMap.animateList[1, 0] = 'A'
-testMap.inanimateList[2, 3] = '#'
-testMap.inanimateList[4, 7] = '%'
-testMap.printMap()
-paths = testMap.dijkstras((1, 2))
-print(testMap.findPath((paths[1]), (127, 235)))
-print(paths[0][(127, 235)])
+# ====================================
+# Run
+# ====================================
+# testMap = Map(15, 15)
+# testMap.animateList[1, 0] = 'A'
+# testMap.inanimateList[2, 3] = '#'
+# testMap.inanimateList[4, 7] = '%'
+# testMap.printMap()
+# paths = testMap.dijkstras((1, 2))
+# print(testMap.findPath((paths[1]), (13, 13)))
+# print(paths[0][(13, 13)])

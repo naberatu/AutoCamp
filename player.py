@@ -100,7 +100,7 @@ class Player(Animate):
         if self.inv_is_full():
             return False
 
-        if items.catalog[item].get_is_weapon() and self.weapon is None:
+        if items.c_items[item].get_is_weapon() and self.weapon is None:
             self.weapon = item
             amount -= 1
             if amount == 0:
@@ -138,12 +138,12 @@ class Player(Animate):
             return False
 
         # Perform the swap
-        if items.catalog[item].get_is_weapon():
+        if items.c_items[item].get_is_weapon():
             if self.weapon:
                 self.inv_add(self.weapon)
             self.weapon = item
             return self.inv_remove(item, discarding=True, notify=False)
-        elif items.catalog[item].get_is_armor():
+        elif items.c_items[item].get_is_armor():
             if self.armor:
                 self.inv_add(self.armor)
             self.armor = item
@@ -218,7 +218,7 @@ class Player(Animate):
                     print("[ER] You can't sell that amount!")
 
                 if selling:
-                    earnings = items.catalog[item].get_cost() * amount
+                    earnings = items.c_items[item].get_cost() * amount
                 elif haggling:
                     earnings = haggle_cost * amount
 
@@ -238,7 +238,7 @@ class Player(Animate):
                     print("[ER] You can't use/discard that amount!")
                     return False
 
-                elif using and not items.catalog[item].is_consumable:
+                elif using and not items.c_items[item].is_consumable:
                     print("[ER] You can not use the {}!".format(item))
                     return False
 

@@ -4,14 +4,17 @@ from random import randint
 from math import floor
 from animate import Animate
 import items
-import campaign
+# import campaign
 
 
 class Encounter:
 
-    def __init__(self, name, is_shop=False, is_combat=False, vendor=None):
+    def __init__(self, name, is_shop=False, is_combat=False, anim=None, vendor=None):
         self.name = name
-        self.animateList = list()
+        if anim:
+            self.animateList = anim
+        else:
+            self.animateList = list()
         self.currentEntity = None
         self.is_shop = is_shop
         self.vendor = vendor
@@ -184,7 +187,7 @@ class Encounter:
         print(("=" * 77) + "\n" + self.vendor.name + "'s Wares\n" + ("=" * 77))
         for item, quantity in self.vendor.inventory.items():
             print("{:<20}".format(item).ljust(20) + "\t\tx" + str(quantity) + "\t\t\t" + str(
-                items.catalog[item].get_cost()) + " cp")
+                items.c_items[item].get_cost()) + " cp")
         print("=" * 77)
 
     # ===============================================================================
@@ -325,7 +328,7 @@ class Encounter:
                         if buyer == "cancel":
                             pass
                         else:
-                            cost = items.catalog[to_buy].get_cost() * buy_quantity
+                            cost = items.c_items[to_buy].get_cost() * buy_quantity
                             purchased = self.currentEntity.money_deduct(cost)
                             if purchased:
                                 self.currentEntity.inv_add(to_buy, amount=buy_quantity)

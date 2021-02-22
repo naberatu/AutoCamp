@@ -6,6 +6,7 @@ from player import Player
 from enemy import Enemy
 from cencounter import CEncounter
 from encounter import Encounter
+from campaign_default import load_default_camp
 
 from os import environ
 import sys
@@ -228,33 +229,26 @@ class Display:
             ENCOUNTERS_OK = False
 
         if not ENCOUNTERS_OK:
-            e_town = Encounter("Tavern")
-            e_battle = CEncounter("Grassy Plain")
-            e_battle.enc_fill_map()
-
-            # Example Entities
-            e_battle.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
-            e_battle.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
-            e_battle.add_entity(Enemy("Werewolf", "Wolf", "Doggo"))
-            # for player in PLAYERS:            # TODO Only add players when starting this encounter.
-            #     e_battle.add_entity(player)
-            # e_battle.start_encounter()
-
-            # Populator Loop
-            # for index in range(e_battle.get_al_size()):
-            #     entity = e_battle.get_entity(True, index)
+            # # for player in PLAYERS:            # TODO Only add players when starting this encounter.
+            # #     e_battle.add_entity(player)
+            # # e_battle.start_encounter()
             #
-            #     while e_battle.enc_move(entity, max(MAP_MAX_X, MAP_MAX_Y) * 5,
-            #                        random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
-            #         pass
-
-            ENCOUNTERS.append(1)                # Encounter tracker.
-            ENCOUNTERS.append(e_battle)         # Encounter 1
-            ENCOUNTERS.append(e_town)           # Encounter 2
+            # # Populator Loop
+            # # for index in range(e_battle.get_al_size()):
+            # #     entity = e_battle.get_entity(True, index)
+            # #
+            # #     while e_battle.enc_move(entity, max(MAP_MAX_X, MAP_MAX_Y) * 5,
+            # #                        random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
+            # #         pass
+            #
+            # ENCOUNTERS.append(1)                # Encounter tracker.
+            # ENCOUNTERS.append(e_battle)         # Encounter 1
+            # ENCOUNTERS.append(e_town)           # Encounter 2
+            ENCOUNTERS = load_default_camp()
             pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
             pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
 
-    change_enc(ENCOUNTERS[0])
+    change_enc(1)
     CURRENT_ENCOUNTER = ENCOUNTERS[ENCOUNTER_INDEX]
 
     # Pages and Menus
@@ -436,8 +430,8 @@ class Display:
         self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
         e_top = 10
         e_left = 10
-        cwid = 80
-        cheight = 30
+        cwid = 135
+        cheight = 40
         max_cols = int(WIDTH / (cwid + 10))
         col_size = int(HEIGHT / (cheight + 10))
         go_to_index = ENCOUNTER_INDEX
@@ -450,18 +444,18 @@ class Display:
                 # encbuttons.append(TextButton())
                 if index == ENCOUNTER_INDEX:
                     encbuttons.append(
-                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=20, t_font="nodesto",
-                                   left=e_left, top=e_top, width=cwid, t_color=(241, 194, 50)))
+                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=16, t_font="nodesto",
+                                   left=e_left, top=e_top, width=cwid, height=cheight, t_color=(241, 194, 50)))
                 else:
                     encbuttons.append(
-                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=16, t_font="nodesto",
-                                   left=e_left, top=e_top, width=cwid))
+                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=12, t_font="nodesto",
+                                   left=e_left, top=e_top, width=cwid, height=cheight))
                 if index % col_size == 0:
                     e_top = 10
                     e_left += cwid + 10
                     columns += 1
                 else:
-                    e_top += B_HEIGHT + 10
+                    e_top += cheight + 10
                 if columns % max_cols == 0:
                     next_page_start = index + 1
 
@@ -638,3 +632,6 @@ class Display:
         pygame.display.update()
         self.CLK.tick(15)
 
+
+disp = Display()
+disp.page_startup()

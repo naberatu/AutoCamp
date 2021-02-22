@@ -7,10 +7,13 @@ from inanimate import Inanimate
 
 
 class CEncounter(Encounter):
-    def __init__(self, name, is_shop=False, is_combat=True, max_inventory="slot"):
-        super().__init__(name, is_shop, is_combat)
+    def __init__(self, name, is_shop=False, is_combat=True, anim=None, inanim=None, max_inventory="slot"):
+        super().__init__(name, is_shop, is_combat, anim)
         self.is_combat = is_combat
-        self.inanimateList = list()
+        if inanim:
+            self.inanimateList = inanim
+        else:
+            self.inanimateList = list()
         self.mapList = list()
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
         self.turnCounter = 0
@@ -122,16 +125,16 @@ class CEncounter(Encounter):
         actor.set_coors(new_x_coord, new_y_coord, new_z_coord)
         return [requested_distance, False]
 
-    def enc_fill_map(self, width=15, height=10):
-        self.map_max_x = width
-        self.map_max_y = height
-        for i in range(0, height):
-            newRow = list()
-            newRow.append('|')
-            for i in range(0, width):
-                newRow.append(' ')
-                newRow.append('|')
-            self.mapList.append(newRow)
+    # def enc_fill_map(self, width=15, height=10):
+    #     self.map_max_x = width
+    #     self.map_max_y = height
+    #     for i in range(0, height):
+    #         newRow = list()
+    #         newRow.append('|')
+    #         for i in range(0, width):
+    #             newRow.append(' ')
+    #             newRow.append('|')
+    #         self.mapList.append(newRow)
 
     def enc_update_map(self):
         for i in range(0, len(self.animateList)):
