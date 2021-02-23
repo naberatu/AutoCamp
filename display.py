@@ -624,7 +624,8 @@ class Display:
                     except:
                         try:
                             num_dice, diceface = result.split("d")
-                            result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface), print_results=False))
+                            result = str(ENCOUNTERS[ENCOUNTER_INDEX].rollDice(int(num_dice), int(diceface),
+                                                                                   print_results=False))
                         except:
                             result = "ERROR"
 
@@ -637,8 +638,7 @@ class Display:
                     except:
                         try:
                             num_dice, diceface = result.split("d")
-                            result = str(self.CURRENT_ENCOUNTER.rollDice(int(num_dice), int(diceface),
-                                                                         print_results=False, set_form=True))
+                            result = str(ENCOUNTERS[ENCOUNTER_INDEX].rollDice(int(num_dice), int(diceface), print_results=False, set_form=True))
                         except:
                             result = "ERROR"
 
