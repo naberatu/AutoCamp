@@ -32,6 +32,12 @@ class Map:
                 if self.inanimateList.get((testX, testY)) != None:
                     return True
 
+    def get_map(self):
+        return self.tileList
+
+    def load_map(self, tiles):
+        self.tileList = tiles
+
     def printMap(self):
         row = ""
         for i in range(0, self.height):

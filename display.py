@@ -160,10 +160,11 @@ class TileButton:
 
 class TextButton:
     def __init__(self, parent=None, path="./assets/button.png", text="test", t_size=20, t_color=WHITE, t_font="scaly",
-                 left=0, top=0, width=B_WIDTH, height=B_HEIGHT):
+                 left=0, top=0, width=B_WIDTH, height=B_HEIGHT, just="mid"):
 
         self.textstr = text
         self.parent = parent
+        self.just = just
         self.t_size, self.t_color = t_size, t_color
         self.t_font = use_font(size=t_size, font=t_font)
 
@@ -173,6 +174,10 @@ class TextButton:
 
         self.text, self.textbox = text_objects(self.textstr, self.t_font, t_color)
         self.textbox.center = self.rect.center
+        if self.just == "left":
+            self.textbox.left = self.rect.left + 10
+        elif self.just == "right":
+            self.textbox.right = self.rect.right - 10
 
         parent.blit(self.box, self.rect)
         parent.blit(self.text, self.textbox)
@@ -456,6 +461,8 @@ class Display:
         b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
                              top=rect.top, width=30, height=30)
 
+        # Equipped Items
+        # ==================================
         eq_width, eq_height, eq_top = 100, 30, inv_box.bottom + 20
         b_weapon = TextButton(parent=self.SCREEN, text=player.get_weapon(), t_font="nodesto", t_size=16,
                               left=rect.center[0] - eq_width - 5, top=eq_top, width=eq_width, height=eq_height)
@@ -470,6 +477,24 @@ class Display:
 
         b_armor = TextButton(parent=self.SCREEN, text=player.get_armor(), t_font="nodesto", t_size=16,
                              left=arm_box.right + 5, top=eq_top, width=eq_width, height=eq_height)
+
+        # Item list
+        # ==================================
+        item_width = int(0.7 * width)
+        item_height = 30
+        item_buttons = list()
+        items_left = rect.center[0] - int(item_width / 2)
+
+        b_scrollup = TextButton(parent=self.SCREEN, text='^', t_font="hylia", t_size=20,
+                                left=items_left, top=wep_box.bottom + 20, width=item_width, height=item_height)
+
+        for item in player.inventory:
+            b_item = TextButton(parent=self.SCREEN, text=item, t_size=16, t_font="nodesto", left=items_left,
+                                top=b_scrollup.rect.bottom, width=item_width, height=item_height, just="left")
+            a_text, a_box = text_objects("x" + str(player.inventory[item]), use_font(16, "nodesto"), WHITE)
+            a_box.center = b_item.rect.center
+            a_box.right = b_item.rect.right - 10
+            self.SCREEN.blit(a_text, a_box)
 
         self.SCREEN.blit(t_weapon, wep_box)
         self.SCREEN.blit(t_armor, arm_box)
