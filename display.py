@@ -463,7 +463,7 @@ class Display:
             self.end_page()
 
     def inv_prompt(self, player):
-        width, height = 400, 480
+        width, height = 400, HEIGHT
         rect = pygame.Rect(WIDTH - width, 0, width, height)
 
         # Item list
