@@ -466,88 +466,105 @@ class Display:
         width, height = 400, HEIGHT
         rect = pygame.Rect(WIDTH - width, 0, width, height)
 
-        # Item list
+        # Item list Parameters
+        # ==================================
         item_width = int(0.7 * width)
         item_height = 30
         list_len = 6
-        last_index = 1
-        item_sel_index = -1
+        start_index = 0
         item_buttons = list()
+        item_sel_index = -1
         items_left = rect.center[0] - int(item_width / 2)
-
-        # ==================================
-        # Mouse Events
-        # ==================================
-        inv_box = InvBox(self.SCREEN, width, height, rect, player_name=player.get_name())
-        b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
-                             top=rect.top, width=30, height=30)
-
-        # Parameters
-        eq_width, eq_height, eq_top = 100, 30, inv_box.bottom + 20
-
-        # Equipped Items Buttons
-        # ==================================
-        b_weapon = TextButton(parent=self.SCREEN, text=player.get_weapon(), t_font="nodesto", t_size=16,
-                              left=rect.center[0] - eq_width - 5, top=eq_top, width=eq_width, height=eq_height)
-
-        t_weapon, wep_box = text_objects("Weapon:", use_font(16), WHITE)
-        wep_box.center = b_weapon.textbox.center
-        wep_box.left = b_weapon.rect.left - wep_box.width - 5
-
-        t_armor, arm_box = text_objects("Armor:", use_font(16), WHITE)
-        arm_box.center = b_weapon.textbox.center
-        arm_box.left = rect.center[0] + 5
-
-        b_armor = TextButton(parent=self.SCREEN, text=player.get_armor(), t_font="nodesto", t_size=16,
-                             left=arm_box.right + 5, top=eq_top, width=eq_width, height=eq_height)
-
-        # Item List Buttons
-        # ==================================
-        b_scrollup = TextButton(parent=self.SCREEN, text='Prev', t_font="hylia", t_size=16,
-                                left=items_left, top=wep_box.bottom + 20, width=item_width, height=item_height)
-
-        items_bottom = b_scrollup.rect.bottom + (list_len * item_height)
-        b_scrolldown = TextButton(parent=self.SCREEN, text='Next', t_font="hylia", t_size=16, left=items_left,
-                                  top=items_bottom, width=item_width, height=item_height)
-
-        item_top = b_scrollup.rect.bottom
-        for index, item in enumerate(player.inventory, 1):
-            if index == item_sel_index and item_sel_index != -1:
-                b_item = TextButton(parent=self.SCREEN, text=item, t_size=16, t_font="nodesto", left=items_left,
-                                    top=item_top, width=item_width, height=item_height, just="left",
-                                    t_color=GOLD)
-                a_text, a_box = text_objects("x" + str(player.inventory[item]), use_font(16, "nodesto"), GOLD)
-            else:
-                b_item = TextButton(parent=self.SCREEN, text=item, t_size=16, t_font="nodesto", left=items_left,
-                                    top=item_top, width=item_width, height=item_height, just="left")
-                a_text, a_box = text_objects("x" + str(player.inventory[item]), use_font(16, "nodesto"), WHITE)
-
-            item_buttons.append(b_item)
-
-            a_box.center = b_item.rect.center
-            a_box.right = b_item.rect.right - 10
-            self.SCREEN.blit(a_text, a_box)
-            item_top += item_height
-
-            if index % list_len == 0:
-                last_index = index + 1
-                break
-
-        self.SCREEN.blit(t_weapon, wep_box)
-        self.SCREEN.blit(t_armor, arm_box)
+        update_inv_list = True
 
         while True:
+            if update_inv_list:
+                # Other Parameters
+                # ==================================
+                inv_box = InvBox(self.SCREEN, width, height, rect, player_name=player.get_name())
+                b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
+                                     top=rect.top, width=30, height=30)
+
+                eq_width, eq_height, eq_top = 100, 30, inv_box.bottom + 20
+
+                # Equipped Items Buttons
+                # ==================================
+                b_weapon = TextButton(parent=self.SCREEN, text=player.get_weapon(), t_font="nodesto", t_size=16,
+                                      left=rect.center[0] - eq_width - 5, top=eq_top, width=eq_width, height=eq_height)
+
+                t_weapon, wep_box = text_objects("Weapon:", use_font(16), WHITE)
+                wep_box.center = b_weapon.textbox.center
+                wep_box.left = b_weapon.rect.left - wep_box.width - 5
+
+                t_armor, arm_box = text_objects("Armor:", use_font(16), WHITE)
+                arm_box.center = b_weapon.textbox.center
+                arm_box.left = rect.center[0] + 5
+
+                b_armor = TextButton(parent=self.SCREEN, text=player.get_armor(), t_font="nodesto", t_size=16,
+                                     left=arm_box.right + 5, top=eq_top, width=eq_width, height=eq_height)
+
+                self.SCREEN.blit(t_weapon, wep_box)
+                self.SCREEN.blit(t_armor, arm_box)
+
+                # Item List Buttons
+                # ==================================
+                b_scrollup = TextButton(parent=self.SCREEN, text='Prev', t_font="hylia", t_size=16,
+                                        left=items_left, top=wep_box.bottom + 20, width=item_width, height=item_height)
+
+                items_bottom = b_scrollup.rect.bottom + (list_len * item_height)
+                b_scrolldown = TextButton(parent=self.SCREEN, text='Next', t_font="hylia", t_size=16, left=items_left,
+                                          top=items_bottom, width=item_width, height=item_height)
+
+                # Determine items to show
+                # ==================================
+                items_to_show = list()
+                inventory = list(player.inventory)
+                end_index = start_index + list_len
+                if end_index >= len(player.inventory):
+                    end_index = len(player.inventory)
+                for index in range(start_index, end_index):
+                    items_to_show.append(inventory[index])
+
+                # Display Items
+                # ==================================
+                item_top = b_scrollup.rect.bottom
+                item_buttons = list()
+
+                for index, item in enumerate(items_to_show):
+                    if index == item_sel_index and item_sel_index >= 0:
+                        item_buttons.append(
+                            TextButton(parent=self.SCREEN, text=item, t_size=16, t_font="nodesto", left=items_left,
+                                       top=item_top, width=item_width, height=item_height, just="left",
+                                       t_color=GOLD))
+                        a_text, a_box = text_objects("x" + str(player.inventory[item]), use_font(16, "nodesto"), GOLD)
+                    else:
+                        item_buttons.append(
+                            TextButton(parent=self.SCREEN, text=item, t_size=16, t_font="nodesto", left=items_left,
+                                       top=item_top, width=item_width, height=item_height, just="left"))
+                        a_text, a_box = text_objects("x" + str(player.inventory[item]), use_font(16, "nodesto"), WHITE)
+
+                    # Math stage
+                    a_box.center = item_buttons[index].rect.center
+                    a_box.right = item_buttons[index].rect.right - 10
+                    self.SCREEN.blit(a_text, a_box)
+                    item_top += item_height
+
+            update_inv_list = False
+            # ==================================
+            # Mouse Events
+            # ==================================
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
                 if b_close.rect.collidepoint(mouse):
                     self.CLICK = False
                     return
-                if b_scrollup.rect.collidepoint(mouse) and last_index != 1:
-                    item_buttons = list()
-                    last_index -= list_len
-                if b_scrolldown.rect.collidepoint(mouse) and last_index < len(player.inventory) - 1:
-                    item_buttons = list()
-                    last_index += list_len
+
+                update_inv_list = True
+
+                if b_scrollup.rect.collidepoint(mouse) and start_index > 0:
+                    start_index -= list_len
+                if b_scrolldown.rect.collidepoint(mouse): # and start_index + list_len < len(player.inventory) - 1:
+                    start_index += list_len
                 for index, b_item in enumerate(item_buttons):
                     if b_item.rect.collidepoint(mouse):
                         item_sel_index = index
