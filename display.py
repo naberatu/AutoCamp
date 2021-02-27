@@ -14,7 +14,7 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 # Screen Dimensions:
 WIDTH = 800  # Use 16x16 sprites & tiles. Makes 50x30 grid.
-HEIGHT = 480
+HEIGHT = 450
 ORIGIN = (0, 0)
 
 # Map Dimensions:
@@ -368,7 +368,7 @@ class Display:
 
     def page_nce(self):
         global ASK_SAVE
-        menu_top = 420
+        menu_top = 390
         menu_left = 670
         cwid = 120
         offs = cwid + 10
