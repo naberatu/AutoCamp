@@ -479,6 +479,9 @@ class Display:
 
         while True:
             if update_inv_list:
+                # Critical to ensure that it blits at the right time.
+                update_inv_list = False
+
                 # Other Parameters
                 # ==================================
                 inv_box = InvBox(self.SCREEN, width, height, rect, player_name=player.get_name())
@@ -549,7 +552,6 @@ class Display:
                     self.SCREEN.blit(a_text, a_box)
                     item_top += item_height
 
-            update_inv_list = False
             # ==================================
             # Mouse Events
             # ==================================
@@ -562,8 +564,11 @@ class Display:
                 update_inv_list = True
 
                 if b_scrollup.rect.collidepoint(mouse) and start_index > 0:
+                    item_sel_index = -1
                     start_index -= list_len
-                if b_scrolldown.rect.collidepoint(mouse): # and start_index + list_len < len(player.inventory) - 1:
+                if b_scrolldown.rect.collidepoint(mouse) \
+                        and start_index + list_len < len(player.inventory):
+                    item_sel_index = -1
                     start_index += list_len
                 for index, b_item in enumerate(item_buttons):
                     if b_item.rect.collidepoint(mouse):
