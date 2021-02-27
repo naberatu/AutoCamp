@@ -436,7 +436,7 @@ class Display:
             self.SCREEN.fill(BLACK)
 
             tb_title = TextBox(parent=self.SCREEN, text="AutoCamp Team", t_font="hylia", t_size=30,
-                               top=50, center=True)
+                               top=30, center=True)
             tb_member1 = TextBox(parent=self.SCREEN, text="Nader Atout", t_font="hylia", t_size=20, center=True,
                                  top=tb_title.textbox.top + tb_title.textbox.height)
             tb_member2 = TextBox(parent=self.SCREEN, text="Diana Penalba", t_font="hylia", t_size=20, center=True,
@@ -445,17 +445,20 @@ class Display:
                                  top=tb_member2.textbox.top + tb_member2.textbox.height)
 
             tb_advisor = TextBox(parent=self.SCREEN, text="Team Advisor", t_font="hylia", t_size=30, center=True,
-                                 top=tb_member3.textbox.top + tb_member3.textbox.height + 30)
+                                 top=tb_member3.textbox.top + tb_member3.textbox.height + 20)
             tb_advname = TextBox(parent=self.SCREEN, text="Asst. Prof. Salma Elmalaki", t_font="hylia", t_size=20,
                                  center=True, top=tb_advisor.textbox.top + tb_advisor.textbox.height)
 
             tb_game = TextBox(parent=self.SCREEN, text="Original Tabletop Game", t_font="hylia", t_size=30,
-                              center=True, top=tb_advname.textbox.top + tb_advname.textbox.height + 30)
+                              center=True, top=tb_advname.textbox.top + tb_advname.textbox.height + 20)
             tb_wizards = TextBox(parent=self.SCREEN, text="Wizards of the Coast", t_font="hylia", t_size=20,
                                  center=True, top=tb_game.textbox.top + tb_game.textbox.height)
 
+            tb_images = TextBox(parent=self.SCREEN, text="All artwork found through Google Images", t_font="hylia",
+                                t_size=20, center=True, top=tb_wizards.textbox.top + tb_wizards.textbox.height + 20)
+
             b_back = TextButton(parent=self.SCREEN, path="./assets/b_credits.png", text="Back", left=B_CENTER,
-                                top=B_YPOS + 50, width=B_WIDTH, height=B_HEIGHT)
+                                top=B_YPOS + 60, width=B_WIDTH, height=B_HEIGHT)
 
             if b_back.rect.collidepoint(pygame.mouse.get_pos()) and self.CLICK:
                 return
