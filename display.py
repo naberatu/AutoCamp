@@ -315,10 +315,14 @@ class Display:
             self.end_page()
 
     def page_map(self):
+        reload = True
+        leave_message = "Travel"
+
         tile_list = list()
         x, y = 0, 0
         tile_img = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_tile_img(), TILE_SIZE, TILE_SIZE)
         self.SCREEN.blit(tile_img, ORIGIN)
+
         for y_tile in range(MAP_MAX_Y):
             y = int(TILE_SIZE * y_tile)
             for x_tile in range(MAP_MAX_X):
@@ -329,27 +333,33 @@ class Display:
         x, y = -1, -1
 
         while True:
-            self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
             tile_coors = "Tile: "
             if x >= 0 and y >= 0:
                 tile_coors += "(" + str(x) + ", " + str(y) + ")"
 
             if ENCOUNTERS[ENCOUNTER_INDEX].no_enemies():
+                if leave_message == "Flee":
+                    reload = True
                 leave_message = "Travel"
             else:
+                if leave_message == "Travel":
+                    reload = True
                 leave_message = "Flee"
 
-            # Control Buttons
-            # ==================================
-            tb_coors = TextBox(parent=self.SCREEN, text=tile_coors,
-                               left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
-            b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF,
-                                    top=Q_TP, width=Q_WD, height=Q_HT)
-            b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=Q_LF - Q_WD - 10,
-                                  top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
+            if reload:
+                self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
 
-            for tile in tile_list:
-                tile[0] = TileButton(parent=self.SCREEN, img=tile_img, left=tile[1][0], top=tile[1][1])
+                reload = False
+                # Control Buttons
+                # ==================================
+                TextBox(parent=self.SCREEN, text=tile_coors, t_color=BLACK, left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
+
+                b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
+                b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=Q_LF - Q_WD - 10,
+                                      top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
+
+                for tile in tile_list:
+                    tile[0] = TileButton(parent=self.SCREEN, img=tile_img, left=tile[1][0], top=tile[1][1])
 
             # Mouse Events
             # ==================================
@@ -358,7 +368,8 @@ class Display:
                 if b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return
-                if mouse[0] <= (MAP_MAX_Y + 1) * TILE_SIZE:
+                if mouse[0] <= MAP_MAX_Y * TILE_SIZE:
+                    reload = True
                     x = int(mouse[0] / TILE_SIZE)
                     y = int(mouse[1] / TILE_SIZE)
                 if b_travel.rect.collidepoint(mouse):
@@ -467,6 +478,7 @@ class Display:
             self.end_page()
 
     def inv_prompt(self, player, bwid):
+        global ASK_SAVE
         width, height = WIDTH - bwid - 20, HEIGHT
         rect = pygame.Rect(WIDTH - width, 0, width, height)
 
@@ -595,6 +607,7 @@ class Display:
                 self.CLICK = False
                 if b_close.rect.collidepoint(mouse):
                     return
+
                 update_inv_list = True
 
                 try:
@@ -602,36 +615,42 @@ class Display:
                     if sel_button == EQP:
                         if b_equip.rect.collidepoint(mouse):
                             player.inv_equip(items_to_show[item_sel_index])
+                            ASK_SAVE = True
 
                     if sel_button == DQP:
                         if b_dequip.rect.collidepoint(mouse):
                             if item_sel_index == -1:
                                 player.inv_dequip(player.get_weapon())
+                                ASK_SAVE = True
                             if item_sel_index == -2:
                                 player.inv_dequip(player.get_armor())
+                                ASK_SAVE = True
+
+
                 except: pass
 
                 if b_scrollup.rect.collidepoint(mouse) and start_index > 0:
                     item_sel_index = -3
                     start_index -= list_len
-                if b_scrolldown.rect.collidepoint(mouse) \
+                elif b_scrolldown.rect.collidepoint(mouse) \
                         and start_index + list_len < len(player.inventory):
                     item_sel_index = -3
                     start_index += list_len
-                if b_weapon.rect.collidepoint(mouse):
+                elif b_weapon.rect.collidepoint(mouse):
                     sel_button = DQP
                     item_sel_index = -1
-                if b_armor.rect.collidepoint(mouse):
+                elif b_armor.rect.collidepoint(mouse):
                     sel_button = DQP
                     item_sel_index = -2
-                for index, b_item in enumerate(item_buttons):
-                    if b_item.rect.collidepoint(mouse):
-                        item_sel_index = index
-                        if c_items[items_to_show[item_sel_index]].get_is_weapon() \
-                                or c_items[items_to_show[item_sel_index]].get_is_armor():
-                            sel_button = EQP
-                        else:
-                            sel_button = USE
+                else:
+                    for index, b_item in enumerate(item_buttons):
+                        if b_item.rect.collidepoint(mouse):
+                            item_sel_index = index
+                            if c_items[items_to_show[item_sel_index]].get_is_weapon() \
+                                    or c_items[items_to_show[item_sel_index]].get_is_armor():
+                                sel_button = EQP
+                            else:
+                                sel_button = USE
 
             self.end_page()
 
@@ -639,8 +658,8 @@ class Display:
         self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
         e_top = 10
         e_left = 10
-        cwid = 135
-        cheight = 40
+        cwid = 150
+        cheight = 50
         max_cols = int(WIDTH / (cwid + 10))
         col_size = int(HEIGHT / (cheight + 10))
         go_to_index = ENCOUNTER_INDEX
@@ -653,11 +672,11 @@ class Display:
                 # encbuttons.append(TextButton())
                 if index == ENCOUNTER_INDEX:
                     encbuttons.append(
-                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=16, t_font="nodesto",
-                                   left=e_left, top=e_top, width=cwid, height=cheight, t_color=(241, 194, 50)))
+                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=18, t_font="nodesto",
+                                   left=e_left, top=e_top, width=cwid, height=cheight, t_color=GOLD))
                 else:
                     encbuttons.append(
-                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=12, t_font="nodesto",
+                        TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=14, t_font="nodesto",
                                    left=e_left, top=e_top, width=cwid, height=cheight))
                 if index % col_size == 0:
                     e_top = 10
