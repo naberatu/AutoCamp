@@ -141,13 +141,15 @@ class Player(Animate):
         if items.c_items[item].get_is_weapon():
             if self.weapon:
                 self.inv_add(self.weapon)
+            res = self.inv_remove(item, discarding=True, notify=False)
             self.weapon = item
-            return self.inv_remove(item, discarding=True, notify=False)
+            return res
         elif items.c_items[item].get_is_armor():
             if self.armor:
                 self.inv_add(self.armor)
+            res = self.inv_remove(item, discarding=True, notify=False)
             self.armor = item
-            return self.inv_remove(item, discarding=True, notify=False)
+            return res
         else:
             print("[ER] You can't equip that!")
             return False
@@ -156,7 +158,7 @@ class Player(Animate):
         if item == self.weapon:
             self.inv_add(item)
             self.weapon = None
-        if item == self.armor:
+        elif item == self.armor:
             self.inv_add(item)
             self.armor = None
         else:
