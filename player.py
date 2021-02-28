@@ -1,7 +1,7 @@
 
 from animate import Animate
 import random
-import items
+from items import c_items
 from statblock import StatBlock
 
 role_dict = {
@@ -100,7 +100,7 @@ class Player(Animate):
         if self.inv_is_full():
             return False
 
-        if items.c_items[item].get_is_weapon() and self.weapon is None:
+        if c_items[item].get_is_weapon() and self.weapon is None:
             self.weapon = item
             amount -= 1
             if amount == 0:
@@ -131,6 +131,15 @@ class Player(Animate):
             print("[ER] Invalid amount entered!")
             return False
 
+    def swap_eq(self, item):
+        temp = dict()
+        for key in self.inventory:
+            if key == item:
+                temp[self.weapon] = self.inventory[key]
+            else:
+                temp[key] = self.inventory[key]
+        self.inventory = temp
+
     def inv_equip(self, item):
         # If it doesn't exist, don't bother.
         if item not in self.inventory.keys():
@@ -138,15 +147,21 @@ class Player(Animate):
             return False
 
         # Perform the swap
-        if items.c_items[item].get_is_weapon():
+        if c_items[item].get_is_weapon():
             if self.weapon:
-                self.inv_add(self.weapon)
+                if self.inventory[item] == 1:
+                    self.swap_eq(item)
+                else:
+                    self.inv_add(self.weapon)
             res = self.inv_remove(item, discarding=True, notify=False)
             self.weapon = item
             return res
-        elif items.c_items[item].get_is_armor():
+        elif c_items[item].get_is_armor():
             if self.armor:
-                self.inv_add(self.armor)
+                if self.inventory[item] == 1:
+                    self.swap_eq(item)
+                else:
+                    self.inv_add(self.armor)
             res = self.inv_remove(item, discarding=True, notify=False)
             self.armor = item
             return res
@@ -220,7 +235,7 @@ class Player(Animate):
                     print("[ER] You can't sell that amount!")
 
                 if selling:
-                    earnings = items.c_items[item].get_cost() * amount
+                    earnings = c_items[item].get_cost() * amount
                 elif haggling:
                     earnings = haggle_cost * amount
 
@@ -240,7 +255,7 @@ class Player(Animate):
                     print("[ER] You can't use/discard that amount!")
                     return False
 
-                elif using and not items.c_items[item].is_consumable:
+                elif using and not c_items[item].is_consumable:
                     print("[ER] You can not use the {}!".format(item))
                     return False
 
