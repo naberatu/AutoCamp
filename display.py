@@ -27,7 +27,6 @@ TILE_SIZE = int(HEIGHT / MAP_MAX_Y)      # Usually would be 32
 # Base Colors:
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-DIRT = (197, 145, 84)
 GOLD = (241, 194, 50)
 
 # Button Dimensions:
@@ -47,6 +46,44 @@ ENCOUNTERS = list()
 ENCOUNTER_INDEX = 1         # Can never be 0, since that's its own index
 ASK_SAVE = False
 
+# drawText from Pygame.org wiki
+def drawText(surface, text, color, rect, font, aa=False, bkg=None):
+    rect = pygame.Rect(rect)
+    y = rect.top
+    lineSpacing = -2
+
+    # get the height of the font
+    fontHeight = font.size("Tg")[1]
+
+    while text:
+        i = 1
+
+        # determine if the row of text will be outside our area
+        if y + fontHeight > rect.bottom:
+            break
+
+        # determine maximum width of line
+        while font.size(text[:i])[0] < rect.width and i < len(text):
+            i += 1
+
+        # if we've wrapped the text, then adjust the wrap to the last word
+        if i < len(text):
+            i = text.rfind(" ", 0, i) + 1
+
+        # render the line and blit it to the surface
+        if bkg:
+            image = font.render(text[:i], 1, color, bkg)
+            image.set_colorkey(bkg)
+        else:
+            image = font.render(text[:i], aa, color)
+
+        surface.blit(image, (rect.left, y))
+        y += fontHeight + lineSpacing
+
+        # remove the text we just blitted
+        text = text[i:]
+
+    return text
 
 def use_font(size=12, font="hylia"):
     if font == "hylia":
@@ -89,6 +126,21 @@ def save():
     pickle.dump(PLAYERS, open("players.camp", "wb"))
     pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
     ASK_SAVE = False
+
+def gridify(image="./assets/rivermouth.jpg"):
+    battlemap = load_image(image, MAP_MAX_X * TILE_SIZE, MAP_MAX_Y * TILE_SIZE)
+    tiles = list()
+    for num in range(MAP_MAX_X):
+        tiles.append(list())
+
+    for y_tile in range(MAP_MAX_Y):
+        for x_tile in range(MAP_MAX_X):
+            surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+            surf.blit(battlemap, (x_tile * TILE_SIZE, y_tile * TILE_SIZE),
+                                 (x_tile * TILE_SIZE, y_tile * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+            tiles[x_tile].append(surf)
+
+    return tiles
 
 
 class QuitBox:
@@ -333,6 +385,8 @@ class Display:
         x, y = -1, -1
 
         while True:
+            # Tile Message:
+            # ==================================
             tile_coors = "Tile: "
             if x >= 0 and y >= 0:
                 tile_coors += "(" + str(x) + ", " + str(y) + ")"
@@ -346,6 +400,8 @@ class Display:
                     reload = True
                 leave_message = "Flee"
 
+            # Map Reloading
+            # ==================================
             if reload:
                 self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
 
@@ -489,15 +545,15 @@ class Display:
         item_buttons = list()
         item_sel_index = -3
         items_left = WIDTH - 20 - item_width
-        update_inv_list = True
+        reload = True
         sel_button = 0
         EQP, DQP, USE = 1, 2, 3
         font_size = 20
 
         while True:
-            if update_inv_list:
+            if reload:
                 # Critical to ensure that it blits at the right time.
-                update_inv_list = False
+                reload = False
 
                 # Other Parameters
                 # ==================================
@@ -580,8 +636,8 @@ class Display:
 
                 # Action Buttons
                 # ==================================
+                awid, aheight = 100, 40
                 if item_sel_index >= -2:
-                    awid, aheight = 100, 40
                     b_discard = TextButton(parent=self.SCREEN, text="Discard", t_font="nodesto", t_size=20,
                                            left=WIDTH - awid - 20, top=HEIGHT - aheight - 10, width=awid, height=aheight)
 
@@ -599,6 +655,41 @@ class Display:
                         b_use = TextButton(parent=self.SCREEN, text="Use", t_font="nodesto", t_size=20,
                                            left=items_left, top=HEIGHT - aheight - 10, width=awid, height=aheight)
 
+                # Description Box
+                # ==================================
+                if 0 <= item_sel_index < list_len:
+                    description = c_items[items_to_show[item_sel_index]].get_details()
+                elif item_sel_index == -1:
+                    description = c_items[player.get_weapon()].get_details()
+                elif item_sel_index == -2:
+                    description = c_items[player.get_armor()].get_details()
+                else:
+                    description = ""
+
+                desc_left = WIDTH - width + 20
+
+                desc_width = items_left - desc_left - 10
+                desc_height = b_scrolldown.rect.bottom - b_scrollup.rect.top - 25
+
+                desc_rect = pygame.Rect(desc_left, b_scrollup.rect.top, desc_width, desc_height)
+                self.SCREEN.blit(load_image("./assets/button.png", desc_width, desc_height), desc_rect)
+                tb_desc = TextBox(parent=self.SCREEN, text="Description", t_size=13, t_font="hylia",
+                                  left=desc_left + 10, top=b_scrollup.rect.top + 1)
+
+                desc_rect = pygame.Rect(desc_left + 10, tb_desc.rect.bottom + 25, desc_width - 15, desc_height - 20)
+                drawText(self.SCREEN, description, WHITE, desc_rect, use_font(17, "scaly"))
+
+
+
+                # Money Box
+                # ==================================
+                wallet = player.get_money()
+                money = ("{:3} GP           {:2} SP          {:2} CP").format(
+                    wallet["gold"], wallet["silver"], wallet["copper"])
+
+                money_box = TextButton(parent=self.SCREEN, text=money, t_font="hylia", t_size=16, left=desc_left,
+                                       top=b_weapon.rect.top, width=desc_width, height=item_height)
+
             # ==================================
             # Mouse Events
             # ==================================
@@ -608,7 +699,7 @@ class Display:
                 if b_close.rect.collidepoint(mouse):
                     return
 
-                update_inv_list = True
+                reload = True
 
                 try:
                     self.CLICK = False
@@ -625,8 +716,6 @@ class Display:
                             if item_sel_index == -2:
                                 player.inv_dequip(player.get_armor())
                                 ASK_SAVE = True
-
-
                 except: pass
 
                 if b_scrollup.rect.collidepoint(mouse) and start_index > 0:

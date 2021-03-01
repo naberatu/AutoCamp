@@ -48,6 +48,9 @@ class Inanimate(Entity):
     def get_stack_size(self):
         return self.maxStack
 
+    def get_details(self):
+        return self.details
+
     def get_quantity(self):
         return self.quantity
 

@@ -57,6 +57,9 @@ class Player(Animate):
     # ==================================
     # Inventory
     # ==================================
+    def get_money(self):
+        return self.money
+
     def money_add(self, copper=1, silver=0, gold=0):    # Gives the player money.
         # If illogical values are placed, don't bother.
         if copper < 0 or silver < 0 or gold < 0:
