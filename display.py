@@ -46,6 +46,7 @@ ENCOUNTERS = list()
 ENCOUNTER_INDEX = 1         # Can never be 0, since that's its own index
 ASK_SAVE = False
 
+
 # drawText from Pygame.org wiki
 def drawText(surface, text, color, rect, font, aa=False, bkg=None):
     rect = pygame.Rect(rect)
@@ -84,6 +85,7 @@ def drawText(surface, text, color, rect, font, aa=False, bkg=None):
         text = text[i:]
 
     return text
+
 
 def use_font(size=12, font="hylia"):
     if font == "hylia":
@@ -126,6 +128,7 @@ def save():
     pickle.dump(PLAYERS, open("players.camp", "wb"))
     pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
     ASK_SAVE = False
+
 
 def gridify(image="./assets/rivermouth.jpg"):
     battlemap = load_image(image, MAP_MAX_X * TILE_SIZE, MAP_MAX_Y * TILE_SIZE)
@@ -199,6 +202,34 @@ class InvBox:
 
         self.parent.blit(self.bkgd, self.rect)
         self.parent.blit(title, title_box)
+
+
+class NumberBox:
+    def __init__(self, parent, width, height, t_res, rect, title):
+        self.backgd = load_image("./assets/button.png", width, height)
+        self.parent = parent
+
+        title, title_box = text_objects(title, use_font(20, "hylia"), WHITE)
+        title_box.center = rect.center
+        title_box.top = rect.top
+
+        res_wid = int(0.75 * width)
+
+        self.results, self.res_rect = text_objects(t_res, use_font(20, "nodesto"), BLACK)
+        self.result_field = pygame.Rect(rect.center[0] - int(res_wid / 2), title_box.bottom + 10, res_wid, 25)
+        self.res_rect.center = self.result_field.center
+
+        self.parent.blit(self.backgd, rect)
+        self.parent.blit(title, title_box)
+        pygame.draw.rect(self.parent, WHITE, self.result_field)
+        self.parent.blit(self.results, self.res_rect)
+        self.bottom = self.res_rect.bottom
+
+    def update_result(self, result):
+        self.results, self.res_rect = text_objects(result, use_font(20, "nodesto"), BLACK)
+        self.res_rect.center = self.result_field.center
+        pygame.draw.rect(self.parent, WHITE, self.result_field)
+        self.parent.blit(self.results, self.res_rect)
 
 
 class TileButton:
@@ -669,7 +700,7 @@ class Display:
                 desc_left = WIDTH - width + 20
 
                 desc_width = items_left - desc_left - 10
-                desc_height = b_scrolldown.rect.bottom - b_scrollup.rect.top - 25
+                desc_height = HEIGHT - b_scrollup.rect.top - 10
 
                 desc_rect = pygame.Rect(desc_left, b_scrollup.rect.top, desc_width, desc_height)
                 self.SCREEN.blit(load_image("./assets/button.png", desc_width, desc_height), desc_rect)
@@ -678,8 +709,6 @@ class Display:
 
                 desc_rect = pygame.Rect(desc_left + 10, tb_desc.rect.bottom + 25, desc_width - 15, desc_height - 20)
                 drawText(self.SCREEN, description, WHITE, desc_rect, use_font(17, "scaly"))
-
-
 
                 # Money Box
                 # ==================================
@@ -702,13 +731,11 @@ class Display:
                 reload = True
 
                 try:
-                    self.CLICK = False
                     if sel_button == EQP:
                         if b_equip.rect.collidepoint(mouse):
                             player.inv_equip(items_to_show[item_sel_index])
                             ASK_SAVE = True
-
-                    if sel_button == DQP:
+                    elif sel_button == DQP:
                         if b_dequip.rect.collidepoint(mouse):
                             if item_sel_index == -1:
                                 player.inv_dequip(player.get_weapon())
@@ -716,6 +743,15 @@ class Display:
                             if item_sel_index == -2:
                                 player.inv_dequip(player.get_armor())
                                 ASK_SAVE = True
+                    elif b_discard.rect.collidepoint(mouse):
+                        amt = self.number_prompt("Discard Item", player.inventory[items_to_show[item_sel_index]],
+                                                 desc_left, tb_desc.rect.bottom, width=desc_width, height=desc_height)
+                        if amt:
+                            ASK_SAVE = True
+                            if item_sel_index == -1 or item_sel_index == -2:
+                                player.inv_remove(items_to_show[item_sel_index], dropping=True)
+                            else:
+                                player.inv_remove(items_to_show[item_sel_index], amount=amt, discarding=True)
                 except: pass
 
                 if b_scrollup.rect.collidepoint(mouse) and start_index > 0:
@@ -788,6 +824,68 @@ class Display:
 
             self.end_page()
 
+    def number_prompt(self, title, max_amt, in_left, in_top, width=200, height=320):
+        result = ""
+        rect = pygame.Rect(in_left, in_top, width, height)
+        NumBox = NumberBox(self.SCREEN, width, height, result, rect, title)
+
+        cl_left = rect.left + width - 30
+        kp_top = NumBox.bottom + 10
+        kp_dim = 50
+        kp_left = rect.center[0] - int(kp_dim / 2) - kp_dim - 5
+
+        can_clr = False
+        keypad = list()
+
+        b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
+                             width=30, height=30)
+
+        for num in range(1, 13):
+            if num == 10:
+                keypad.append(TextButton(parent=self.SCREEN, text="0", t_font="hylia", t_size=24,
+                                         left=kp_left + kp_dim + 5, top=kp_top, width=kp_dim, height=kp_dim))
+            elif num == 11:
+                keypad.append(TextButton(parent=self.SCREEN, text="clr", t_font="hylia", t_size=20,
+                                         left=kp_left - kp_dim - 5, top=kp_top, width=kp_dim, height=kp_dim))
+            elif num == 12:
+                keypad.append(TextButton(parent=self.SCREEN, text="en", t_font="hylia", t_size=20,
+                                         left=kp_left + 5, top=kp_top, width=kp_dim, height=kp_dim))
+            else:
+                keypad.append(TextButton(parent=self.SCREEN, text=str(num), t_font="hylia", t_size=24,
+                                         left=kp_left, top=kp_top, width=kp_dim, height=kp_dim))
+
+            if num % 3 == 0:
+                kp_left, kp_top = rect.center[0] - int(kp_dim / 2) - kp_dim - 5, kp_top + kp_dim + 5
+            else:
+                kp_left += kp_dim + 5
+
+        while True:
+            mouse = pygame.mouse.get_pos()
+            if self.CLICK:
+                if b_close.rect.collidepoint(mouse):
+                    return
+                for num, key in enumerate(keypad):
+                    if key.rect.collidepoint(mouse):
+                        key_val = num + 1
+
+                        if can_clr:
+                            result = ""
+                            can_clr = False
+                        if key_val == 10:
+                            result += "0"
+                        if key_val == 11:
+                            result = ""
+                        if key_val == 12:
+                            if int(result) <= max_amt:
+                                return int(result)
+                            result = "You don't have that many!"
+                            can_clr = True
+                        else:
+                            result += str(key_val)
+                        NumBox.update_result(result)
+                        self.CLICK = False
+            self.end_page()
+
     def dice_prompt(self):
         dice_options = ["d4", "d6", "d8", "d10", "d12", "d20"]
         width, height = 335, 320
@@ -798,9 +896,11 @@ class Display:
         result = ""
         keypad = list()
         dicepad = list()
+
         dice_box = DiceBox(self.SCREEN, width, height, result, rect)
         kp_top = dice_box.bottom + 10
         kp_left = rect.left + 10
+
         dp_size = 60
         dp_left = rect.right - 20 - (2 * dp_size)
         b_sum = 0       # Just to start it off.
