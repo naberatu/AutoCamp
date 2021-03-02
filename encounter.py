@@ -8,7 +8,6 @@ import items
 
 
 class Encounter:
-
     def __init__(self, name, is_shop=False, is_combat=False, anim=None, bkgd="./assets/tavern.jpg", vendor=None):
         self.name = name
         if anim:
@@ -256,13 +255,16 @@ class Encounter:
             else:
                 flag = self.currentEntity.inv_remove(to_use, using=True)
 
-    def inv_give(self, recipient, item_name, amount=1):
-        if not recipient.get_iff() and self.currentEntity.inv_remove(item_name, amount=amount, discarding=True,
-                                                                     notify=False) \
-                and recipient.inv_add(item_name, amount=amount):
-            print("[OK] You gave", recipient.get_name(), amount, item_name, "!")
-        else:
-            print("[ER] Cannot give", item_name, "to", recipient.get_name(), "!")
+    def inv_give(self, giver, recipient, item_name, amount=1, notify=False):
+        friend = not recipient.get_iff()
+        rem_success = giver.inv_remove(item_name, amount=amount, discarding=True, notify=False)
+        add_success = recipient.inv_add(item_name, amount=amount)
+
+        if notify:
+            if friend and rem_success and add_success:
+                print("[OK] You gave", recipient.get_name(), amount, item_name, "!")
+            else:
+                print("[ER] Cannot give", item_name, "to", recipient.get_name(), "!")
 
     def giveBranch(self):
         giving = True

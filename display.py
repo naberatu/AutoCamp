@@ -28,6 +28,7 @@ TILE_SIZE = int(HEIGHT / MAP_MAX_Y)      # Usually would be 32
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GOLD = (241, 194, 50)
+GREEN = (84, 230, 84)
 
 # Button Dimensions:
 B_WIDTH = 200
@@ -204,9 +205,23 @@ class InvBox:
         self.parent.blit(title, title_box)
 
 
+class PlayerBox:
+    def __init__(self, parent, width, height, rect):
+        self.rect = rect
+        pygame.draw.rect(parent, BLACK, self.rect)
+        self.parent = parent
+
+        title, title_box = text_objects("Select Player", use_font(16, "hylia"), WHITE)
+        title_box.center = self.rect.center
+        title_box.top = self.rect.top
+        self.bottom = title_box.bottom
+
+        self.parent.blit(title, title_box)
+
+
 class NumberBox:
     def __init__(self, parent, width, height, t_res, rect, title):
-        self.backgd = load_image("./assets/button.png", width, height)
+        pygame.draw.rect(parent, BLACK, rect)
         self.parent = parent
 
         title, title_box = text_objects(title, use_font(20, "hylia"), WHITE)
@@ -219,7 +234,6 @@ class NumberBox:
         self.result_field = pygame.Rect(rect.center[0] - int(res_wid / 2), title_box.bottom + 10, res_wid, 25)
         self.res_rect.center = self.result_field.center
 
-        self.parent.blit(self.backgd, rect)
         self.parent.blit(title, title_box)
         pygame.draw.rect(self.parent, WHITE, self.result_field)
         self.parent.blit(self.results, self.res_rect)
@@ -523,7 +537,7 @@ class Display:
                 if b_roll.rect.collidepoint(mouse):
                     self.dice_prompt()
                 if b_inv.rect.collidepoint(mouse):
-                    self.inv_prompt(current_player, cwid)
+                    self.inv_prompt(current_player, cwid, player_index)
                 for index, button in enumerate(exp_buttons):
                     if button.rect.collidepoint(mouse):
                         player_index = index
@@ -564,7 +578,7 @@ class Display:
 
             self.end_page()
 
-    def inv_prompt(self, player, bwid):
+    def inv_prompt(self, player, bwid, player_index):
         global ASK_SAVE
         width, height = WIDTH - bwid - 20, HEIGHT
         rect = pygame.Rect(WIDTH - width, 0, width, height)
@@ -752,6 +766,20 @@ class Display:
                                 player.inv_remove(items_to_show[item_sel_index], dropping=True)
                             else:
                                 player.inv_remove(items_to_show[item_sel_index], amount=amt, discarding=True)
+                    elif b_give.rect.collidepoint(mouse):
+                        rec_index = self.player_prompt(player_index, desc_left, tb_desc.rect.bottom, width=desc_width,
+                                                       height=desc_height)
+                        if rec_index >= player_index:
+                            rec_index += 1
+
+                        if rec_index >= 0:
+                            amt = self.number_prompt("Give Item", player.inventory[items_to_show[item_sel_index]],
+                                                     desc_left, tb_desc.rect.bottom, width=desc_width, height=desc_height)
+                            if amt:
+                                ASK_SAVE = True
+                                ENCOUNTERS[ENCOUNTER_INDEX].inv_give(PLAYERS[player_index], PLAYERS[rec_index],
+                                                                     items_to_show[item_sel_index], amount=amt)
+
                 except: pass
 
                 if b_scrollup.rect.collidepoint(mouse) and start_index > 0:
@@ -884,6 +912,66 @@ class Display:
                             result += str(key_val)
                         NumBox.update_result(result)
                         self.CLICK = False
+            self.end_page()
+
+    def player_prompt(self, giver_index, in_left, in_top, width=200, height=320):
+        rect = pygame.Rect(in_left, in_top, width, height)
+        reload = True
+        new_index = -1
+        valid_selection = False
+        recipients = list()
+        for index, player in enumerate(PLAYERS):
+            if index != giver_index:
+                recipients.append(player)
+
+        while True:
+            if reload:
+                reload = False
+
+                p_box = PlayerBox(self.SCREEN, width, height, rect)
+                p_buttons = list()
+
+                cl_left = rect.left + width - 30
+                b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=cl_left, top=rect.top,
+                                     width=30, height=30)
+                p_top = p_box.bottom + 10
+                b_ht = 35
+
+                for index, player in enumerate(recipients):
+                    if index == new_index:
+                        p_color = GOLD
+                    else:
+                        p_color = WHITE
+
+                    p_buttons.append(TextButton(parent=self.SCREEN, text=player.get_name(), t_size=20,
+                                                just="left", t_font="nodesto", left=in_left, top=p_top,
+                                                width=width, height=b_ht, t_color=p_color))
+                    p_top += b_ht
+
+                if valid_selection:
+                    button_text = "> Confirm <"
+                    button_color = GREEN
+                else:
+                    button_text = "Please select a recipient."
+                    button_color = WHITE
+
+                b_confirm = TextButton(parent=self.SCREEN, text=button_text, t_font="nodesto", t_color=button_color,
+                                       t_size=20, left=in_left, top=in_top+height-b_ht, width=width, height=b_ht)
+
+            mouse = pygame.mouse.get_pos()
+            if self.CLICK:
+                self.CLICK = False
+
+                if b_close.rect.collidepoint(mouse):
+                    return -1
+                elif b_confirm.rect.collidepoint(mouse) and valid_selection:
+                    return new_index
+                for num, player in enumerate(p_buttons):
+                    if player.rect.collidepoint(mouse):
+                        reload = True
+                        new_index = num
+                        valid_selection = True
+
             self.end_page()
 
     def dice_prompt(self):
