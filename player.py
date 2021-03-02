@@ -138,7 +138,10 @@ class Player(Animate):
         temp = dict()
         for key in self.inventory:
             if key == item:
-                temp[self.weapon] = self.inventory[key]
+                if c_items[item].get_is_weapon():
+                    temp[self.weapon] = self.inventory[key]
+                elif c_items[item].get_is_armor():
+                    temp[self.armor] = self.inventory[key]
             else:
                 temp[key] = self.inventory[key]
         self.inventory = temp

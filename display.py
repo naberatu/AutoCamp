@@ -707,9 +707,9 @@ class Display:
                 # ==================================
                 if 0 <= item_sel_index < list_len:
                     description = c_items[items_to_show[item_sel_index]].get_details()
-                elif item_sel_index == -1:
+                elif item_sel_index == -1 and player.get_weapon():
                     description = c_items[player.get_weapon()].get_details()
-                elif item_sel_index == -2:
+                elif item_sel_index == -2 and player.get_armor():
                     description = c_items[player.get_armor()].get_details()
                 else:
                     description = ""
