@@ -254,7 +254,7 @@ class TileButton:
         self.img_rect = self.img.get_rect()
         self.img_rect.center = self.rect.center
 
-        parent.blit(self.img, self.img_rect)
+        # parent.blit(self.img, self.img_rect)
 
 
 class TextButton:
@@ -462,6 +462,8 @@ class Display:
                 for tile in tile_list:
                     tile[0] = TileButton(parent=self.SCREEN, img=tile_img, left=tile[1][0], top=tile[1][1])
 
+                self.SCREEN.blit(load_image("./assets/rivermouth.jpg", MAP_MAX_X * TILE_SIZE, MAP_MAX_Y * TILE_SIZE), ORIGIN)
+
             # Mouse Events
             # ==================================
             mouse = pygame.mouse.get_pos()
@@ -469,11 +471,12 @@ class Display:
                 if b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return
-                if mouse[0] <= MAP_MAX_Y * TILE_SIZE:
+                    reload = True
+                elif mouse[0] <= MAP_MAX_Y * TILE_SIZE:
                     reload = True
                     x = int(mouse[0] / TILE_SIZE)
                     y = int(mouse[1] / TILE_SIZE)
-                if b_travel.rect.collidepoint(mouse):
+                elif b_travel.rect.collidepoint(mouse):
                     self.travel_prompt()
                     return
 

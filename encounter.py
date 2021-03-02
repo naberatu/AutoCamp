@@ -216,44 +216,45 @@ class Encounter:
     # ===============================================================================
     # Inventory Methods
     # ===============================================================================
-    def discardBranch(self, discarding=False, selling=False):
-        term = None
-        if discarding:
-            term = "discard"
-        elif selling:
-            term = "sell"
 
-        while discarding or selling:
-            item_name = input("What would you like to " + term + "?\n> ")
-            if item_name == "cancel":
-                break
-            item_amount = input("How many would you like to " + term + "?\n> ")
-            if item_amount == "cancel":
-                break
-            elif term == "discard":
-                discarding = not self.currentEntity.inv_remove(item_name, amount=item_amount, discarding=True)
-            elif term == "sell":
-                selling = not self.currentEntity.inv_remove(item_name, amount=item_amount, selling=True, notify=True)
+    # def discardBranch(self, discarding=False, selling=False):
+    #     term = None
+    #     if discarding:
+    #         term = "discard"
+    #     elif selling:
+    #         term = "sell"
+    #
+    #     while discarding or selling:
+    #         item_name = input("What would you like to " + term + "?\n> ")
+    #         if item_name == "cancel":
+    #             break
+    #         item_amount = input("How many would you like to " + term + "?\n> ")
+    #         if item_amount == "cancel":
+    #             break
+    #         elif term == "discard":
+    #             discarding = not self.currentEntity.inv_remove(item_name, amount=item_amount, discarding=True)
+    #         elif term == "sell":
+    #             selling = not self.currentEntity.inv_remove(item_name, amount=item_amount, selling=True, notify=True)
 
-    def equipBranch(self):
-        equipping = True
-        # self.currentEntity.inv_add("Spear")      # For testing
-        while equipping:
-            to_equip = input("What would you like to equip?\n> ")
-            if to_equip == "cancel":
-                break
-            else:
-                self.currentEntity.inv_equip(to_equip)
-                equipping = False
+    # def equipBranch(self):
+    #     equipping = True
+    #     # self.currentEntity.inv_add("Spear")      # For testing
+    #     while equipping:
+    #         to_equip = input("What would you like to equip?\n> ")
+    #         if to_equip == "cancel":
+    #             break
+    #         else:
+    #             self.currentEntity.inv_equip(to_equip)
+    #             equipping = False
 
-    def useBranch(self):
-        flag = False
-        while not flag:
-            to_use = input("What would you like to use?\n> ")
-            if to_use == "cancel":
-                break
-            else:
-                flag = self.currentEntity.inv_remove(to_use, using=True)
+    # def useBranch(self):
+    #     flag = False
+    #     while not flag:
+    #         to_use = input("What would you like to use?\n> ")
+    #         if to_use == "cancel":
+    #             break
+    #         else:
+    #             flag = self.currentEntity.inv_remove(to_use, using=True)
 
     def inv_give(self, giver, recipient, item_name, amount=1, notify=False):
         friend = not recipient.get_iff()
@@ -266,68 +267,68 @@ class Encounter:
             else:
                 print("[ER] Cannot give", item_name, "to", recipient.get_name(), "!")
 
-    def giveBranch(self):
-        giving = True
-        giver = self.currentEntity
-        while giving:
-            to_give = input("What would you like to give?\n> ")
-            if to_give == "cancel":
-                break
+    # def giveBranch(self):
+    #     giving = True
+    #     giver = self.currentEntity
+    #     while giving:
+    #         to_give = input("What would you like to give?\n> ")
+    #         if to_give == "cancel":
+    #             break
+    #
+    #         give_quantity = input("How many would you like to give?\n> ")
+    #         if give_quantity == "cancel":
+    #             break
+    #
+    #         print("Who is receiving this?\n")
+    #         recipient = self.choosePC(True, giver)
+    #         if recipient == "cancel":
+    #             break
+    #         try:
+    #             self.inv_give(recipient, to_give, give_quantity)
+    #         except:
+    #             print("[ER] Could not complete that!")
 
-            give_quantity = input("How many would you like to give?\n> ")
-            if give_quantity == "cancel":
-                break
-
-            print("Who is receiving this?\n")
-            recipient = self.choosePC(True, giver)
-            if recipient == "cancel":
-                break
-            try:
-                self.inv_give(recipient, to_give, give_quantity)
-            except:
-                print("[ER] Could not complete that!")
-
-    def invBranch(self):
-        print("Whose inventory would you like to view?")
-        choice = self.choosePC()
-        if choice == "cancel":
-            pass
-        else:
-            viewing_inv = True
-            while viewing_inv:
-                invNotEmpty = self.currentEntity.inv_print()
-                if not invNotEmpty:
-                    self.currentEntity.inv_print(list_inv=False)
-
-                print("What would you like to do with {}'s inventory?".format(self.currentEntity.get_name()))
-
-                self.displayCmds(self.inv_commands)
-                inv_action = input("> ")
-
-                if inv_action not in self.inv_commands:
-                    print("[ER] Invalid command! Please enter one of the commands above")
-
-                elif inv_action == "cancel":
-                    viewing_inv = False
-
-                elif inv_action == "discard":
-                    self.discardBranch(discarding=True)
-
-                elif inv_action == "equip":
-                    self.equipBranch()
-
-                elif inv_action == "use":
-                    self.useBranch()
-
-                elif inv_action == "give":
-                    self.giveBranch()
-
-                elif inv_action == "sell":
-                    self.discardBranch(selling=True)
-
-                elif inv_action == "dequip":
-                    toBeRemoved = input("What would you like to remove?\n> ")
-                    self.currentEntity.inv_dequip(toBeRemoved)
+    # def invBranch(self):
+    #     print("Whose inventory would you like to view?")
+    #     choice = self.choosePC()
+    #     if choice == "cancel":
+    #         pass
+    #     else:
+    #         viewing_inv = True
+    #         while viewing_inv:
+    #             invNotEmpty = self.currentEntity.inv_print()
+    #             if not invNotEmpty:
+    #                 self.currentEntity.inv_print(list_inv=False)
+    #
+    #             print("What would you like to do with {}'s inventory?".format(self.currentEntity.get_name()))
+    #
+    #             self.displayCmds(self.inv_commands)
+    #             inv_action = input("> ")
+    #
+    #             if inv_action not in self.inv_commands:
+    #                 print("[ER] Invalid command! Please enter one of the commands above")
+    #
+    #             elif inv_action == "cancel":
+    #                 viewing_inv = False
+    #
+    #             elif inv_action == "discard":
+    #                 self.discardBranch(discarding=True)
+    #
+    #             elif inv_action == "equip":
+    #                 self.equipBranch()
+    #
+    #             elif inv_action == "use":
+    #                 self.useBranch()
+    #
+    #             elif inv_action == "give":
+    #                 self.giveBranch()
+    #
+    #             elif inv_action == "sell":
+    #                 self.discardBranch(selling=True)
+    #
+    #             elif inv_action == "dequip":
+    #                 toBeRemoved = input("What would you like to remove?\n> ")
+    #                 self.currentEntity.inv_dequip(toBeRemoved)
 
     # ===============================================================================
     # Vendor Methods
