@@ -310,11 +310,11 @@ class Display:
         ENCOUNTERS_OK = True
     except:
         if not PLAYERS_OK:
-            PLAYERS.append(Player("Fjord", "Orc", "Warlock"))
-            PLAYERS.append(Player("Jester Lavorre", "Tiefling", "Cleric"))
-            PLAYERS.append(Player("Caleb Widowgast", "Human", "Wizard"))
-            PLAYERS.append(Player("Yasha Nyoodrin", "Aasimar", "Barbarian"))
-            PLAYERS.append(Player("Veth Brenatto", "Goblin", "Rogue"))
+            PLAYERS.append(Player(name="Fjord", race="Orc", role="Warlock"))
+            PLAYERS.append(Player(name="Jester Lavorre", race="Tiefling", role="Cleric"))
+            PLAYERS.append(Player(name="Caleb Widowgast", race="Human", role="Wizard"))
+            PLAYERS.append(Player(name="Yasha Nyoodrin", race="Aasimar", role="Barbarian"))
+            PLAYERS.append(Player(name="Veth Brenatto", race="Goblin", role="Rogue"))
 
             for hero in PLAYERS:
                 hero.set_weapon("Shortsword")
@@ -386,10 +386,6 @@ class Display:
         reload = True
         leave_message = "Travel"
 
-        icon_player = load_image("./assets/item_drop.png", TILE_SIZE, TILE_SIZE)
-        icon_inanim = load_image("./assets/moneybag.png", TILE_SIZE, TILE_SIZE)
-        icon_enemy = load_image("./assets/item_potion.png", TILE_SIZE, TILE_SIZE)
-
         background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bkgd(), TILE_SIZE * MAP_MAX_X, TILE_SIZE * MAP_MAX_Y)
 
         if RELOAD_ENC:
@@ -409,7 +405,6 @@ class Display:
                     player_pos.append((x_coor, y_coor))
 
             for ent in ENCOUNTERS[ENCOUNTER_INDEX].get_anim():
-                name = ent.get_name()
                 if type(ent) == Enemy:
                     left_lim = int(MAP_MAX_X / 2)
                     right_lim = MAP_MAX_X - 1
@@ -421,8 +416,6 @@ class Display:
                                                                 randint(left_lim, right_lim),
                                                                 randint(upper_lim, lower_lim)):
                             break
-                    pos = ent.get_coors()
-                    print(ent.get_name(), ent.get_coors(), "\n")
 
                 if type(ent) == Player:
                     while True:
@@ -432,10 +425,6 @@ class Display:
                         if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(ent, 30, cell[0], cell[1]):
                             del player_pos[index]
                             break
-
-            for ent in ENCOUNTERS[ENCOUNTER_INDEX].get_anim():
-                if type(ent) == Enemy:
-                    print(ent.get_name(), ent.get_coors())
 
         while True:
             # Tile Message:
@@ -475,15 +464,15 @@ class Display:
 
                 for ent in entity_list:
                     coors = ent.get_coors()
-                    if type(ent) == Inanimate:
-                        self.SCREEN.blit(icon_inanim,
-                                         pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
-                    if type(ent) == Player:
-                        self.SCREEN.blit(icon_player,
-                                         pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
-                    if type(ent) == Enemy:
-                        self.SCREEN.blit(icon_enemy,
-                                         pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
+                    # if type(ent) == Inanimate:
+                    self.SCREEN.blit(load_image(ent.get_icon(), TILE_SIZE, TILE_SIZE),
+                                     pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
+                    # if type(ent) == Player:
+                    #     self.SCREEN.blit(icon_player,
+                    #                      pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
+                    # if type(ent) == Enemy:
+                    #     self.SCREEN.blit(icon_enemy,
+                    #                      pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
 
             # Mouse Events
             # ==================================

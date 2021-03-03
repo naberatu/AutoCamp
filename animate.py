@@ -6,8 +6,8 @@ import conditions
 
 
 class Animate(Entity):
-    def __init__(self, name, race=None, role=None, level=1, stat_block=StatBlock()):
-        super().__init__(name)       # should inherit everything this way
+    def __init__(self, name, icon="./assets/item_drop.png", race=None, role=None, level=1, stat_block=StatBlock()):
+        super().__init__(name, icon)       # should inherit everything this way
         self.conditions = dict()
 
         self.stat_block = stat_block

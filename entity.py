@@ -1,15 +1,18 @@
 
 class Entity:
-    def __init__(self, name):
+    def __init__(self, name, icon="./assets/item_drop.png"):
         self.name = name                # must have a name to be created
         self.coors = [0, 0, 0]       # done separately, since this refers to on-SCREEN appearance
         self.tileSize = 1
+        self.icon = icon
 
     # Accessors
     # ==================================
     def get_name(self):
         return self.name
 
+    def get_icon(self):
+        return self.icon
     def get_tile_size(self):
         return self.tileSize
 

@@ -4,9 +4,9 @@ from statblock import StatBlock
 
 
 class Enemy(Animate):
-    def __init__(self, name, race=None, role=None, level=1, stat_block=StatBlock(), AC=0, HP=0, speed=(0,0,0),
+    def __init__(self, name, icon="./assets/item_drop.png", race=None, role=None, level=1, stat_block=StatBlock(), AC=0, HP=0, speed=(0,0,0),
                  abs=(0,0,0,0,0,0), saving_throws=dict(), skills=dict(), dmg_resist=[], dmg_immune=[], dmg_vuln=[], cond_immune=[], exp=0):
-        super().__init__(name, race, role, level, stat_block)      # should inherit everything this way
+        super().__init__(name, icon, race, role, level, stat_block)      # should inherit everything this way
         self.exp = exp
         #self.companion = None
         self.is_enemy = True

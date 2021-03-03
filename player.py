@@ -23,8 +23,8 @@ role_dict = {
 
 
 class Player(Animate):
-    def __init__(self, name, race=None, role=None, level=1, stat_block=StatBlock(), entity_id=random.randint(0, 99999)):
-        super().__init__(name, race, role, level, stat_block)      # should inherit everything this way
+    def __init__(self, name, icon="./assets/item_drop.png", race=None, role=None, level=1, stat_block=StatBlock(), entity_id=random.randint(0, 99999)):
+        super().__init__(name, icon, race, role, level, stat_block)      # should inherit everything this way
 
         self.entity_id = entity_id
         self.exp = 0                    # This should be changed depending on the player's level?

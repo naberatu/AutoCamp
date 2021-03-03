@@ -11,7 +11,7 @@ except:
     #c_items[""] = Enemy("", AC=, HP=, speed=(, , , , ), abs=(, , , , , ), saving_throws={}, skills={}, dmg_resist=[], dmg_immune=[], dmg_vuln=[], cond_immune=[], exp=)
 
     # ================================================ A ===================================================================
-    c_monsters["Aarakocra"] = Enemy("Aarakocra", AC=12, HP=13, speed=(20, 50, 0, 0, 0), abs=(10, 14, 10, 11, 12, 11), skills={"Perception": 5}, exp=50)
+    c_monsters["Aarakocra"] = Enemy("Aarakocra", icon="./assets/kenku.png", AC=12, HP=13, speed=(20, 50, 0, 0, 0), abs=(10, 14, 10, 11, 12, 11), skills={"Perception": 5}, exp=50)
     c_monsters["Aboleth"] = Enemy("Aboleth", AC=17, HP=135, speed=(10, 0, 40, 0, 0), abs=(21, 9, 15, 18, 15, 18), saving_throws={"Constitution": 6, "Intellect": 8, "Wisdom": 6}, skills={"History": 12, "Perception": 10}, exp=5900)
 
     # # Angels
@@ -29,7 +29,7 @@ except:
 
     # ================================================ B ===================================================================
     c_monsters["Banshee"] = Enemy("Banshee", AC=12, HP=58, speed=(0, 40, 0, 0, 0), abs=(0, 14, 10, 12, 11, 17), saving_throws={"Wisdom": 2, "Charisma": 4}, dmg_resist=["acid", "fire", "lightning", "thunder", "bludgeoning", "piercing", "slashing (nonmagical weapons)"], dmg_immune=["cold", "necrotic", "poison"], cond_immune=["Charmed", "Exhausted", "Frightened", "Grappled", "Paralyzed", "Petrified", "Poisoned", "Prone", "Restrained"], exp=1100)
-    c_monsters["Basilisk"] = Enemy("Basilisk", AC=15, HP=52, speed=(20, 0, 0, 0, 0), abs=(16, 8, 15, 2, 8, 7), exp=700)
+    c_monsters["Basilisk"] = Enemy("Basilisk", icon="./assets/basilisk.png", AC=15, HP=52, speed=(20, 0, 0, 0, 0), abs=(16, 8, 15, 2, 8, 7), exp=700)
     c_monsters["Behir"] = Enemy("Behir", AC=17, HP=168, speed=(50, 0, 0, 0, 40), abs=(23, 16, 18, 7, 14, 12), skills={"Perception": 6, "Stealth": 7}, dmg_immune=["lightning"], exp=7200)
 
     # # Beholders
@@ -38,9 +38,9 @@ except:
     c_monsters["Spectator"] = Enemy("Spectator", AC=14, HP=39, speed=(0, 30, 0, 0, 0), abs=(8, 14, 14, 13, 14, 11), skills={"Perception": 6}, cond_immune=["Prone"], exp=700)
 
     # # Blights
-    c_monsters["Needle Blight"] = Enemy("Needle Blight", AC=12, HP=11, speed=(30, 0, 0, 0, 0), abs=(12, 12, 13, 4, 8, 3), cond_immune=["Blinded", "Deafened"], exp=50)
-    c_monsters["Twig Blight"] = Enemy("Twig Blight", AC=13, HP=4, speed=(20, 0, 0, 0, 0), abs=(6, 13, 12, 4, 8, 3), skills={"Stealth": 3}, dmg_vuln=["fire"], cond_immune=["Blinded", "Deafened"], exp=25)
-    c_monsters["Vine Blight"] = Enemy("Vine Blight", AC=12, HP=26, speed=(10, 0, 0, 0, 0), abs=(15, 8, 14, 5, 10, 3), skills={"Stealth": 1}, cond_immune=["Blinded", "Deafened"], exp=100)
+    c_monsters["Needle Blight"] = Enemy("Needle Blight", icon="./assets/blight.png", AC=12, HP=11, speed=(30, 0, 0, 0, 0), abs=(12, 12, 13, 4, 8, 3), cond_immune=["Blinded", "Deafened"], exp=50)
+    c_monsters["Twig Blight"] = Enemy("Twig Blight", icon="./assets/blight.png", AC=13, HP=4, speed=(20, 0, 0, 0, 0), abs=(6, 13, 12, 4, 8, 3), skills={"Stealth": 3}, dmg_vuln=["fire"], cond_immune=["Blinded", "Deafened"], exp=25)
+    c_monsters["Vine Blight"] = Enemy("Vine Blight", icon="./assets/blight.png", AC=12, HP=26, speed=(10, 0, 0, 0, 0), abs=(15, 8, 14, 5, 10, 3), skills={"Stealth": 1}, cond_immune=["Blinded", "Deafened"], exp=100)
 
     # # Bugbears
     c_monsters["Bugbear"] = Enemy("Bugbear", AC=16, HP=27, speed=(30, 0, 0, 0, 0), abs=(15, 14, 13, 8, 11, 9), skills={"Stealth": 6, "Survival": 2}, exp=200)
