@@ -382,11 +382,21 @@ class Display:
             self.end_page()
 
     def page_map(self):
-        global RELOAD_ENC
+        global RELOAD_ENC, ASK_SAVE
         reload = True
         leave_message = "Travel"
+        map_pixels = (TILE_SIZE * MAP_MAX_X, TILE_SIZE * MAP_MAX_Y)
 
-        background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bkgd(), TILE_SIZE * MAP_MAX_X, TILE_SIZE * MAP_MAX_Y)
+        entity_index, entity_coors = None, [None, None]
+
+        TILE = list()
+        # for y_coor in range(MAP_MAX_Y):
+        #     TILE.append(list())
+        #     for x_coor in range(MAP_MAX_X):
+        #         button = pygame.Rect(x_coor * TILE_SIZE, y_coor * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+        #         TILE[y_coor].append(button)
+
+        background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bkgd(), map_pixels[0], map_pixels[1])
 
         if RELOAD_ENC:
             RELOAD_ENC = False
@@ -410,29 +420,27 @@ class Display:
                     right_lim = MAP_MAX_X - 1
                     upper_lim = 0
                     lower_lim = MAP_MAX_Y - 1
-                    ent.set_coors(x=MAP_MAX_X - 1, y=y_mid)
+                    coors = (MAP_MAX_X - 1, y_mid)
+                    z_val = ent.get_coors()[2]
+                    ent.set_coors(coors[0], coors[1], z_val)
                     while True:
-                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(ent, int(max(MAP_MAX_X, MAP_MAX_Y) * 5),
+                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(coors[0], coors[1], z_val,
+                                                                int(max(MAP_MAX_X, MAP_MAX_Y) * 5),
                                                                 randint(left_lim, right_lim),
                                                                 randint(upper_lim, lower_lim)):
                             break
 
                 if type(ent) == Player:
+                    coors = ent.get_coors()
                     while True:
                         index = randint(0, len(player_pos) - 1)
                         cell = player_pos[index]
 
-                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(ent, 30, cell[0], cell[1]):
+                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(coors[0], coors[1], coors[2], 30, cell[0], cell[1]):
                             del player_pos[index]
                             break
 
         while True:
-            # Tile Message:
-            # ==================================
-            # tile_coors = "Tile: "
-            # if x >= 0 and y >= 0:
-            #     tile_coors += "(" + str(x) + ", " + str(y) + ")"
-
             if ENCOUNTERS[ENCOUNTER_INDEX].no_enemies():
                 if leave_message == "Flee":
                     reload = True
@@ -442,53 +450,75 @@ class Display:
                     reload = True
                 leave_message = "Flee"
 
+            if ASK_SAVE:
+                save_text = "Save"
+            else:
+                save_text = "Saved!"
+
             # Map Reloading
             # ==================================
             if reload:
-                self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
-
                 reload = False
+                self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
+                self.SCREEN.blit(background, ORIGIN)
+                menu_rect = pygame.Rect(map_pixels[0], 0, WIDTH - map_pixels[0], HEIGHT)
+                TILE = list()
+                for x_coor in range(MAP_MAX_X):
+                    TILE.append(list())
+                    for y_coor in range(MAP_MAX_Y):
+                        button = pygame.Rect(x_coor * TILE_SIZE, y_coor * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                        TILE[x_coor].append(button)
+
                 # Control Buttons
                 # ==================================
-                # TextBox(parent=self.SCREEN, text=tile_coors, t_color=BLACK, left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
-
                 b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
                 b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=Q_LF - Q_WD - 10,
                                       top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
+                b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - 2*(Q_WD + 10),
+                                      top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
 
-                self.SCREEN.blit(background, ORIGIN)
+                turn_title = "Fjord's Turn"
+                tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=30, t_color=BLACK, t_font="hylia",
+                                  left=menu_rect.center[0], top=menu_rect.center[1])
 
                 # Blit out Entities:
                 # ==================================
                 entity_list = ENCOUNTERS[ENCOUNTER_INDEX].get_inanim() + ENCOUNTERS[ENCOUNTER_INDEX].get_anim()
 
                 for ent in entity_list:
-                    coors = ent.get_coors()
-                    # if type(ent) == Inanimate:
-                    self.SCREEN.blit(load_image(ent.get_icon(), TILE_SIZE, TILE_SIZE),
-                                     pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
-                    # if type(ent) == Player:
-                    #     self.SCREEN.blit(icon_player,
-                    #                      pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
-                    # if type(ent) == Enemy:
-                    #     self.SCREEN.blit(icon_enemy,
-                    #                      pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
+                    coors = [ent.get_coors()[0], ent.get_coors()[1]]
+                    tile_rect = pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE)
+                    if coors == entity_coors:
+                        self.SCREEN.blit(load_image("./assets/button.png", TILE_SIZE, TILE_SIZE), tile_rect)
+                    self.SCREEN.blit(load_image(ent.get_icon(), TILE_SIZE, TILE_SIZE), tile_rect)
 
             # Mouse Events
             # ==================================
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
+                self.CLICK = False
                 if b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return
                     reload = True
-                elif mouse[0] <= MAP_MAX_Y * TILE_SIZE:
+                elif b_save.rect.collidepoint(mouse):
                     reload = True
-                    x = int(mouse[0] / TILE_SIZE)
-                    y = int(mouse[1] / TILE_SIZE)
+                    save()
                 elif b_travel.rect.collidepoint(mouse):
                     self.travel_prompt()
                     return
+                else:
+                    flag = False
+                    for x_coor in range(MAP_MAX_X):
+                        if flag:
+                            break
+                        for y_coor in range(MAP_MAX_Y):
+                            if TILE[x_coor][y_coor].collidepoint(mouse):
+                                entity_index = ENCOUNTERS[ENCOUNTER_INDEX].entity_at(x_coor, y_coor)
+                                entity_coors = [x_coor, y_coor]
+                                reload = True
+                                flag = True
+                                break
 
             self.end_page()
 
@@ -542,18 +572,19 @@ class Display:
                 if b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return False
-                if b_save.rect.collidepoint(mouse):
+                elif b_save.rect.collidepoint(mouse):
                     save()
-                if b_travel.rect.collidepoint(mouse):
+                elif b_travel.rect.collidepoint(mouse):
                     self.TO_TRAVEL = True
                     return
-                if b_roll.rect.collidepoint(mouse):
+                elif b_roll.rect.collidepoint(mouse):
                     self.dice_prompt()
-                if b_inv.rect.collidepoint(mouse):
+                elif b_inv.rect.collidepoint(mouse):
                     self.inv_prompt(current_player, cwid, player_index)
-                for index, button in enumerate(exp_buttons):
-                    if button.rect.collidepoint(mouse):
-                        player_index = index
+                else:
+                    for index, button in enumerate(exp_buttons):
+                        if button.rect.collidepoint(mouse):
+                            player_index = index
 
             self.end_page()
 

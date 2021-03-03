@@ -1,5 +1,7 @@
 import math
 from queue import PriorityQueue
+from inanimate import Inanimate
+from animate import Animate
 
 
 class Map:
@@ -8,31 +10,26 @@ class Map:
     def __init__(self, initWidth, initHeight, anim=None, inanim=None):
         self.width = initWidth
         self.height = initHeight
+
         if anim is None:
-            self.animateList = list()
-        else:
-            self.animateList = anim
+            anim = list()
         if inanim is None:
-            self.inanimateList = list()
-        else:
-            self.inanimateList = inanim
+            inanim = list()
+
+        self.entities = anim + inanim
 
         for i in range(0, initHeight):
             for j in range(0, initWidth):
                 newTile = self.MapTile(init_coors=(i, j))
                 self.tileList.append(newTile)
 
-    def object_found(self, testX, testY, testZ=0, animate=True):
-        if animate:
-            for object in self.animateList:
-                if object.get_coors() == [testX, testY, testZ]:
-                    return True
-        else:
-            for object in self.inanimateList:
-                if object.get_coors() == [testX, testY, testZ] and object.get_is_prop():
-                    return True
+    def object_found(self, testX, testY, testZ=0):
+        for ent in self.entities:
+            if ent.get_coors() == [testX, testY, testZ]:
+                if type(ent) != Inanimate or ent.get_is_prop():
+                    return [True, ent]
 
-        return False
+        return [False, 0]
 
     def get_tile_list(self):
         return self.tileList
@@ -40,29 +37,24 @@ class Map:
     def load_map(self, tiles):
         self.tileList = tiles
 
-    def printMap(self):
-        row = ""
-        for i in range(0, self.height):
-            for j in range(0, self.width):
-                row += '|'
-                if self.object_found(testX=j, testY=i):
-                    for object in self.animateList:
-                        if object.get_coors() == [j, i, 0]:
-                            row += object.get_name()[0]
-                elif self.object_found(testX=j, testY=i, animate=False):
-                    for object in self.inanimateList:
-                        if object.get_coors() == [j, i, 0]:
-                            row += object.get_name()[0]
-                else:
-                    row += ' '
-            row += '|'
-            print(row)
-            row = ""
+    # def printMap(self):
+    #     row = ""
+    #     for i in range(0, self.height):
+    #         for j in range(0, self.width):
+    #             row += '|'
+    #             result = self.object_found(testX=j, testY=i)
+    #             if result[0]:
+    #                 row += result[1].get_name()[0]
+    #             else:
+    #                 row += ' '
+    #         row += '|'
+    #         print(row)
+    #         row = ""
 
     def dijkstras(self, source):
         adjacencyMatrix = {}
-        for i in range (0, self.height):
-            for j in range (0, self.width):
+        for i in range(0, self.height):
+            for j in range(0, self.width):
                 adjacencyMatrix[(j, i)] = list()
         for i in adjacencyMatrix:
             adjacencyMatrix[i].append((i[0] - 1, i[1] - 1))
@@ -103,21 +95,21 @@ class Map:
                 if adjacencyMatrix[i].count((i[0] + 1, i[1] + 1)) != 0:
                     adjacencyMatrix[i].remove((i[0] + 1, i[1] + 1))
 
-            if self.object_found(i[0] - 1, i[1] - 1) or self.object_found(i[0] - 1, i[1] - 1, animate=False):
+            if self.object_found(i[0] - 1, i[1] - 1)[0] or self.object_found(i[0] - 1, i[1] - 1)[0]:
                 adjacencyMatrix[i].remove((i[0] - 1, i[1] - 1))
-            if self.object_found(i[0] + 1, i[1] + 1) or self.object_found(i[0] + 1, i[1] + 1, animate=False):
+            if self.object_found(i[0] + 1, i[1] + 1)[0] or self.object_found(i[0] + 1, i[1] + 1)[0]:
                 adjacencyMatrix[i].remove((i[0] + 1, i[1] + 1))
-            if self.object_found(i[0] - 1, i[1] + 1) or self.object_found(i[0] - 1, i[1] + 1, animate=False):
+            if self.object_found(i[0] - 1, i[1] + 1)[0] or self.object_found(i[0] - 1, i[1] + 1)[0]:
                 adjacencyMatrix[i].remove((i[0] - 1, i[1] + 1))
-            if self.object_found(i[0] + 1, i[1] - 1) or self.object_found(i[0] + 1, i[1] - 1, animate=False):
+            if self.object_found(i[0] + 1, i[1] - 1)[0] or self.object_found(i[0] + 1, i[1] - 1)[0]:
                 adjacencyMatrix[i].remove((i[0] + 1, i[1] - 1))
-            if self.object_found(i[0] - 1, i[1]) or self.object_found(i[0] - 1, i[1], animate=False):
+            if self.object_found(i[0] - 1, i[1])[0] or self.object_found(i[0] - 1, i[1])[0]:
                 adjacencyMatrix[i].remove((i[0] - 1, i[1]))
-            if self.object_found(i[0], i[1] - 1) or self.object_found(i[0], i[1] - 1, animate=False):
+            if self.object_found(i[0], i[1] - 1)[0] or self.object_found(i[0], i[1] - 1)[0]:
                 adjacencyMatrix[i].remove((i[0], i[1] - 1))
-            if self.object_found(i[0] + 1, i[1]) or self.object_found(i[0] + 1, i[1], animate=False):
+            if self.object_found(i[0] + 1, i[1])[0] or self.object_found(i[0] + 1, i[1])[0]:
                 adjacencyMatrix[i].remove((i[0] + 1, i[1]))
-            if self.object_found(i[0], i[1] + 1) or self.object_found(i[0], i[1] + 1, animate=False):
+            if self.object_found(i[0], i[1] + 1)[0] or self.object_found(i[0], i[1] + 1)[0]:
                 adjacencyMatrix[i].remove((i[0], i[1] + 1))
 
         parent = {}
@@ -140,38 +132,38 @@ class Map:
                     parent[v] = u
                     pq.put((distances[v], v))
 
-
-
         return (distances, parent)
 
-    def findPath(self, parentList, target):
-        path = list()
-        path.append(target)
-        parent = parentList[target]
-        while parent[0] != -1:
-            path.append(parent)
-            parent = parentList[parent]
-        path.reverse()
-        return path
+    # def findPath(self, parentList, target):
+    #     path = list()
+    #     path.append(target)
+    #     parent = parentList[target]
+    #     while parent[0] != -1:
+    #         path.append(parent)
+    #         parent = parentList[parent]
+    #     path.reverse()
+    #     return path
 
     class MapTile:
         def __init__(self, init_coors=(0, 0)):
             self.coordinates = init_coors
 
+
 # ====================================
 # Run
 # ====================================
-# testMap = Map(15, 15)
-# testMap.animateList.append(animate.Animate("Harold"))
-# testMap.animateList[0].set_coors(x=0, y=0)
-# coors = testMap.animateList[0].get_coors()
-#
-# testMap.inanimateList.append(inanimate.Inanimate("Boulder", item_code=0))
-# testMap.inanimateList[0].set_coors(x=1, y=1)
-#
+# coors = (3, 0)
 # destination = (5, 1)
 #
+# anims = [Animate("Harold")]
+# anims[0].set_coors(x=coors[0], y=coors[1])
+#
+# inanims = [Inanimate("Boulder", item_code=0)]
+# inanims[0].set_coors(x=1, y=1)
+#
+# testMap = Map(15, 15, anim=anims, inanim=inanims)
+#
 # testMap.printMap()
-# paths = testMap.dijkstras((coors[0], coors[1]))
+# paths = testMap.dijkstras(coors)
 # print(testMap.findPath((paths[1]), destination))
 # print(paths[0][destination])

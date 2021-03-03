@@ -144,7 +144,7 @@ def cond_ok(CAN_ACT=False, SPEED_REM=False, ACTOR=False, try_move=False, try_act
                 print(ACTOR.get_name(), "has died!!")
                 ACTOR.set_death_evasions(0)
                 ACTOR.set_death_strikes(0)
-                ENC.animateList.remove(ACTOR)
+                ENC.animate_list.remove(ACTOR)
                 print("Your turn has ended.")
                 ENC.enc_print_map()
                 ENC.next_turn()

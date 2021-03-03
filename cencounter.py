@@ -3,21 +3,24 @@ from enemy import Enemy
 from player import Player
 from inanimate import Inanimate
 from map import Map
-# from random import randint
-# from math import floor
 
 
 class CEncounter(Encounter):
     def __init__(self, name, is_shop=False, is_combat=True, anim=None, inanim=None, bkgd="./assets/rivermouth.jpg",
                  max_inventory="slot", max_x=15, max_y=15):
         super().__init__(name, is_shop, is_combat, anim)
+
+        if anim is None:
+            anim = list()
+        if inanim is None:
+            inanim = list()
+
+        self.inanimate_list = inanim
+        self.animate_list = anim
         self.is_combat = is_combat
-        if inanim:
-            self.inanimateList = inanim
-        else:
-            self.inanimateList = list()
+
         self.background = bkgd
-        self.map = Map(max_x, max_y, self.animateList, self.inanimateList)
+        self.map = Map(max_x, max_y, self.animate_list, self.inanimate_list)
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
         self.turnCounter = 0
         self.live = False
@@ -26,7 +29,7 @@ class CEncounter(Encounter):
         self.death_saves = 0
 
     def no_enemies(self):
-        for ent in self.animateList:
+        for ent in self.animate_list:
             if type(ent) == Enemy:
                 return False
         return True
@@ -35,7 +38,7 @@ class CEncounter(Encounter):
         return self.background
 
     def get_inanim(self):
-        return self.inanimateList
+        return self.inanimate_list
 
     def get_tiles(self):
         return self.map.get_tile_list()
@@ -45,30 +48,30 @@ class CEncounter(Encounter):
 
     def get_entity(self, is_animate, index):
         if is_animate:
-            return self.animateList[index]
+            return self.animate_list[index]
         else:
-            return self.inanimateList[index]
+            return self.inanimate_list[index]
 
     def get_actor(self):
         return self.currentEntity
 
     def get_al_size(self):
-        return len(self.animateList)
+        return len(self.animate_list)
 
     def add_entity(self, ent):
         if isinstance(ent, Inanimate):
-            self.inanimateList.append(ent)
+            self.inanimate_list.append(ent)
         else:
-            self.animateList.append(ent)
+            self.animate_list.append(ent)
             if self.live:
-                self.turnCounter = self.turnCounter % (len(self.animateList) - 1)
+                self.turnCounter = self.turnCounter % (len(self.animate_list) - 1)
                 self.determineInitiative()
 
     def start_encounter(self):
         self.determineInitiative()
-        self.currentEntity = self.animateList[0]
+        self.currentEntity = self.animate_list[0]
         self.live = True
-        self.map = Map(self.map_max_x, self.map_max_y, self.animateList, self.inanimateList)
+        self.map = Map(self.map_max_x, self.map_max_y, self.animate_list, self.inanimate_list)
 
     def enemyInRange(self):
         location = self.currentEntity.get_coors()
@@ -94,14 +97,14 @@ class CEncounter(Encounter):
             nearbyCoors.append([x - 1, y - 1, z])
 
         if not self.currentEntity.get_iff():  # if attacker is a player
-            for ent in self.animateList:
+            for ent in self.animate_list:
                 if ent.get_iff():
                     otherCoors = ent.get_coors()
                     if otherCoors in nearbyCoors:
                         inRange.append(ent)
 
         else:  # if attacker is an enemy
-            for ent in self.animateList:
+            for ent in self.animate_list:
                 if not ent.get_iff():
                     otherCoors = ent.get_coors()
                     if otherCoors in nearbyCoors:
@@ -112,23 +115,39 @@ class CEncounter(Encounter):
     # ===============================================================================
     # Map, Movement, and Hint Methods
     # ===============================================================================
-    def enc_move(self, actor, speed_remaining, new_x_coord, new_y_coord, new_z_coord=1):
-        source = (actor.get_coors()[0], actor.get_coors()[1])
-        destination = (new_x_coord, new_y_coord)
+    def entity_at(self, x_coor, y_coor):
+        entity_list = self.animate_list + self.inanimate_list
+        for index, ent in enumerate(entity_list):
+            coors = (ent.get_coors()[0], ent.get_coors()[1])
+            if coors == (x_coor, y_coor):
+                return index
+        return None
 
-        if new_x_coord > self.map_max_x or new_y_coord > self.map_max_y:
-            return [0, "[ER] Out of bounds!"]
+    def enc_move(self, x_src, y_src, z_src, speed, x_dest, y_dest, z_dest=0):
+        source = (x_src, y_src)
+        destination = (x_dest, y_dest)
 
-        obstacles = self.animateList + self.inanimateList
+        if x_dest > self.map_max_x or y_dest > self.map_max_y:
+            return False
+
+        actor = None
+        for ent in self.animate_list:
+            if ent.get_coors() == [x_src, y_src, z_src]:
+                actor = ent
+                break
+
+        obstacles = self.animate_list + self.inanimate_list
+        obstacles.remove(actor)
+
         for ent in obstacles:
-            if ent.get_coors() == [new_x_coord, new_y_coord, new_z_coord] and ent != actor:
+            if ent.get_coors() == [x_dest, y_dest, z_dest]:
                 return False   # In the case of failure
 
         paths = self.map.dijkstras(source)
         distance = paths[0][destination]
 
-        if distance <= speed_remaining:
-            actor.set_coors(x=new_x_coord, y=new_y_coord, z=new_z_coord)
+        if distance <= speed:
+            actor.set_coors(x=x_dest, y=y_dest, z=z_dest)
             return True
 
         return False
@@ -142,14 +161,14 @@ class CEncounter(Encounter):
             response = "No hints for DM controlled entities."
             return response
         elif type(actor) == Player:
-            for i in range(0, len(self.animateList)):
-                if (type(self.animateList[i]) == Enemy) and self.distance_between(actor, self.animateList[i]) <= 5:
-                    enemies_in_attack_range.append(self.animateList[i])
-                if (type(self.animateList[i]) == Enemy) and self.distance_between(actor,
-                                                                                  self.animateList[
+            for i in range(0, len(self.animate_list)):
+                if (type(self.animate_list[i]) == Enemy) and self.distance_between(actor, self.animate_list[i]) <= 5:
+                    enemies_in_attack_range.append(self.animate_list[i])
+                if (type(self.animate_list[i]) == Enemy) and self.distance_between(actor,
+                                                                                   self.animate_list[
                                                                                       i]) <= actor.get_stat(
                     "Speed"):
-                    enemies_in_range.append(self.animateList[i])
+                    enemies_in_range.append(self.animate_list[i])
             if len(enemies_in_attack_range) != 0:
                 min_health_remaining = float('inf')
                 min_health_remaining_index = -1
@@ -201,15 +220,15 @@ class CEncounter(Encounter):
         return roll
 
     def determineSurprise(self):
-        for ent in self.animateList:
+        for ent in self.animate_list:
             if ent.is_stealthy:
                 stealth = self.performCheck("Stealth", ent)
-                for ent2 in self.animateList:
+                for ent2 in self.animate_list:
                     if type(ent) != type(ent2) and stealth > self.passiveCheck("Perception", ent2, False, False, False):
                         ent2.is_surprised = True
 
     def resetSurprise(self):
-        for ent in self.animateList:
+        for ent in self.animate_list:
             if ent.is_surprised:
                 ent.set_surprise(False)
 
@@ -220,16 +239,16 @@ class CEncounter(Encounter):
     def determineInitiative(self):
         order = []
         index = 0
-        for ent in self.animateList:
+        for ent in self.animate_list:
             order.append((index, self.performCheck("Dexterity", None, ent, print_results=False)))
             index += 1
         order = sorted(order, key=lambda x: - x[1])
 
-        self.animateList[:] = [self.animateList[i[0]] for i in order]
+        self.animate_list[:] = [self.animate_list[i[0]] for i in order]
 
     def next_turn(self):
         self.turnCounter += 1
-        self.currentEntity = self.animateList[self.turnCounter % len(self.animateList)]
+        self.currentEntity = self.animate_list[self.turnCounter % len(self.animate_list)]
 
     def dealDMG(self, damage, target):
         targetHealth = target.get_stat("Current HP")
@@ -242,7 +261,7 @@ class CEncounter(Encounter):
             target.set_stats("Current HP", 0)
             print(target.get_name(), "has died!!")
             self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
-            self.animateList.remove(target)
+            self.animate_list.remove(target)
 
         elif targetHealth >= 0:  # HP is +/0, player -> DMG
             target.set_stats("Current HP", targetHealth)
@@ -253,7 +272,7 @@ class CEncounter(Encounter):
             target.set_stats("Current HP", 0)
             print(target.get_name(), "has died!!")
             self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
-            self.animateList.remove(target)
+            self.animate_list.remove(target)
             self.enc_update_map()
 
         elif (targetHealth * -1) <= target.get_stat("Max HP"):  # HP is negative, doesn't exceed max HP -> UNCONSCIOUS

@@ -62,7 +62,7 @@ for p in players:
     p.money_add(5, 7, 300)
 
 for e in encounters:
-    e.animateList = copy.deepcopy(players)
+    e.animate_list = copy.deepcopy(players)
 
 # ===============================================================================
 # CE Setup

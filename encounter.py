@@ -10,10 +10,11 @@ import items
 class Encounter:
     def __init__(self, name, is_shop=False, is_combat=False, anim=None, bkgd="./assets/tavern.jpg", vendor=None):
         self.name = name
-        if anim:
-            self.animateList = anim
-        else:
-            self.animateList = list()
+
+        if anim is None:
+            anim = list()
+
+        self.animate_list = anim
 
         self.bkgd = bkgd
         self.currentEntity = None
@@ -56,26 +57,26 @@ class Encounter:
         return self.bkgd
 
     def load_players(self, player_list):
-        for ent in self.animateList:
+        for ent in self.animate_list:
             if type(ent) == Player:
                 return
 
         for pl in player_list:
-            self.animateList.append(pl)
+            self.animate_list.append(pl)
 
     def save_players(self):
         returning = list()
         non_player = list()
-        for ent in self.animateList:
+        for ent in self.animate_list:
             if type(ent) == Player:
                 returning.append(ent)
             else:
                 non_player.append(ent)
-        self.animateList = non_player
+        self.animate_list = non_player
         return returning
 
     def get_anim(self):
-        return self.animateList
+        return self.animate_list
 
     # ===============================================================================
     # Misc Helper Methods
@@ -90,20 +91,20 @@ class Encounter:
         chosenPC = 0
 
         while choosing:
-            for pchar in self.animateList:
+            for pchar in self.animate_list:
                 if giving and pchar == giver:
                     pass
                 else:
-                    print("> {:<3}: {}".format(self.animateList.index(pchar) + 1, pchar.get_name()))
+                    print("> {:<3}: {}".format(self.animate_list.index(pchar) + 1, pchar.get_name()))
             chosenPC = input("> ")
             if chosenPC == "cancel":
                 return "cancel"
             else:
                 try:
                     chosenPC = int(chosenPC) - 1
-                    if giving and giver == self.animateList[chosenPC]:
+                    if giving and giver == self.animate_list[chosenPC]:
                         print("[ER] You can't give an item to yourself! Please pick another party member!")
-                    elif 0 <= chosenPC < len(self.animateList):
+                    elif 0 <= chosenPC < len(self.animate_list):
                         choosing = False
                 except ValueError:
                     print(
@@ -112,9 +113,9 @@ class Encounter:
                     print("[ER] invalid input! Please select a valid party member or enter 'cancel' to return")
         if giving:
             self.currentEntity = giver
-            return self.animateList[chosenPC]
+            return self.animate_list[chosenPC]
         else:
-            self.currentEntity = self.animateList[chosenPC]
+            self.currentEntity = self.animate_list[chosenPC]
             return "success"
 
     @staticmethod
@@ -611,51 +612,51 @@ class Encounter:
                 exit()
 
 
-if __name__ == "__main__":
-
-    nce1 = Encounter("Town")
-    nce2 = Encounter("Mountains")
-    nce3 = Encounter("Forest")
-    nce4 = Encounter("Caves")
-    nce5 = Encounter("Temmie's", is_shop=True)
-
-    encounters = [nce1, nce2, nce3, nce4, nce5]
-
-    sBlocks = [StatBlock(), StatBlock(), StatBlock(), StatBlock(), StatBlock()]
-
-    players = [
-        Player("Fjord", "Orc", "Warlock", stat_block=sBlocks[0]),
-        Player("Jester Lavorre", "Tiefling", "Cleric", stat_block=sBlocks[1]),
-        Player("Caleb Widowgast", "Human", "Wizard", stat_block=sBlocks[2]),
-        Player("Yasha Nyoodrin", "Aasimar", "Barbarian", stat_block=sBlocks[3]),
-        Player("Veth Brenatto", "Goblin", "Rogue", stat_block=sBlocks[4])]
-
-    for p in players:
-        p.inv_add("Shortsword")
-        p.inv_add("Dagger")
-        p.inv_add("Chain Mail")
-        p.inv_add("Padded Armor")
-        p.inv_add("Mana Potion", randint(1, 6))
-        p.inv_equip("Chain Mail")
-        p.level_up()
-        p.level_up()
-        p.level_up()
-        p.set_stats("Current HP", 1)
-        p.set_stats("Constitution", randint(1, 17))
-        p.money_add(5, 7, 300)
-
-    for enc in encounters:
-        enc.animateList = players
-
-    # (self, name, race=None, role=None, level=1, stat_block=StatBlock())
-    merchant = Animate("Tem", "Temmie", "Vendor")
-
-    merchant.inventory["Spear"] = 3
-    merchant.inventory["Padded Armor"] = 3
-    merchant.inventory["Mana Potion"] = 10
-    merchant.inventory["Scale Mail"] = 2
-
-    nce5.vendor = merchant
-
-    # nce1.genLoop()
-    nce5.vendLoop()
+# if __name__ == "__main__":
+#
+#     nce1 = Encounter("Town")
+#     nce2 = Encounter("Mountains")
+#     nce3 = Encounter("Forest")
+#     nce4 = Encounter("Caves")
+#     nce5 = Encounter("Temmie's", is_shop=True)
+#
+#     encounters = [nce1, nce2, nce3, nce4, nce5]
+#
+#     sBlocks = [StatBlock(), StatBlock(), StatBlock(), StatBlock(), StatBlock()]
+#
+#     players = [
+#         Player("Fjord", "Orc", "Warlock", stat_block=sBlocks[0]),
+#         Player("Jester Lavorre", "Tiefling", "Cleric", stat_block=sBlocks[1]),
+#         Player("Caleb Widowgast", "Human", "Wizard", stat_block=sBlocks[2]),
+#         Player("Yasha Nyoodrin", "Aasimar", "Barbarian", stat_block=sBlocks[3]),
+#         Player("Veth Brenatto", "Goblin", "Rogue", stat_block=sBlocks[4])]
+#
+#     for p in players:
+#         p.inv_add("Shortsword")
+#         p.inv_add("Dagger")
+#         p.inv_add("Chain Mail")
+#         p.inv_add("Padded Armor")
+#         p.inv_add("Mana Potion", randint(1, 6))
+#         p.inv_equip("Chain Mail")
+#         p.level_up()
+#         p.level_up()
+#         p.level_up()
+#         p.set_stats("Current HP", 1)
+#         p.set_stats("Constitution", randint(1, 17))
+#         p.money_add(5, 7, 300)
+#
+#     for enc in encounters:
+#         enc.animate_list = players
+#
+#     # (self, name, race=None, role=None, level=1, stat_block=StatBlock())
+#     merchant = Animate("Tem", "Temmie", "Vendor")
+#
+#     merchant.inventory["Spear"] = 3
+#     merchant.inventory["Padded Armor"] = 3
+#     merchant.inventory["Mana Potion"] = 10
+#     merchant.inventory["Scale Mail"] = 2
+#
+#     nce5.vendor = merchant
+#
+#     # nce1.genLoop()
+#     nce5.vendLoop()
