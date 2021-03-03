@@ -46,6 +46,9 @@ class CEncounter(Encounter):
     def get_background(self):
         return self.background
 
+    def get_turn(self):
+        return self.turnCounter
+
     def get_entity(self, is_animate, index):
         if is_animate:
             return self.animate_list[index]
@@ -121,6 +124,12 @@ class CEncounter(Encounter):
             coors = (ent.get_coors()[0], ent.get_coors()[1])
             if coors == (x_coor, y_coor):
                 return index
+        return None
+
+    def get_entity(self, index):
+        entity_list = self.animate_list + self.inanimate_list
+        if 0 <= index < len(entity_list):
+            return entity_list[index]
         return None
 
     def enc_move(self, x_src, y_src, z_src, speed, x_dest, y_dest, z_dest=0):

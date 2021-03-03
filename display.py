@@ -387,14 +387,11 @@ class Display:
         leave_message = "Travel"
         map_pixels = (TILE_SIZE * MAP_MAX_X, TILE_SIZE * MAP_MAX_Y)
 
-        entity_index, entity_coors = None, [None, None]
+        entity_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
+        ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+        entity_coors = (ENTITY.get_coors()[0], ENTITY.get_coors()[1])
 
         TILE = list()
-        # for y_coor in range(MAP_MAX_Y):
-        #     TILE.append(list())
-        #     for x_coor in range(MAP_MAX_X):
-        #         button = pygame.Rect(x_coor * TILE_SIZE, y_coor * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-        #         TILE[y_coor].append(button)
 
         background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bkgd(), map_pixels[0], map_pixels[1])
 
@@ -469,6 +466,8 @@ class Display:
                         button = pygame.Rect(x_coor * TILE_SIZE, y_coor * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                         TILE[x_coor].append(button)
 
+                ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+
                 # Control Buttons
                 # ==================================
                 b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
@@ -477,7 +476,7 @@ class Display:
                 b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - 2*(Q_WD + 10),
                                       top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
 
-                turn_title = "Fjord's Turn"
+                turn_title = ENTITY.get_name()
                 tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=30, t_color=BLACK, t_font="hylia",
                                   left=menu_rect.center[0], top=menu_rect.center[1])
 
