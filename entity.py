@@ -2,7 +2,7 @@
 class Entity:
     def __init__(self, name):
         self.name = name                # must have a name to be created
-        self.coors = [1, 1, 1]       # done separately, since this refers to on-SCREEN appearance
+        self.coors = [0, 0, 0]       # done separately, since this refers to on-SCREEN appearance
         self.tileSize = 1
 
     # Accessors
@@ -24,7 +24,7 @@ class Entity:
     def set_tile_size(self, value):
         self.tileSize = value
 
-    def set_coors(self, x=1, y=1, z=1):
+    def set_coors(self, x=0, y=0, z=0):
         self.coors[0] = x
         self.coors[1] = y
         self.coors[2] = z

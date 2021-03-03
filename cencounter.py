@@ -2,26 +2,27 @@ from encounter import Encounter
 from enemy import Enemy
 from player import Player
 from inanimate import Inanimate
+from map import Map
 # from random import randint
 # from math import floor
 
 
 class CEncounter(Encounter):
-    def __init__(self, name, is_shop=False, is_combat=True, anim=None, inanim=None, tile="./assets/grasstile.png",
-                 max_inventory="slot"):
+    def __init__(self, name, is_shop=False, is_combat=True, anim=None, inanim=None, bkgd="./assets/rivermouth.jpg",
+                 max_inventory="slot", max_x=15, max_y=15):
         super().__init__(name, is_shop, is_combat, anim)
         self.is_combat = is_combat
         if inanim:
             self.inanimateList = inanim
         else:
             self.inanimateList = list()
-        self.tile = tile
-        self.mapList = list()
+        self.background = bkgd
+        self.map = Map(max_x, max_y, self.animateList, self.inanimateList)
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
         self.turnCounter = 0
         self.live = False
-        self.map_max_x = 0
-        self.map_max_y = 0
+        self.map_max_x = max_x
+        self.map_max_y = max_y
         self.death_saves = 0
 
     def no_enemies(self):
@@ -30,8 +31,17 @@ class CEncounter(Encounter):
                 return False
         return True
 
-    def get_tile_img(self):
-        return self.tile
+    def get_bkgd(self):
+        return self.background
+
+    def get_inanim(self):
+        return self.inanimateList
+
+    def get_tiles(self):
+        return self.map.get_tile_list()
+
+    def get_background(self):
+        return self.background
 
     def get_entity(self, is_animate, index):
         if is_animate:
@@ -58,6 +68,7 @@ class CEncounter(Encounter):
         self.determineInitiative()
         self.currentEntity = self.animateList[0]
         self.live = True
+        self.map = Map(self.map_max_x, self.map_max_y, self.animateList, self.inanimateList)
 
     def enemyInRange(self):
         location = self.currentEntity.get_coors()
@@ -102,57 +113,25 @@ class CEncounter(Encounter):
     # Map, Movement, and Hint Methods
     # ===============================================================================
     def enc_move(self, actor, speed_remaining, new_x_coord, new_y_coord, new_z_coord=1):
-        x_coord = actor.get_coors()[0]
-        y_coord = actor.get_coors()[1]
-        testing = [new_x_coord, new_y_coord, new_z_coord]
+        source = (actor.get_coors()[0], actor.get_coors()[1])
+        destination = (new_x_coord, new_y_coord)
 
         if new_x_coord > self.map_max_x or new_y_coord > self.map_max_y:
             return [0, "[ER] Out of bounds!"]
 
-        for ent in self.animateList:
-            if ent.get_coors() == testing and ent != actor:
-                return [0, "[ER] That space is occupied!"]
+        obstacles = self.animateList + self.inanimateList
+        for ent in obstacles:
+            if ent.get_coors() == [new_x_coord, new_y_coord, new_z_coord] and ent != actor:
+                return False   # In the case of failure
 
-        requested_distance = 0
-        # vertical
-        if actor.get_coors()[0] == new_x_coord:
-            requested_distance = abs(actor.get_coors()[1] - new_y_coord) * 5
-        # horizontal
-        elif actor.get_coors()[1] == new_y_coord:
-            requested_distance = abs(actor.get_coors()[0] - new_x_coord) * 5
-        else:
-            requested_distance = (abs(actor.get_coors()[0] - new_x_coord) * 5) + (
-                    abs(actor.get_coors()[1] - new_y_coord) * 5)
-        if requested_distance > speed_remaining:
-            return [0, "[ER] You're not fast enough! (Speed {})".format(actor.get_stat("Speed"))]
+        paths = self.map.dijkstras(source)
+        distance = paths[0][destination]
 
-        self.mapList[y_coord - 1][(x_coord + ((1 * x_coord) - 1))] = ' '
-        actor.set_coors(new_x_coord, new_y_coord, new_z_coord)
-        return [requested_distance, False]
+        if distance <= speed_remaining:
+            actor.set_coors(x=new_x_coord, y=new_y_coord, z=new_z_coord)
+            return True
 
-    # def enc_fill_map(self, width=15, height=10):
-    #     self.map_max_x = width
-    #     self.map_max_y = height
-    #     for i in range(0, height):
-    #         newRow = list()
-    #         newRow.append('|')
-    #         for i in range(0, width):
-    #             newRow.append(' ')
-    #             newRow.append('|')
-    #         self.mapList.append(newRow)
-
-    def enc_update_map(self):
-        for i in range(0, len(self.animateList)):
-            xCoord = self.animateList[i].get_coors()[0]
-            yCoord = self.animateList[i].get_coors()[1]
-            self.mapList[yCoord - 1][(xCoord + ((1 * xCoord) - 1))] = self.animateList[i].get_name()[0]
-
-    def enc_print_map(self):
-        print()
-        for i in range(0, len(self.mapList)):
-            for j in range(0, len(self.mapList[i])):
-                print(self.mapList[i][j], end='')
-            print("")
+        return False
 
     def get_hint(self):
         response = ""
@@ -242,7 +221,7 @@ class CEncounter(Encounter):
         order = []
         index = 0
         for ent in self.animateList:
-            order.append((index, self.performCheck("Dexterity", None, ent,print_results=False)))
+            order.append((index, self.performCheck("Dexterity", None, ent, print_results=False)))
             index += 1
         order = sorted(order, key=lambda x: - x[1])
 

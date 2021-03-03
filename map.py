@@ -20,19 +20,21 @@ class Map:
         for i in range(0, initHeight):
             for j in range(0, initWidth):
                 newTile = self.MapTile(init_coors=(i, j))
-                self.tileList.append(newTile);
+                self.tileList.append(newTile)
 
-    def object_found(self, testX, testY, animate=True):
+    def object_found(self, testX, testY, testZ=0, animate=True):
         if animate:
-            for i in self.animateList:
-                if self.animateList.get((testX, testY)) != None:
+            for object in self.animateList:
+                if object.get_coors() == [testX, testY, testZ]:
                     return True
         else:
-            for i in self.inanimateList:
-                if self.inanimateList.get((testX, testY)) != None:
+            for object in self.inanimateList:
+                if object.get_coors() == [testX, testY, testZ] and object.get_is_prop():
                     return True
 
-    def get_map(self):
+        return False
+
+    def get_tile_list(self):
         return self.tileList
 
     def load_map(self, tiles):
@@ -43,12 +45,14 @@ class Map:
         for i in range(0, self.height):
             for j in range(0, self.width):
                 row += '|'
-                animateLocation = self.object_found(j, i)
-                inanimateLocation = self.object_found(j, i, animate=False)
-                if animateLocation != None:
-                    row += self.animateList[j, i]
-                elif (inanimateLocation != None) :
-                    row += self.inanimateList[j, i]
+                if self.object_found(testX=j, testY=i):
+                    for object in self.animateList:
+                        if object.get_coors() == [j, i, 0]:
+                            row += object.get_name()[0]
+                elif self.object_found(testX=j, testY=i, animate=False):
+                    for object in self.inanimateList:
+                        if object.get_coors() == [j, i, 0]:
+                            row += object.get_name()[0]
                 else:
                     row += ' '
             row += '|'
@@ -99,6 +103,23 @@ class Map:
                 if adjacencyMatrix[i].count((i[0] + 1, i[1] + 1)) != 0:
                     adjacencyMatrix[i].remove((i[0] + 1, i[1] + 1))
 
+            if self.object_found(i[0] - 1, i[1] - 1) or self.object_found(i[0] - 1, i[1] - 1, animate=False):
+                adjacencyMatrix[i].remove((i[0] - 1, i[1] - 1))
+            if self.object_found(i[0] + 1, i[1] + 1) or self.object_found(i[0] + 1, i[1] + 1, animate=False):
+                adjacencyMatrix[i].remove((i[0] + 1, i[1] + 1))
+            if self.object_found(i[0] - 1, i[1] + 1) or self.object_found(i[0] - 1, i[1] + 1, animate=False):
+                adjacencyMatrix[i].remove((i[0] - 1, i[1] + 1))
+            if self.object_found(i[0] + 1, i[1] - 1) or self.object_found(i[0] + 1, i[1] - 1, animate=False):
+                adjacencyMatrix[i].remove((i[0] + 1, i[1] - 1))
+            if self.object_found(i[0] - 1, i[1]) or self.object_found(i[0] - 1, i[1], animate=False):
+                adjacencyMatrix[i].remove((i[0] - 1, i[1]))
+            if self.object_found(i[0], i[1] - 1) or self.object_found(i[0], i[1] - 1, animate=False):
+                adjacencyMatrix[i].remove((i[0], i[1] - 1))
+            if self.object_found(i[0] + 1, i[1]) or self.object_found(i[0] + 1, i[1], animate=False):
+                adjacencyMatrix[i].remove((i[0] + 1, i[1]))
+            if self.object_found(i[0], i[1] + 1) or self.object_found(i[0], i[1] + 1, animate=False):
+                adjacencyMatrix[i].remove((i[0], i[1] + 1))
+
         parent = {}
         parent[source] = (-1, -1)
 
@@ -134,19 +155,23 @@ class Map:
         return path
 
     class MapTile:
-        def __init__(self, init_coors=(0, 0), icon="./assets/grasstile.png"):
+        def __init__(self, init_coors=(0, 0)):
             self.coordinates = init_coors
-            self.icon = icon
-
 
 # ====================================
 # Run
 # ====================================
 # testMap = Map(15, 15)
-# testMap.animateList[1, 0] = 'A'
-# testMap.inanimateList[2, 3] = '#'
-# testMap.inanimateList[4, 7] = '%'
+# testMap.animateList.append(animate.Animate("Harold"))
+# testMap.animateList[0].set_coors(x=0, y=0)
+# coors = testMap.animateList[0].get_coors()
+#
+# testMap.inanimateList.append(inanimate.Inanimate("Boulder", item_code=0))
+# testMap.inanimateList[0].set_coors(x=1, y=1)
+#
+# destination = (5, 1)
+#
 # testMap.printMap()
-# paths = testMap.dijkstras((1, 2))
-# print(testMap.findPath((paths[1]), (13, 13)))
-# print(paths[0][(13, 13)])
+# paths = testMap.dijkstras((coors[0], coors[1]))
+# print(testMap.findPath((paths[1]), destination))
+# print(paths[0][destination])

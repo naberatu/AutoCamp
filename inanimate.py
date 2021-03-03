@@ -69,6 +69,9 @@ class Inanimate(Entity):
     def get_is_armor(self):
         return self.is_armor
 
+    def get_is_prop(self):
+        return self.is_prop
+
     def get_property(self, name):
         if self.properties.keys().__contains__(name):
             return self.properties[name]

@@ -1,11 +1,10 @@
-import random
-import time
+from random import randint
 import pygame
 import pickle
 from player import Player
+from inanimate import Inanimate
 from enemy import Enemy
 from cencounter import CEncounter
-from encounter import Encounter
 from campaign_default import load_default_camp
 from items import c_items
 
@@ -46,6 +45,7 @@ PLAYERS = list()
 ENCOUNTERS = list()
 ENCOUNTER_INDEX = 1         # Can never be 0, since that's its own index
 ASK_SAVE = False
+RELOAD_ENC = False
 
 
 # drawText from Pygame.org wiki
@@ -109,7 +109,7 @@ def load_image(path="./assets", x=1, y=1):
 
 
 def change_enc(index):
-    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE
+    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE, RELOAD_ENC
 
     if index == ENCOUNTER_INDEX:
         return
@@ -120,6 +120,9 @@ def change_enc(index):
     ENCOUNTERS[ENCOUNTER_INDEX].load_players(PLAYERS)
     ASK_SAVE = True
 
+    if type(ENCOUNTERS[ENCOUNTER_INDEX]) == CEncounter:
+        RELOAD_ENC = True
+
 
 def save():
     global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE
@@ -129,22 +132,6 @@ def save():
     pickle.dump(PLAYERS, open("players.camp", "wb"))
     pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
     ASK_SAVE = False
-
-
-def gridify(image="./assets/rivermouth.jpg"):
-    battlemap = load_image(image, MAP_MAX_X * TILE_SIZE, MAP_MAX_Y * TILE_SIZE)
-    tiles = list()
-    for num in range(MAP_MAX_X):
-        tiles.append(list())
-
-    for y_tile in range(MAP_MAX_Y):
-        for x_tile in range(MAP_MAX_X):
-            surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
-            surf.blit(battlemap, (x_tile * TILE_SIZE, y_tile * TILE_SIZE),
-                                 (x_tile * TILE_SIZE, y_tile * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-            tiles[x_tile].append(surf)
-
-    return tiles
 
 
 class QuitBox:
@@ -246,17 +233,6 @@ class NumberBox:
         self.parent.blit(self.results, self.res_rect)
 
 
-class TileButton:
-    def __init__(self, parent=None, img=None, left=0, top=0, width=TILE_SIZE, height=TILE_SIZE):
-        self.rect = pygame.Rect(left, top, width, height)
-        self.img = img
-
-        self.img_rect = self.img.get_rect()
-        self.img_rect.center = self.rect.center
-
-        # parent.blit(self.img, self.img_rect)
-
-
 class TextButton:
     def __init__(self, parent=None, path="./assets/button.png", text="test", t_size=20, t_color=WHITE, t_font="scaly",
                  left=0, top=0, width=B_WIDTH, height=B_HEIGHT, just="mid"):
@@ -343,13 +319,13 @@ class Display:
             for hero in PLAYERS:
                 hero.set_weapon("Shortsword")
                 hero.set_armor("Chain Mail")
-                hero.inv_add("Mana Potion", random.randint(1, 6))
-                hero.inv_add("Bread (Loaf)", random.randint(1, 4))
+                hero.inv_add("Mana Potion", randint(1, 6))
+                hero.inv_add("Bread (Loaf)", randint(1, 4))
                 hero.inv_add("Spyglass", 1)
                 hero.inv_add("Fishing Tackle", 2)
-                hero.inv_add("Clothes (Common)", random.randint(3, 8))
-                hero.inv_add("Handaxe", random.randint(1, 2))
-                hero.inv_add("Net", random.randint(1, 2))
+                hero.inv_add("Clothes (Common)", randint(3, 8))
+                hero.inv_add("Handaxe", randint(1, 2))
+                hero.inv_add("Net", randint(1, 2))
                 hero.inv_add("Leather Armor", 1)
 
             pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
@@ -357,12 +333,6 @@ class Display:
             ENCOUNTERS_OK = False
 
         if not ENCOUNTERS_OK:
-            # # for index in range(e_battle.get_al_size()):
-            # #     entity = e_battle.get_entity(True, index)
-            # #
-            # #     while e_battle.enc_move(entity, max(MAP_MAX_X, MAP_MAX_Y) * 5,
-            # #                        random.randint(1, MAP_MAX_X), random.randint(1, MAP_MAX_Y))[1]:
-            # #         pass
             ENCOUNTERS = load_default_camp()
             pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
             pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
@@ -412,29 +382,67 @@ class Display:
             self.end_page()
 
     def page_map(self):
+        global RELOAD_ENC
         reload = True
         leave_message = "Travel"
 
-        tile_list = list()
-        x, y = 0, 0
-        tile_img = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_tile_img(), TILE_SIZE, TILE_SIZE)
-        self.SCREEN.blit(tile_img, ORIGIN)
+        icon_player = load_image("./assets/item_drop.png", TILE_SIZE, TILE_SIZE)
+        icon_inanim = load_image("./assets/moneybag.png", TILE_SIZE, TILE_SIZE)
+        icon_enemy = load_image("./assets/item_potion.png", TILE_SIZE, TILE_SIZE)
 
-        for y_tile in range(MAP_MAX_Y):
-            y = int(TILE_SIZE * y_tile)
-            for x_tile in range(MAP_MAX_X):
-                x = int(TILE_SIZE * x_tile)
-                b_tile = TileButton(parent=self.SCREEN, img=tile_img, left=x, top=y)
-                tile_list.append([b_tile, (x, y)])
+        background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bkgd(), TILE_SIZE * MAP_MAX_X, TILE_SIZE * MAP_MAX_Y)
 
-        x, y = -1, -1
+        if RELOAD_ENC:
+            RELOAD_ENC = False
+            ENCOUNTERS[ENCOUNTER_INDEX].start_encounter()
+
+            y_mid = int(MAP_MAX_Y / 2)
+            player_pos = list()
+            radius = 2
+            x_start = 0
+            y_start = y_mid - radius
+            x_end = radius
+            y_end = y_mid + radius
+
+            for y_coor in range(y_start, y_end + 1):
+                for x_coor in range(x_start, x_end + 1):
+                    player_pos.append((x_coor, y_coor))
+
+            for ent in ENCOUNTERS[ENCOUNTER_INDEX].get_anim():
+                name = ent.get_name()
+                if type(ent) == Enemy:
+                    left_lim = int(MAP_MAX_X / 2)
+                    right_lim = MAP_MAX_X - 1
+                    upper_lim = 0
+                    lower_lim = MAP_MAX_Y - 1
+                    ent.set_coors(x=MAP_MAX_X - 1, y=y_mid)
+                    while True:
+                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(ent, int(max(MAP_MAX_X, MAP_MAX_Y) * 5),
+                                                                randint(left_lim, right_lim),
+                                                                randint(upper_lim, lower_lim)):
+                            break
+                    pos = ent.get_coors()
+                    print(ent.get_name(), ent.get_coors(), "\n")
+
+                if type(ent) == Player:
+                    while True:
+                        index = randint(0, len(player_pos) - 1)
+                        cell = player_pos[index]
+
+                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(ent, 30, cell[0], cell[1]):
+                            del player_pos[index]
+                            break
+
+            for ent in ENCOUNTERS[ENCOUNTER_INDEX].get_anim():
+                if type(ent) == Enemy:
+                    print(ent.get_name(), ent.get_coors())
 
         while True:
             # Tile Message:
             # ==================================
-            tile_coors = "Tile: "
-            if x >= 0 and y >= 0:
-                tile_coors += "(" + str(x) + ", " + str(y) + ")"
+            # tile_coors = "Tile: "
+            # if x >= 0 and y >= 0:
+            #     tile_coors += "(" + str(x) + ", " + str(y) + ")"
 
             if ENCOUNTERS[ENCOUNTER_INDEX].no_enemies():
                 if leave_message == "Flee":
@@ -453,16 +461,29 @@ class Display:
                 reload = False
                 # Control Buttons
                 # ==================================
-                TextBox(parent=self.SCREEN, text=tile_coors, t_color=BLACK, left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
+                # TextBox(parent=self.SCREEN, text=tile_coors, t_color=BLACK, left=(MAP_MAX_X * TILE_SIZE) + 20, top=int(HEIGHT/2))
 
                 b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
                 b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=Q_LF - Q_WD - 10,
                                       top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
 
-                for tile in tile_list:
-                    tile[0] = TileButton(parent=self.SCREEN, img=tile_img, left=tile[1][0], top=tile[1][1])
+                self.SCREEN.blit(background, ORIGIN)
 
-                self.SCREEN.blit(load_image("./assets/rivermouth.jpg", MAP_MAX_X * TILE_SIZE, MAP_MAX_Y * TILE_SIZE), ORIGIN)
+                # Blit out Entities:
+                # ==================================
+                entity_list = ENCOUNTERS[ENCOUNTER_INDEX].get_inanim() + ENCOUNTERS[ENCOUNTER_INDEX].get_anim()
+
+                for ent in entity_list:
+                    coors = ent.get_coors()
+                    if type(ent) == Inanimate:
+                        self.SCREEN.blit(icon_inanim,
+                                         pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
+                    if type(ent) == Player:
+                        self.SCREEN.blit(icon_player,
+                                         pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
+                    if type(ent) == Enemy:
+                        self.SCREEN.blit(icon_enemy,
+                                         pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE))
 
             # Mouse Events
             # ==================================

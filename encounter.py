@@ -74,6 +74,9 @@ class Encounter:
         self.animateList = non_player
         return returning
 
+    def get_anim(self):
+        return self.animateList
+
     # ===============================================================================
     # Misc Helper Methods
     # ===============================================================================
