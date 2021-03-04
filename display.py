@@ -540,8 +540,7 @@ class Display:
                                 ENCOUNTERS[ENCOUNTER_INDEX].enc_move(entity_coors[0], entity_coors[1], 0, speed, x, y)
                                 flag = True
                                 break
-                    if not flag:
-                        map_reload = True
+                    map_reload = True
 
                 elif b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
