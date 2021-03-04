@@ -412,12 +412,11 @@ class Display:
         x_start, x_end, y_start, y_end = 0, 0, 0, 0
 
         TILE = list()
-
         background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bkgd(), map_pixels[0], map_pixels[1])
+        ENCOUNTERS[ENCOUNTER_INDEX].start_encounter()
 
         if RELOAD_ENC:
             RELOAD_ENC = False
-            ENCOUNTERS[ENCOUNTER_INDEX].start_encounter()
 
             y_mid = int(MAP_MAX_Y / 2)
             player_pos = list()
