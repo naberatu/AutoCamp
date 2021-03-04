@@ -7,6 +7,7 @@ from enemy import Enemy
 from cencounter import CEncounter
 from campaign_default import load_default_camp
 from items import c_items
+import copy
 
 from os import environ
 import sys
@@ -388,14 +389,26 @@ class Display:
 
     def page_map(self):
         global RELOAD_ENC, ASK_SAVE
-        reload = True
+        map_reload = True
+        move_reload = False
+        move_select = False
         leave_message = "Travel"
         map_pixels = (TILE_SIZE * MAP_MAX_X, TILE_SIZE * MAP_MAX_Y)
 
+        # prepare move_tile list ahead of time
+        move_tiles = list()
+        for x in range(MAP_MAX_X):
+            move_tiles.append(list())
+            for y in range(MAP_MAX_Y):
+                move_tiles[x].append(None)
+
+        # entity selection variables
         entity_index = -1
         turn_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
         ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(turn_index)
         entity_coors = (ENTITY.get_coors()[0], ENTITY.get_coors()[1])
+
+        x_start, x_end, y_start, y_end = 0, 0, 0, 0
 
         TILE = list()
 
@@ -446,11 +459,11 @@ class Display:
         while True:
             if ENCOUNTERS[ENCOUNTER_INDEX].no_enemies():
                 if leave_message == "Flee":
-                    reload = True
+                    map_reload = True
                 leave_message = "Travel"
             else:
                 if leave_message == "Travel":
-                    reload = True
+                    map_reload = True
                 leave_message = "Flee"
 
             if ASK_SAVE:
@@ -460,8 +473,8 @@ class Display:
 
             # Map Reloading
             # ==================================
-            if reload:
-                reload = False
+            if map_reload:
+                map_reload = False
                 self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
                 self.SCREEN.blit(background, ORIGIN)
                 menu_rect = pygame.Rect(map_pixels[0], 0, WIDTH - map_pixels[0], HEIGHT)
@@ -471,8 +484,6 @@ class Display:
                     for y_coor in range(MAP_MAX_Y):
                         button = pygame.Rect(x_coor * TILE_SIZE, y_coor * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                         TILE[x_coor].append(button)
-
-
 
                 # Control Buttons
                 # ==================================
@@ -484,9 +495,8 @@ class Display:
                 b_move = TextButton(parent=self.SCREEN, text="Move", left=Q_LF, top=HEIGHT - Q_HT - 10,
                                     width=Q_WD, height=Q_HT)
 
-
                 turn_title = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(turn_index).get_name() + "'s Turn"
-                ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+
 
                 tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=30, t_color=BLACK, t_font="hylia",
                                   center=True, rect=menu_rect)
@@ -502,21 +512,66 @@ class Display:
                         self.SCREEN.blit(load_image("./assets/button.png", TILE_SIZE, TILE_SIZE), tile_rect)
                     self.SCREEN.blit(load_image(ent.get_icon(), TILE_SIZE, TILE_SIZE), tile_rect)
 
+            # Move Reloading
+            # ==================================
+            if move_reload:
+                move_reload = False
+                for x in range(x_start, x_end):
+                    for y in range(y_start, y_end):
+                        if move_tiles[x][y] is not None:
+                            self.SCREEN.blit(load_image("./assets/button.png", TILE_SIZE, TILE_SIZE),
+                                             (x * TILE_SIZE, y * TILE_SIZE))
+                move_select = True
+
             # Mouse Events
             # ==================================
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
                 self.CLICK = False
-                if b_quitgame.rect.collidepoint(mouse):
+                if move_select:
+                    move_select = False
+
+                    flag = False
+                    for x in range(x_start, x_end):
+                        if flag:
+                            break
+                        for y in range(y_start, y_end):
+                            if move_tiles[x][y] is not None and move_tiles[x][y].collidepoint(mouse):
+                                ENCOUNTERS[ENCOUNTER_INDEX].enc_move(entity_coors[0], entity_coors[1], 0, speed, x, y)
+                                flag = True
+                                break
+                    if not flag:
+                        map_reload = True
+
+                elif b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return
-                    reload = True
+                    map_reload = True
                 elif b_save.rect.collidepoint(mouse):
-                    reload = True
+                    map_reload = True
                     save()
                 elif b_travel.rect.collidepoint(mouse):
                     self.travel_prompt()
                     return
+                elif b_move.rect.collidepoint(mouse):
+                    speed = ENTITY.get_stat("Speed")
+
+                    x_start = max(0, entity_coors[0] - int(speed / 5))
+                    x_end = min(MAP_MAX_X, entity_coors[0] + int(speed / 5))
+                    y_start = max(0, entity_coors[1] - int(speed / 5))
+                    y_end = min(MAP_MAX_Y, entity_coors[1] + int(speed / 5))
+
+                    # empty out grid
+                    for x, i in enumerate(move_tiles):
+                        for y, j in enumerate(move_tiles[x]):
+                            move_tiles[x][y] = None
+
+                    for x_coor in range(x_start, x_end):
+                        for y_coor in range(y_start, y_end):
+                            if ENCOUNTERS[ENCOUNTER_INDEX].entity_at(x_coor, y_coor) is None:
+                                move_tiles[x_coor][y_coor] = TILE[x_coor][y_coor]
+                                move_reload = True
+
                 else:
                     flag = False
                     for x_coor in range(MAP_MAX_X):
@@ -526,7 +581,8 @@ class Display:
                             if TILE[x_coor][y_coor].collidepoint(mouse):
                                 entity_index = ENCOUNTERS[ENCOUNTER_INDEX].entity_at(x_coor, y_coor)
                                 entity_coors = [x_coor, y_coor]
-                                reload = True
+                                ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+                                map_reload = True
                                 flag = True
                                 break
 
