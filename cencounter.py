@@ -128,8 +128,10 @@ class CEncounter(Encounter):
 
     def get_entity(self, index):
         entity_list = self.animate_list + self.inanimate_list
-        if 0 <= index < len(entity_list):
-            return entity_list[index]
+        try:
+            if 0 <= index < len(entity_list):
+                return entity_list[index]
+        except: pass
         return None
 
     def enc_move(self, x_src, y_src, z_src, speed, x_dest, y_dest, z_dest=0):

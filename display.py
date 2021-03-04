@@ -259,20 +259,25 @@ class TextButton:
 
 
 class TextBox:
-    def __init__(self, parent=None, center=False, text="test", t_size=20, t_color=WHITE, t_font="scaly", left=0, top=0):
+    def __init__(self, parent=None, center=False, text="test", t_size=20, t_color=WHITE, t_font="scaly",
+                 left=0, top=0, rect=None):
 
         self.t_size, self.t_color = t_size, t_color
         self.t_font = use_font(size=t_size, font=t_font)
-
-        self.rect = pygame.Rect(left, top, WIDTH - (2 * left), 0)
+        if not rect:
+            self.rect = pygame.Rect(left, top, WIDTH - (2 * left), 0)
+        else:
+            self.rect = rect
 
         self.text, self.textbox = text_objects(text, self.t_font, t_color)
         if center:
             self.textbox.center = self.rect.center
+            if rect is None:
+                self.textbox.top = top
         else:
             self.textbox.left = left
+            self.textbox.top = top
 
-        self.textbox.top = top
         parent.blit(self.text, self.textbox)
 
 
@@ -387,8 +392,9 @@ class Display:
         leave_message = "Travel"
         map_pixels = (TILE_SIZE * MAP_MAX_X, TILE_SIZE * MAP_MAX_Y)
 
-        entity_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
-        ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+        entity_index = -1
+        turn_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
+        ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(turn_index)
         entity_coors = (ENTITY.get_coors()[0], ENTITY.get_coors()[1])
 
         TILE = list()
@@ -466,7 +472,7 @@ class Display:
                         button = pygame.Rect(x_coor * TILE_SIZE, y_coor * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                         TILE[x_coor].append(button)
 
-                ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+
 
                 # Control Buttons
                 # ==================================
@@ -474,11 +480,16 @@ class Display:
                 b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=Q_LF - Q_WD - 10,
                                       top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
                 b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - 2*(Q_WD + 10),
-                                      top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
+                                    top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
+                b_move = TextButton(parent=self.SCREEN, text="Move", left=Q_LF, top=HEIGHT - Q_HT - 10,
+                                    width=Q_WD, height=Q_HT)
 
-                turn_title = ENTITY.get_name()
+
+                turn_title = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(turn_index).get_name() + "'s Turn"
+                ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+
                 tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=30, t_color=BLACK, t_font="hylia",
-                                  left=menu_rect.center[0], top=menu_rect.center[1])
+                                  center=True, rect=menu_rect)
 
                 # Blit out Entities:
                 # ==================================
