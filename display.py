@@ -126,13 +126,14 @@ def change_enc(index):
 
 
 def save():
-    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE
+    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE, RELOAD_ENC
     ENCOUNTERS[0] = ENCOUNTER_INDEX
     pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
     pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
     pickle.dump(PLAYERS, open("players.camp", "wb"))
     pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
     ASK_SAVE = False
+    RELOAD_ENC = False
 
 
 class QuitBox:
@@ -405,8 +406,8 @@ class Display:
         # entity selection variables
         entity_index = -1
         turn_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
-        ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(turn_index)
-        entity_coors = (ENTITY.get_coors()[0], ENTITY.get_coors()[1])
+        ENTITY = None
+        entity_coors = [-1, -1]
 
         x_start, x_end, y_start, y_end = 0, 0, 0, 0
 
@@ -497,7 +498,6 @@ class Display:
 
                 turn_title = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(turn_index).get_name() + "'s Turn"
 
-
                 tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=30, t_color=BLACK, t_font="hylia",
                                   center=True, rect=menu_rect)
 
@@ -541,6 +541,9 @@ class Display:
                                 flag = True
                                 break
                     map_reload = True
+                    ENTITY = None
+                    entity_coors = [-1, -1]
+                    ASK_SAVE = True
 
                 elif b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
@@ -552,7 +555,8 @@ class Display:
                 elif b_travel.rect.collidepoint(mouse):
                     self.travel_prompt()
                     return
-                elif b_move.rect.collidepoint(mouse):
+                elif b_move.rect.collidepoint(mouse) and ENTITY is not None:
+                    print(ENTITY)
                     speed = ENTITY.get_stat("Speed")
 
                     x_start = max(0, entity_coors[0] - int(speed / 5))
