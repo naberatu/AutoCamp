@@ -34,8 +34,8 @@ def load_default_camp():
     DEFAULT_ENC.append(Encounter("[Adgard] Crownguard HQ", bkgd="./assets/guardhq.jpg"))
 
     # Combat Encounters
-    DEFAULT_ENC.append(CEncounter("Verdant Wilds", anim=foe_lists[0]))
-    DEFAULT_ENC.append(CEncounter("Jagged Pass", anim=foe_lists[1]))
-    DEFAULT_ENC.append(CEncounter("Rivermouth", anim=foe_lists[2]))
+    DEFAULT_ENC.append(CEncounter("Verdant Wilds", anim=foe_lists[0], bkgd="./assets/verdantwilds.jpg"))
+    DEFAULT_ENC.append(CEncounter("Jagged Pass", anim=foe_lists[1], bkgd="./assets/jaggedpass.jpg"))
+    DEFAULT_ENC.append(CEncounter("Rivermouth", anim=foe_lists[2], bkgd="./assets/rivermouth.jpg"))
 
     return DEFAULT_ENC
