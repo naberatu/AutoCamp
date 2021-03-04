@@ -74,7 +74,6 @@ class CEncounter(Encounter):
     def start_encounter(self, reset_init=True):
         if reset_init:
             self.determineInitiative()
-        # self.currentEntity = self.animate_list[0]
         self.live = True
         self.map = Map(self.map_max_x, self.map_max_y, self.animate_list, self.inanimate_list)
 
@@ -261,8 +260,6 @@ class CEncounter(Encounter):
 
     def next_turn(self):
         self.turnCounter = (self.turnCounter + 1) % len(self.animate_list + self.inanimate_list)
-        # self.current_turn
-        # self.currentEntity = self.animate_list[self.turnCounter % len(self.animate_list)]
 
     def dealDMG(self, damage, target):
         targetHealth = target.get_stat("Current HP")

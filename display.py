@@ -44,7 +44,7 @@ Q_TP = HEIGHT - Q_HT - 10
 EMPTY_LIST = list()
 PLAYERS = list()
 ENCOUNTERS = list()
-ENCOUNTER_INDEX = 1         # Can never be 0, since that's its own index
+ENC_INDEX = 1         # Can never be 0, since that's its own index
 ASK_SAVE = False
 RELOAD_ENC = False
 
@@ -110,24 +110,24 @@ def load_image(path="./assets", x=1, y=1):
 
 
 def change_enc(index):
-    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE, RELOAD_ENC
+    global PLAYERS, ENCOUNTERS, ENC_INDEX, ASK_SAVE, RELOAD_ENC
 
-    if index == ENCOUNTER_INDEX:
+    if index == ENC_INDEX:
         return
 
-    PLAYERS = ENCOUNTERS[ENCOUNTER_INDEX].save_players()
+    PLAYERS = ENCOUNTERS[ENC_INDEX].save_players()
 
-    ENCOUNTER_INDEX = index
-    ENCOUNTERS[ENCOUNTER_INDEX].load_players(PLAYERS)
+    ENC_INDEX = index
+    ENCOUNTERS[ENC_INDEX].load_players(PLAYERS)
     ASK_SAVE = True
 
-    if type(ENCOUNTERS[ENCOUNTER_INDEX]) == CEncounter:
+    if type(ENCOUNTERS[ENC_INDEX]) == CEncounter:
         RELOAD_ENC = True
 
 
 def save():
-    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, ASK_SAVE, RELOAD_ENC
-    ENCOUNTERS[0] = ENCOUNTER_INDEX
+    global PLAYERS, ENCOUNTERS, ENC_INDEX, ASK_SAVE, RELOAD_ENC
+    ENCOUNTERS[0] = ENC_INDEX
     pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
     pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
     pickle.dump(PLAYERS, open("players.camp", "wb"))
@@ -276,6 +276,8 @@ class TextBox:
             self.textbox.center = self.rect.center
             if rect is None:
                 self.textbox.top = top
+            elif top != 0:
+                self.textbox.top -= top
         else:
             self.textbox.left = left
             self.textbox.top = top
@@ -305,12 +307,12 @@ class Display:
     TO_MAIN_MENU = False
     TO_TRAVEL = False
 
-    global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX, MODE, EMPTY_LIST
+    global PLAYERS, ENCOUNTERS, ENC_INDEX, MODE, EMPTY_LIST
 
     # Load Data
     # ==================================
     try:
-        # global PLAYERS, ENCOUNTERS, ENCOUNTER_INDEX
+        # global PLAYERS, ENCOUNTERS, ENC_INDEX
         PLAYERS = pickle.load(open("players.camp", "rb"))
         PLAYERS_OK = True
         ENCOUNTERS = pickle.load(open("savegame.camp", "rb"))
@@ -344,8 +346,8 @@ class Display:
             pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
             pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
 
-    ENCOUNTER_INDEX = ENCOUNTERS[0]
-    change_enc(ENCOUNTER_INDEX)
+    ENC_INDEX = ENCOUNTERS[0]
+    change_enc(ENC_INDEX)
 
     # Pages and Menus
     # ==================================
@@ -369,14 +371,14 @@ class Display:
             if self.CLICK:
                 if b_start.rect.collidepoint(mouse):
                     self.CLICK = False
-                    ENCOUNTERS[ENCOUNTER_INDEX].load_players(PLAYERS)
+                    ENCOUNTERS[ENC_INDEX].load_players(PLAYERS)
                     while True:
                         if self.TO_MAIN_MENU:
                             self.TO_MAIN_MENU = False
                             break
                         if self.TO_TRAVEL:
                             self.travel_prompt()
-                        if type(ENCOUNTERS[ENCOUNTER_INDEX]) == CEncounter:
+                        if type(ENCOUNTERS[ENC_INDEX]) == CEncounter:
                             self.page_map()
                         else:
                             self.page_nce()
@@ -404,8 +406,8 @@ class Display:
                 move_tiles[x].append(None)
 
         # entity selection variables
-        entity_index = -1
-        turn_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
+        turn_index = ENCOUNTERS[ENC_INDEX].get_turn()
+        entity_index = turn_index
         ENTITY = None
         entity_coors = [-1, -1]
         num_entities = 0
@@ -414,11 +416,11 @@ class Display:
         rem_speed = 0
 
         TILE = list()
-        background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bkgd(), map_pixels[0], map_pixels[1])
+        background = load_image(ENCOUNTERS[ENC_INDEX].get_bkgd(), map_pixels[0], map_pixels[1])
 
         if RELOAD_ENC:
             RELOAD_ENC = False
-            ENCOUNTERS[ENCOUNTER_INDEX].start_encounter()
+            ENCOUNTERS[ENC_INDEX].start_encounter()
 
             y_mid = int(MAP_MAX_Y / 2)
             player_pos = list()
@@ -432,7 +434,7 @@ class Display:
                 for x_coor in range(x_start, x_end + 1):
                     player_pos.append((x_coor, y_coor))
 
-            for ent in ENCOUNTERS[ENCOUNTER_INDEX].get_anim():
+            for ent in ENCOUNTERS[ENC_INDEX].get_anim():
                 if type(ent) == Enemy:
                     left_lim = int(MAP_MAX_X / 2)
                     right_lim = MAP_MAX_X - 1
@@ -442,10 +444,10 @@ class Display:
                     z_val = ent.get_coors()[2]
                     ent.set_coors(coors[0], coors[1], z_val)
                     while True:
-                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(coors[0], coors[1], z_val,
-                                                                int(max(MAP_MAX_X, MAP_MAX_Y) * 5),
-                                                                randint(left_lim, right_lim),
-                                                                randint(upper_lim, lower_lim))[0]:
+                        if ENCOUNTERS[ENC_INDEX].enc_move(coors[0], coors[1], z_val,
+                                                          int(max(MAP_MAX_X, MAP_MAX_Y) * 5),
+                                                          randint(left_lim, right_lim),
+                                                          randint(upper_lim, lower_lim))[0]:
                             break
 
                 if type(ent) == Player:
@@ -454,14 +456,14 @@ class Display:
                         index = randint(0, len(player_pos) - 1)
                         cell = player_pos[index]
 
-                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(coors[0], coors[1], coors[2], 30, cell[0], cell[1])[0]:
+                        if ENCOUNTERS[ENC_INDEX].enc_move(coors[0], coors[1], coors[2], 30, cell[0], cell[1])[0]:
                             del player_pos[index]
                             break
         else:
-            ENCOUNTERS[ENCOUNTER_INDEX].start_encounter(reset_init=False)
+            ENCOUNTERS[ENC_INDEX].start_encounter(reset_init=False)
 
         while True:
-            if ENCOUNTERS[ENCOUNTER_INDEX].no_enemies():
+            if ENCOUNTERS[ENC_INDEX].no_enemies():
                 if leave_message == "Flee":
                     map_reload = True
                 leave_message = "Travel"
@@ -489,33 +491,41 @@ class Display:
                         button = pygame.Rect(x_coor * TILE_SIZE, y_coor * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                         TILE[x_coor].append(button)
 
-                # num_entities = len(ENCOUNTERS[ENCOUNTER_INDEX].get_anim() + ENCOUNTERS[ENCOUNTER_INDEX].get_inanim())
-
-                ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+                ENTITY = ENCOUNTERS[ENC_INDEX].get_entity(entity_index)
                 if ENTITY is not None:
                     entity_coors = [ENTITY.get_coors()[0], ENTITY.get_coors()[1]]
                 else:
                     entity_coors = [-1, -1]
+
                 # Control Buttons
                 # ==================================
-                b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
-                b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=Q_LF - Q_WD - 10,
-                                      top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
-                b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - 2*(Q_WD + 10),
-                                    top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
-                b_move = TextButton(parent=self.SCREEN, text="Move", left=Q_LF, top=HEIGHT - Q_HT - 10,
-                                    width=Q_WD, height=Q_HT)
-                b_endturn = TextButton(parent=self.SCREEN, text="End Turn", left=b_travel.rect.left,
-                                       top=b_move.rect.top, width=Q_WD, height=Q_HT)
+                BB_WID = 100
 
-                turn_title = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(turn_index).get_name() + "'s Turn"
+                b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=WIDTH - BB_WID - 10, top=10,
+                                        width=BB_WID, height=Q_HT)
+                b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=b_quitgame.rect.left - BB_WID - 10,
+                                      top=b_quitgame.rect.top, width=BB_WID, height=Q_HT)
+                b_save = TextButton(parent=self.SCREEN, text=save_text, left=b_travel.rect.left - BB_WID - 10,
+                                    top=b_quitgame.rect.top, width=BB_WID, height=Q_HT)
 
-                tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=30, t_color=BLACK, t_font="hylia",
-                                  center=True, rect=menu_rect)
+                # ==================================
+                turn_title = "- " + ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_name() + "'s Turn -"
+                tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=26, t_color=BLACK, t_font="hylia",
+                                  center=True, rect=menu_rect, top=135)
+                # ==================================
+
+                b_endturn = TextButton(parent=self.SCREEN, text="End Turn", left=WIDTH - BB_WID - 10,
+                                       top=HEIGHT - Q_HT - 10, width=BB_WID, height=Q_HT)
+                b_move = TextButton(parent=self.SCREEN, text="Move", left=b_endturn.rect.left - BB_WID - 10,
+                                    top=b_endturn.rect.top, width=BB_WID, height=Q_HT)
+
+                if turn_index == entity_index:
+                    b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=b_move.rect.left - BB_WID - 10,
+                                       top=b_endturn.rect.top, width=BB_WID, height=Q_HT)
 
                 # Blit out Entities:
                 # ==================================
-                entity_list = ENCOUNTERS[ENCOUNTER_INDEX].get_inanim() + ENCOUNTERS[ENCOUNTER_INDEX].get_anim()
+                entity_list = ENCOUNTERS[ENC_INDEX].get_inanim() + ENCOUNTERS[ENC_INDEX].get_anim()
 
                 for ent in entity_list:
                     coors = [ent.get_coors()[0], ent.get_coors()[1]]
@@ -549,8 +559,8 @@ class Display:
                             break
                         for y in range(y_start, y_end):
                             if move_tiles[x][y] is not None and move_tiles[x][y].collidepoint(mouse):
-                                moved, dist = ENCOUNTERS[ENCOUNTER_INDEX].enc_move(entity_coors[0], entity_coors[1], 0,
-                                                                                   rem_speed, x, y)
+                                moved, dist = ENCOUNTERS[ENC_INDEX].enc_move(entity_coors[0], entity_coors[1], 0,
+                                                                             rem_speed, x, y)
                                 if moved:
                                     rem_speed -= dist
                                 flag = True
@@ -571,8 +581,8 @@ class Display:
                     self.travel_prompt()
                     return
                 elif b_endturn.rect.collidepoint(mouse):
-                    ENCOUNTERS[ENCOUNTER_INDEX].next_turn()
-                    turn_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
+                    ENCOUNTERS[ENC_INDEX].next_turn()
+                    turn_index = ENCOUNTERS[ENC_INDEX].get_turn()
                     entity_index = turn_index
                     ASK_SAVE = True
                     map_reload = True
@@ -591,7 +601,7 @@ class Display:
 
                     for x_coor in range(x_start, x_end):
                         for y_coor in range(y_start, y_end):
-                            if ENCOUNTERS[ENCOUNTER_INDEX].entity_at(x_coor, y_coor) is None:
+                            if ENCOUNTERS[ENC_INDEX].entity_at(x_coor, y_coor) is None:
                                 move_tiles[x_coor][y_coor] = TILE[x_coor][y_coor]
                                 move_reload = True
                 else:
@@ -601,9 +611,9 @@ class Display:
                             break
                         for y_coor in range(MAP_MAX_Y):
                             if TILE[x_coor][y_coor].collidepoint(mouse):
-                                entity_index = ENCOUNTERS[ENCOUNTER_INDEX].entity_at(x_coor, y_coor)
+                                entity_index = ENCOUNTERS[ENC_INDEX].entity_at(x_coor, y_coor)
                                 entity_coors = [x_coor, y_coor]
-                                ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+                                ENTITY = ENCOUNTERS[ENC_INDEX].get_entity(entity_index)
                                 map_reload = True
                                 flag = True
                                 break
@@ -616,7 +626,7 @@ class Display:
         menu_left = 670
         cwid = 120
         offs = cwid + 10
-        background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bg(), WIDTH, HEIGHT)
+        background = load_image(ENCOUNTERS[ENC_INDEX].get_bg(), WIDTH, HEIGHT)
         player_index = 0
         current_player = PLAYERS[0]
 
@@ -627,7 +637,7 @@ class Display:
                 save_text = "Saved!"
 
             self.SCREEN.blit(background, ORIGIN)
-            title = TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENCOUNTER_INDEX].get_name(), t_size=24, t_font="hylia",
+            title = TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENC_INDEX].get_name(), t_size=24, t_font="hylia",
                                left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
             b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
@@ -909,8 +919,8 @@ class Display:
                                                      desc_left, tb_desc.rect.bottom, width=desc_width, height=desc_height)
                             if amt:
                                 ASK_SAVE = True
-                                ENCOUNTERS[ENCOUNTER_INDEX].inv_give(PLAYERS[player_index], PLAYERS[rec_index],
-                                                                     items_to_show[item_sel_index], amount=amt)
+                                ENCOUNTERS[ENC_INDEX].inv_give(PLAYERS[player_index], PLAYERS[rec_index],
+                                                               items_to_show[item_sel_index], amount=amt)
 
                 except: pass
 
@@ -947,7 +957,7 @@ class Display:
         cheight = 50
         max_cols = int(WIDTH / (cwid + 10))
         col_size = int(HEIGHT / (cheight + 10))
-        go_to_index = ENCOUNTER_INDEX
+        go_to_index = ENC_INDEX
 
         encbuttons = list()
         columns = 1
@@ -955,7 +965,7 @@ class Display:
         for index, enc in enumerate(ENCOUNTERS):
             if index > 0:
                 # encbuttons.append(TextButton())
-                if index == ENCOUNTER_INDEX:
+                if index == ENC_INDEX:
                     encbuttons.append(
                         TextButton(parent=self.SCREEN, text=enc.get_name(), t_size=18, t_font="nodesto",
                                    left=e_left, top=e_top, width=cwid, height=cheight, t_color=GOLD))
@@ -1176,8 +1186,8 @@ class Display:
                     except:
                         try:
                             num_dice, diceface = result.split("d")
-                            result = str(ENCOUNTERS[ENCOUNTER_INDEX].rollDice(int(num_dice), int(diceface),
-                                                                                   print_results=False))
+                            result = str(ENCOUNTERS[ENC_INDEX].rollDice(int(num_dice), int(diceface),
+                                                                        print_results=False))
                         except:
                             result = "ERROR"
 
@@ -1190,7 +1200,7 @@ class Display:
                     except:
                         try:
                             num_dice, diceface = result.split("d")
-                            result = str(ENCOUNTERS[ENCOUNTER_INDEX].rollDice(int(num_dice), int(diceface), print_results=False, set_form=True))
+                            result = str(ENCOUNTERS[ENC_INDEX].rollDice(int(num_dice), int(diceface), print_results=False, set_form=True))
                         except:
                             result = "ERROR"
 
