@@ -518,7 +518,7 @@ class Display:
                 for x in range(x_start, x_end):
                     for y in range(y_start, y_end):
                         if move_tiles[x][y] is not None:
-                            self.SCREEN.blit(load_image("./assets/button.png", TILE_SIZE, TILE_SIZE),
+                            self.SCREEN.blit(load_image("./assets/movetile.png", TILE_SIZE, TILE_SIZE),
                                              (x * TILE_SIZE, y * TILE_SIZE))
                 move_select = True
 
@@ -555,7 +555,6 @@ class Display:
                     self.travel_prompt()
                     return
                 elif b_move.rect.collidepoint(mouse) and ENTITY is not None:
-                    print(ENTITY)
                     speed = ENTITY.get_stat("Speed")
 
                     x_start = max(0, entity_coors[0] - int(speed / 5))
