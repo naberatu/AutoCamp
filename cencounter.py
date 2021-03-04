@@ -23,6 +23,7 @@ class CEncounter(Encounter):
         self.map = Map(max_x, max_y, self.animate_list, self.inanimate_list)
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
         self.turnCounter = 0
+        # self.current_turn = 0
         self.live = False
         self.map_max_x = max_x
         self.map_max_y = max_y
@@ -70,9 +71,10 @@ class CEncounter(Encounter):
                 self.turnCounter = self.turnCounter % (len(self.animate_list) - 1)
                 self.determineInitiative()
 
-    def start_encounter(self):
-        self.determineInitiative()
-        self.currentEntity = self.animate_list[0]
+    def start_encounter(self, reset_init=True):
+        if reset_init:
+            self.determineInitiative()
+        # self.currentEntity = self.animate_list[0]
         self.live = True
         self.map = Map(self.map_max_x, self.map_max_y, self.animate_list, self.inanimate_list)
 
@@ -139,7 +141,7 @@ class CEncounter(Encounter):
         destination = (x_dest, y_dest)
 
         if x_dest > self.map_max_x or y_dest > self.map_max_y:
-            return False
+            return [False, 0]
 
         actor = None
         for ent in self.animate_list:
@@ -152,14 +154,14 @@ class CEncounter(Encounter):
 
         for ent in obstacles:
             if ent.get_coors() == [x_dest, y_dest, z_dest]:
-                return False   # In the case of failure
+                return [False, 0]   # In the case of failure
 
         paths = self.map.dijkstras(source)
         distance = paths[0][destination]
 
         if distance <= speed:
             actor.set_coors(x=x_dest, y=y_dest, z=z_dest)
-            return True
+            return [True, distance]
 
         return False
 
@@ -258,8 +260,9 @@ class CEncounter(Encounter):
         self.animate_list[:] = [self.animate_list[i[0]] for i in order]
 
     def next_turn(self):
-        self.turnCounter += 1
-        self.currentEntity = self.animate_list[self.turnCounter % len(self.animate_list)]
+        self.turnCounter = (self.turnCounter + 1) % len(self.animate_list + self.inanimate_list)
+        # self.current_turn
+        # self.currentEntity = self.animate_list[self.turnCounter % len(self.animate_list)]
 
     def dealDMG(self, damage, target):
         targetHealth = target.get_stat("Current HP")

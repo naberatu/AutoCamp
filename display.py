@@ -408,15 +408,17 @@ class Display:
         turn_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
         ENTITY = None
         entity_coors = [-1, -1]
+        num_entities = 0
 
         x_start, x_end, y_start, y_end = 0, 0, 0, 0
+        rem_speed = 0
 
         TILE = list()
         background = load_image(ENCOUNTERS[ENCOUNTER_INDEX].get_bkgd(), map_pixels[0], map_pixels[1])
-        ENCOUNTERS[ENCOUNTER_INDEX].start_encounter()
 
         if RELOAD_ENC:
             RELOAD_ENC = False
+            ENCOUNTERS[ENCOUNTER_INDEX].start_encounter()
 
             y_mid = int(MAP_MAX_Y / 2)
             player_pos = list()
@@ -443,7 +445,7 @@ class Display:
                         if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(coors[0], coors[1], z_val,
                                                                 int(max(MAP_MAX_X, MAP_MAX_Y) * 5),
                                                                 randint(left_lim, right_lim),
-                                                                randint(upper_lim, lower_lim)):
+                                                                randint(upper_lim, lower_lim))[0]:
                             break
 
                 if type(ent) == Player:
@@ -452,9 +454,11 @@ class Display:
                         index = randint(0, len(player_pos) - 1)
                         cell = player_pos[index]
 
-                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(coors[0], coors[1], coors[2], 30, cell[0], cell[1]):
+                        if ENCOUNTERS[ENCOUNTER_INDEX].enc_move(coors[0], coors[1], coors[2], 30, cell[0], cell[1])[0]:
                             del player_pos[index]
                             break
+        else:
+            ENCOUNTERS[ENCOUNTER_INDEX].start_encounter(reset_init=False)
 
         while True:
             if ENCOUNTERS[ENCOUNTER_INDEX].no_enemies():
@@ -485,6 +489,13 @@ class Display:
                         button = pygame.Rect(x_coor * TILE_SIZE, y_coor * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                         TILE[x_coor].append(button)
 
+                # num_entities = len(ENCOUNTERS[ENCOUNTER_INDEX].get_anim() + ENCOUNTERS[ENCOUNTER_INDEX].get_inanim())
+
+                ENTITY = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(entity_index)
+                if ENTITY is not None:
+                    entity_coors = [ENTITY.get_coors()[0], ENTITY.get_coors()[1]]
+                else:
+                    entity_coors = [-1, -1]
                 # Control Buttons
                 # ==================================
                 b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
@@ -494,6 +505,8 @@ class Display:
                                     top=b_quitgame.rect.top, width=Q_WD, height=Q_HT)
                 b_move = TextButton(parent=self.SCREEN, text="Move", left=Q_LF, top=HEIGHT - Q_HT - 10,
                                     width=Q_WD, height=Q_HT)
+                b_endturn = TextButton(parent=self.SCREEN, text="End Turn", left=b_travel.rect.left,
+                                       top=b_move.rect.top, width=Q_WD, height=Q_HT)
 
                 turn_title = ENCOUNTERS[ENCOUNTER_INDEX].get_entity(turn_index).get_name() + "'s Turn"
 
@@ -536,7 +549,10 @@ class Display:
                             break
                         for y in range(y_start, y_end):
                             if move_tiles[x][y] is not None and move_tiles[x][y].collidepoint(mouse):
-                                ENCOUNTERS[ENCOUNTER_INDEX].enc_move(entity_coors[0], entity_coors[1], 0, speed, x, y)
+                                moved, dist = ENCOUNTERS[ENCOUNTER_INDEX].enc_move(entity_coors[0], entity_coors[1], 0,
+                                                                                   rem_speed, x, y)
+                                if moved:
+                                    rem_speed -= dist
                                 flag = True
                                 break
                     map_reload = True
@@ -554,13 +570,19 @@ class Display:
                 elif b_travel.rect.collidepoint(mouse):
                     self.travel_prompt()
                     return
+                elif b_endturn.rect.collidepoint(mouse):
+                    ENCOUNTERS[ENCOUNTER_INDEX].next_turn()
+                    turn_index = ENCOUNTERS[ENCOUNTER_INDEX].get_turn()
+                    entity_index = turn_index
+                    ASK_SAVE = True
+                    map_reload = True
                 elif b_move.rect.collidepoint(mouse) and ENTITY is not None:
-                    speed = ENTITY.get_stat("Speed")
+                    rem_speed = ENTITY.get_stat("Speed")
 
-                    x_start = max(0, entity_coors[0] - int(speed / 5))
-                    x_end = min(MAP_MAX_X, entity_coors[0] + int(speed / 5))
-                    y_start = max(0, entity_coors[1] - int(speed / 5))
-                    y_end = min(MAP_MAX_Y, entity_coors[1] + int(speed / 5))
+                    x_start = max(0, entity_coors[0] - int(rem_speed / 5))
+                    x_end = min(MAP_MAX_X, entity_coors[0] + int(rem_speed / 5))
+                    y_start = max(0, entity_coors[1] - int(rem_speed / 5))
+                    y_end = min(MAP_MAX_Y, entity_coors[1] + int(rem_speed / 5))
 
                     # empty out grid
                     for x, i in enumerate(move_tiles):
@@ -572,7 +594,6 @@ class Display:
                             if ENCOUNTERS[ENCOUNTER_INDEX].entity_at(x_coor, y_coor) is None:
                                 move_tiles[x_coor][y_coor] = TILE[x_coor][y_coor]
                                 move_reload = True
-
                 else:
                     flag = False
                     for x_coor in range(MAP_MAX_X):

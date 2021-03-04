@@ -17,7 +17,7 @@ class Encounter:
         self.animate_list = anim
 
         self.bkgd = bkgd
-        self.currentEntity = None
+        # self.currentEntity = None
         self.is_shop = is_shop
         self.vendor = vendor
         self.is_combat = is_combat
