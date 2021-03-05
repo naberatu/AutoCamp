@@ -328,6 +328,7 @@ class Display:
             PLAYERS.append(Player(name="Veth Brenatto", race="Goblin", role="Rogue"))
 
             for hero in PLAYERS:
+                hero.set_stats("Strength", randint(9, 16))
                 hero.set_weapon("Shortsword")
                 hero.set_armor("Chain Mail")
                 hero.inv_add("Mana Potion", randint(1, 6))
@@ -560,6 +561,8 @@ class Display:
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
                 self.CLICK = False
+                map_reload = True
+
                 if move_select:
                     move_select = False
 
@@ -583,9 +586,7 @@ class Display:
                 elif b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return
-                    map_reload = True
                 elif b_save.rect.collidepoint(mouse):
-                    map_reload = True
                     save()
                 elif b_travel.rect.collidepoint(mouse):
                     self.travel_prompt()
@@ -596,13 +597,8 @@ class Display:
                     entity_index = turn_index
                     rem_speed = ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Speed")
                     ASK_SAVE = True
-                    map_reload = True
                 elif b_inv is not None and b_inv.rect.collidepoint(mouse):
-                    # print(ENTITY.get_name())
-                    # print(ENTITY)
-                    # print(PLAYERS)
                     self.inv_prompt(ENTITY, 120, PLAYERS.index(ENTITY))
-                    map_reload = True
                 elif b_attack is not None and b_attack.rect.collidepoint(mouse):
                     attacker = ENCOUNTERS[ENC_INDEX].get_entity(turn_index)
                     print(attacker.get_name(), attacker.get_stat("Current HP"))
@@ -612,8 +608,6 @@ class Display:
                     print(TARGET.get_name(), TARGET.get_stat("Current HP"))
 
                 elif b_move.rect.collidepoint(mouse) and ENTITY is not None:
-                    # rem_speed = ENTITY.get_stat("Speed")
-
                     x_start = max(0, entity_coors[0] - int(rem_speed / 5))
                     x_end = min(MAP_MAX_X, entity_coors[0] + int(rem_speed / 5))
                     y_start = max(0, entity_coors[1] - int(rem_speed / 5))

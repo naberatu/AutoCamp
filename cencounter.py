@@ -275,7 +275,6 @@ class CEncounter(Encounter):
         if type(target) == Enemy and targetHealth <= 0:  # HP is -/0, enemy -> INSTANT DEATH
             target.set_stats("Current HP", 0)
             print(target.get_name(), "has died!!")
-            # self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
             self.animate_list.remove(target)
 
         elif targetHealth >= 0:  # HP is +/0, player -> DMG
@@ -286,9 +285,7 @@ class CEncounter(Encounter):
         elif (targetHealth * -1) >= target.get_stat("Max HP"):  # HP is -, exceeds max HP-> INSTANT DEATH
             target.set_stats("Current HP", 0)
             print(target.get_name(), "has died!!")
-            # self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
             self.animate_list.remove(target)
-            # self.enc_update_map()
 
         elif (targetHealth * -1) <= target.get_stat("Max HP"):  # HP is negative, doesn't exceed max HP -> UNCONSCIOUS
             target.set_stats("Current HP", 0)
@@ -365,9 +362,9 @@ class CEncounter(Encounter):
                     damage = 0
                     # print("{} is immune to {}!".format(target.get_name(), dmg_type))
                 elif dmg_type in target.dmg_resistances:
-                    print("Damage before: ", damage)
+                    # print("Damage before: ", damage)
                     damage = floor(damage / 2)
-                    print("Damage after: ", damage)
+                    # print("Damage after: ", damage)
                     # print("{} is resistant to {}!".format(target.get_name(), dmg_type))
                 elif dmg_type in target.dmg_vulnerabilities:
                     damage = damage * 2
