@@ -22,6 +22,22 @@ role_dict = {
     "Blood Hunter": 10
 }
 
+icon_dict = {
+    "Barbarian": "./assets/barbarian.png",
+    "Bard": "./assets/bard.png",
+    "Cleric": "./assets/cleric.png",
+    "Druid": 8,
+    "Fighter": 10,
+    "Monk": 8,
+    "Paladin": 10,
+    "Ranger": 10,
+    "Rogue": "./assets/rogue.png",
+    "Sorcerer": 6,
+    "Warlock": "./assets/warlock.png",
+    "Wizard": "./assets/wizard.png",
+    "Artificer": 8,
+    "Blood Hunter": 10
+}
 
 class Player(Animate):
     def __init__(self, name, icon="./assets/item_drop.png", race=None, role=None, level=1, stat_block=StatBlock(),
@@ -48,6 +64,9 @@ class Player(Animate):
             self.set_stats("Max HP", role_dict[role])
             self.set_stats("Current HP", role_dict[role])
             self.set_stats("Hit Dice Quantity", self.level)
+
+        if icon == "./assets/item_drop.png":
+            self.icon = icon_dict[self.role]
 
         self.weapon = None              # a player is either wielding a weapon, or isn't
         self.armor = None               # a player either is wearing armor, or ain't.

@@ -150,8 +150,6 @@ class CEncounter(Encounter):
                 break
 
         obstacles = self.animate_list + self.inanimate_list
-        for obst in obstacles:
-            print(obst.get_name())
         obstacles.remove(actor)
 
         for ent in obstacles:
