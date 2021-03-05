@@ -29,6 +29,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GOLD = (241, 194, 50)
 GREEN = (84, 230, 84)
+RED = (255, 0, 0)
 
 # Button Dimensions:
 B_WIDTH = 200
@@ -358,6 +359,7 @@ class Display:
         st_font = "hylia"
 
         while True:
+            global ENCOUNTERS
             # Graphics Generation
             # ==================================
             self.SCREEN.blit(self.BG_STARTUP, ORIGIN)
@@ -372,8 +374,10 @@ class Display:
             # ==================================
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
+                self.CLICK = False
                 if b_start.rect.collidepoint(mouse):
-                    self.CLICK = False
+                    # ENCOUNTERS = pickle.load(open("savegame.camp", "rb"))
+                    # ENC_INDEX = ENCOUNTERS[0]
                     ENCOUNTERS[ENC_INDEX].load_players(PLAYERS)
                     while True:
                         if self.TO_MAIN_MENU:
@@ -381,14 +385,13 @@ class Display:
                             break
                         if self.TO_TRAVEL:
                             self.travel_prompt()
-                        if type(ENCOUNTERS[ENC_INDEX]) == CEncounter:
+                        elif type(ENCOUNTERS[ENC_INDEX]) == CEncounter:
                             self.page_map()
                         else:
                             self.page_nce()
                 elif b_quit.rect.collidepoint(mouse):
                     sys.exit()
                 elif b_credits.rect.collidepoint(mouse):
-                    self.CLICK = False
                     self.page_credits()
 
             self.end_page()
@@ -400,6 +403,9 @@ class Display:
         move_select = False
         leave_message = "Travel"
         map_pixels = (TILE_SIZE * MAP_MAX_X, TILE_SIZE * MAP_MAX_Y)
+        action_text = ""
+        move_text = ""
+        show_message = ""
 
         # prepare move_tile list ahead of time
         move_tiles = list()
@@ -488,6 +494,11 @@ class Display:
                 self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
                 self.SCREEN.blit(background, ORIGIN)
                 menu_rect = pygame.Rect(map_pixels[0], 0, WIDTH - map_pixels[0], HEIGHT)
+                if action_used:
+                    action_text = "Action Used"
+                if rem_speed == 0:
+                    move_text = "Move Used"
+
                 map_tile = list()
                 for x_coor in range(MAP_MAX_X):
                     map_tile.append(list())
@@ -503,44 +514,67 @@ class Display:
 
                 # Control Buttons
                 # ==================================
-                BB_WID = 100
-                b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=WIDTH - BB_WID - 10, top=10,
-                                        width=BB_WID, height=Q_HT)
-                b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=b_quitgame.rect.left - BB_WID - 10,
-                                      top=b_quitgame.rect.top, width=BB_WID, height=Q_HT)
-                b_save = TextButton(parent=self.SCREEN, text=save_text, left=b_travel.rect.left - BB_WID - 10,
-                                    top=b_quitgame.rect.top, width=BB_WID, height=Q_HT)
+                BT_WID = 100
+                b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=WIDTH - BT_WID - 10, top=10,
+                                        width=BT_WID, height=Q_HT)
+                b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=b_quitgame.rect.left - BT_WID - 10,
+                                      top=b_quitgame.rect.top, width=BT_WID, height=Q_HT)
+                b_save = TextButton(parent=self.SCREEN, text=save_text, left=b_travel.rect.left - BT_WID - 10,
+                                    top=b_quitgame.rect.top, width=BT_WID, height=Q_HT)
 
                 # ==================================
                 turn_title = "- " + ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_name() + "'s Turn -"
-                tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=26, t_color=BLACK, t_font="hylia",
-                                  center=True, rect=menu_rect, top=135)
-                # ==================================
+                TextBox(parent=self.SCREEN, text=turn_title, t_size=26, t_color=BLACK, t_font="hylia",
+                        center=True, rect=menu_rect, top=135)
+                text_hp = "HP: " + str(ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Current HP")) \
+                            + " / " + str(ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Max HP"))
 
-                b_endturn = TextButton(parent=self.SCREEN, text="End Turn", left=WIDTH - BB_WID - 10,
-                                       top=HEIGHT - Q_HT - 10, width=BB_WID, height=Q_HT)
+                TextBox(parent=self.SCREEN, text=text_hp, t_size=20, t_color=BLACK, t_font="hylia",
+                        center=True, rect=menu_rect, top=110)
+                TextBox(parent=self.SCREEN, text=show_message, t_size=20, t_color=BLACK, t_font="hylia",
+                        center=True, rect=menu_rect, top=50)
+                # ==================================
+                AB_WID = int((menu_rect.width - 35) / 2)
+                right = b_quitgame.rect.right - AB_WID
+                b_endturn = TextButton(parent=self.SCREEN, text=">> End Turn >>", left=right,
+                                       top=HEIGHT - Q_HT - 10, width=AB_WID, height=Q_HT)
+
+                b_dice = TextButton(parent=self.SCREEN, text="Roll Dice", left=b_endturn.rect.left,
+                                    top=b_endturn.rect.top - Q_HT - 10, width=AB_WID, height=Q_HT)
+
+                b_stats = TextButton(parent=self.SCREEN, text="View Stats", left=b_save.rect.left,
+                                     top=b_endturn.rect.top, width=AB_WID, height=Q_HT)
 
                 b_inv, b_move = None, None
                 if turn_index == ent_index:
-                    b_move = TextButton(parent=self.SCREEN, text="Move", left=b_endturn.rect.left - BB_WID - 10,
-                                        top=b_endturn.rect.top, width=BB_WID, height=Q_HT)
+                    if rem_speed > 0:
+                        move_text = "Move"
+                    b_move = TextButton(parent=self.SCREEN, text=move_text, left=b_save.rect.left,
+                                        top=b_dice.rect.top, width=AB_WID, height=Q_HT)
 
-                    b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=b_move.rect.left - BB_WID - 10,
-                                       top=b_endturn.rect.top, width=BB_WID, height=Q_HT)
+                    if type(ENCOUNTERS[ENC_INDEX].get_entity(turn_index)) is Player:
+                        b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=b_endturn.rect.left,
+                                           top=b_dice.rect.top - Q_HT - 10, width=AB_WID, height=Q_HT)
+
                 else:
                     ent_name = ENCOUNTERS[ENC_INDEX].get_entity(ent_index)
                     if ent_name is not None:
                         ent_name = ent_name.get_name()
                         turn_title = "- Selected: " + ent_name + " -"
-                        tb_turn = TextBox(parent=self.SCREEN, text=turn_title, t_size=16, t_color=BLACK, t_font="hylia",
-                                          center=True, rect=menu_rect, top=110)
+                        TextBox(parent=self.SCREEN, text=turn_title, t_size=16, t_color=BLACK, t_font="hylia",
+                                center=True, rect=menu_rect, top=80)
 
                 b_attack = None
                 target_found, ent_target = ENCOUNTERS[ENC_INDEX].enemyInRange()[0], ENCOUNTERS[ENC_INDEX].enemyInRange()[1]
 
                 if target_found:
-                    b_attack = TextButton(parent=self.SCREEN, text="Attack", left=b_move.rect.left,
-                                          top=b_endturn.rect.top - Q_HT - 10, width=BB_WID, height=Q_HT)
+                    if not action_used:
+                        action_text = "Attack"
+                        t_color = RED
+                    else:
+                        t_color = WHITE
+                    b_attack = TextButton(parent=self.SCREEN, text=action_text, left=b_save.rect.left, t_color=t_color,
+                                          top=b_dice.rect.top - Q_HT - 10, width=AB_WID, height=Q_HT)
                     ent_target = ENCOUNTERS[ENC_INDEX].get_entity(ent_target)
 
                 # Blit out Entities:
@@ -606,17 +640,27 @@ class Display:
                     ent_index = turn_index
                     rem_speed = ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Speed")
                     ASK_SAVE = True
+                    action_used = False
                 elif b_inv is not None and b_inv.rect.collidepoint(mouse):
-                    self.inv_prompt(ent_select, 120, PLAYERS.index(ent_select))
-                elif b_attack is not None and b_attack.rect.collidepoint(mouse):
+                    pl_index = None
+                    for index, ent in enumerate(ENCOUNTERS[ENC_INDEX].get_anim()):
+                        if type(ent) == Player:
+                            if ent.get_name() == ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_name():
+                                pl_index = index
+
+                    if pl_index is not None:
+                        self.inv_prompt(ent_select, 120, pl_index)
+                elif b_attack is not None and b_attack.rect.collidepoint(mouse) and not action_used:
                     attacker = ENCOUNTERS[ENC_INDEX].get_entity(turn_index)
                     print(attacker.get_name(), attacker.get_stat("Current HP"))
                     print(ent_target.get_name(), ent_target.get_stat("Current HP"))
                     ENCOUNTERS[ENC_INDEX].attack(ent_target, False, False)
                     print(attacker.get_name(), attacker.get_stat("Current HP"))
                     print(ent_target.get_name(), ent_target.get_stat("Current HP"))
+                    action_used = True
 
-                elif b_move is not None and b_move.rect.collidepoint(mouse) and ent_select is not None:
+                elif b_move is not None and b_move.rect.collidepoint(mouse) and ent_select is not None\
+                        and rem_speed > 0:
                     x_start = max(0, ent_coors[0] - int(rem_speed / 5))
                     x_end = min(MAP_MAX_X, ent_coors[0] + int(rem_speed / 5))
                     y_start = max(0, ent_coors[1] - int(rem_speed / 5))
@@ -1286,17 +1330,15 @@ class Display:
         while True:
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
+                self.CLICK = False
                 if b_yes.rect.collidepoint(mouse):
-                    self.CLICK = False
                     save()
                     self.TO_MAIN_MENU = True
                     return True
-                if b_no.rect.collidepoint(mouse):
-                    self.CLICK = False
+                elif b_no.rect.collidepoint(mouse):
                     self.TO_MAIN_MENU = True
                     return True
-                if b_close.rect.collidepoint(mouse):
-                    self.CLICK = False
+                elif b_close.rect.collidepoint(mouse):
                     return False
 
             self.end_page()
