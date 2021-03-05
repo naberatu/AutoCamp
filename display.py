@@ -668,6 +668,9 @@ class Display:
                 elif b_stats.rect.collidepoint(mouse):
                     pass        # TODO: Add stats prompt.
 
+                elif b_dice.rect.collidepoint(mouse):
+                    self.dice_prompt()
+
                 elif b_move is not None and b_move.rect.collidepoint(mouse) and ent_select is not None\
                         and rem_speed > 0:
                     x_start = max(0, ent_coors[0] - int(rem_speed / 5))
