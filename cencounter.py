@@ -150,6 +150,8 @@ class CEncounter(Encounter):
                 break
 
         obstacles = self.animate_list + self.inanimate_list
+        for obst in obstacles:
+            print(obst.get_name())
         obstacles.remove(actor)
 
         for ent in obstacles:
@@ -260,7 +262,7 @@ class CEncounter(Encounter):
         self.animate_list[:] = [self.animate_list[i[0]] for i in order]
 
     def next_turn(self):
-        self.turnCounter = (self.turnCounter + 1) % len(self.animate_list + self.inanimate_list)
+        self.turnCounter = (self.turnCounter + 1) % len(self.animate_list)
 
     def dealDMG(self, damage, target):
         object_list = self.animate_list + self.inanimate_list

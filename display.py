@@ -416,7 +416,7 @@ class Display:
         entity_coors = [-1, -1]
 
         x_start, x_end, y_start, y_end = 0, 0, 0, 0
-        rem_speed = 0
+        rem_speed = ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Speed")
 
         TILE = list()
         background = load_image(ENCOUNTERS[ENC_INDEX].get_bkgd(), map_pixels[0], map_pixels[1])
@@ -503,7 +503,6 @@ class Display:
                 # Control Buttons
                 # ==================================
                 BB_WID = 100
-
                 b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=WIDTH - BB_WID - 10, top=10,
                                         width=BB_WID, height=Q_HT)
                 b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=b_quitgame.rect.left - BB_WID - 10,
@@ -572,10 +571,10 @@ class Display:
                             break
                         for y in range(y_start, y_end):
                             if move_tiles[x][y] is not None and move_tiles[x][y].collidepoint(mouse):
-                                moved, dist = ENCOUNTERS[ENC_INDEX].enc_move(entity_coors[0], entity_coors[1], 0,
-                                                                             rem_speed, x, y)
-                                if moved:
-                                    rem_speed -= dist
+                                moved = ENCOUNTERS[ENC_INDEX].enc_move(entity_coors[0], entity_coors[1], 0,
+                                                                       rem_speed, x, y)
+                                if moved[0]:
+                                    rem_speed -= moved[1]
                                 flag = True
                                 break
                     map_reload = True
