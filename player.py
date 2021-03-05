@@ -3,6 +3,7 @@ from animate import Animate
 import random
 from items import c_items
 from statblock import StatBlock
+from copy import deepcopy
 
 role_dict = {
     "Barbarian": 12,
@@ -23,7 +24,8 @@ role_dict = {
 
 
 class Player(Animate):
-    def __init__(self, name, icon="./assets/item_drop.png", race=None, role=None, level=1, stat_block=StatBlock(), entity_id=random.randint(0, 99999)):
+    def __init__(self, name, icon="./assets/item_drop.png", race=None, role=None, level=1, stat_block=StatBlock(),
+                 entity_id=random.randint(0, 99999), money=0):
         super().__init__(name, icon, race, role, level, stat_block)      # should inherit everything this way
 
         self.entity_id = entity_id
@@ -32,22 +34,25 @@ class Player(Animate):
         self.maxInvWeight = 210         # Arbitrary value
         self.companion = None           # We can add functionality to adjust later
         self.type_tag = "player"
-        self.stat_block = stat_block
+        self.stat_block = deepcopy(stat_block)
 
         if race == ("Dwarf" or "Gnome" or "Halfling"):
-            self.stat_block.modify_stat("Speed", 25)
+            self.set_stats("Speed", 25)
         else:
-            self.stat_block.modify_stat("Speed", 30)
+            self.set_stats("Speed", 30)
 
-        self.stat_block.modify_stat("Hit Dice", role_dict[role])
+        self.set_stats("Armor Class", 10 + self.stat_block.get_mod("Dexterity"))
+
+        self.set_stats("Hit Dice", role_dict[role])
         if self.level == 1:
-            self.stat_block.modify_stat("Max HP", role_dict[role])
-            self.stat_block.modify_stat("Current HP", role_dict[role])
-            self.stat_block.modify_stat("Hit Dice Quantity", self.level)
+            self.set_stats("Max HP", role_dict[role])
+            self.set_stats("Current HP", role_dict[role])
+            self.set_stats("Hit Dice Quantity", self.level)
 
         self.weapon = None              # a player is either wielding a weapon, or isn't
         self.armor = None               # a player either is wearing armor, or ain't.
         self.money = {"gold": 0, "silver": 0, "copper": 0}      # The player's Money.
+        self.money_add(copper=money)
         self.feats = list()
         self.spellSlots = list()        # Make cell 1 hold number of Lvl 1 Spell Slots, cell 2 for lvl 2, etc.
         self.death_strikes = 0
@@ -134,6 +139,10 @@ class Player(Animate):
             print("[ER] Invalid amount entered!")
             return False
 
+    @staticmethod
+    def parse_AC(armor):
+        return int(c_items[armor].details.split()[1][1:])
+
     def swap_eq(self, item):
         temp = dict()
         for key in self.inventory:
@@ -168,6 +177,13 @@ class Player(Animate):
                     self.swap_eq(item)
                 else:
                     self.inv_add(self.armor)
+                new_ac = c_items[item].get_property("armor_class")
+                if c_items[item].get_property("modifier") == "dexterity":
+                    new_ac += self.stat_block.get_mod("Dexterity")
+                elif c_items[item].get_property("modifier") == "dexterity2":
+                    new_ac += min(2, self.stat_block.get_mod("Dexterity"))
+                self.set_stats("Armor Class", new_ac)
+
             res = self.inv_remove(item, discarding=True, notify=False)
             self.armor = item
             return res
@@ -182,6 +198,7 @@ class Player(Animate):
         elif item == self.armor:
             self.inv_add(item)
             self.armor = None
+            self.set_stats("Armor Class", 10 + self.stat_block.get_mod("Dexterity"))
         else:
             print("[ER] You do not have that equipped!")
 

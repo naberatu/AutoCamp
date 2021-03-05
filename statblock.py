@@ -1,4 +1,6 @@
 
+from math import floor
+
 class StatBlock:
     def __init__(self):
         # dictionary of all stats
@@ -59,9 +61,17 @@ class StatBlock:
 
     def get_stat(self, stat):
         if self.stats.keys().__contains__(stat):
+            if stat == "Speed" and type(self.stats["Speed"]) is tuple:
+                return max(self.stats["Speed"])
             return self.stats[stat]
         else:
             print("[ER] That stat is unavailable!")
+
+    def get_mod(self, stat):
+        if stat in list(self.stats.keys())[8:13]:
+            return int(floor((self.stats[stat] - 10) / 2))
+        else:
+            return None
 
     def get_dict(self):
         return self.stats

@@ -63,11 +63,11 @@ except:
     c_items["Studded Leather Armor"] = Inanimate("Studded Leather Armor", item_code=2, cost=4500, details="Provides +12 AC", weight=13, alpha=12, beta="dexterity")
 
     # # Medium Armor
-    c_items["Hide Armor"] = Inanimate("Hide Armor", item_code=2, cost=1000, details="Provides +12 AC", weight=12, alpha=12, beta="dexterity")
-    c_items["Chain Shirt"] = Inanimate("Chain Shirt", item_code=2, cost=5000, details="Provides +13 AC", weight=20, alpha=13, beta="dexterity")
-    c_items["Scale Mail"] = Inanimate("Scale Mail", item_code=2, cost=5000, details="Provides +14 AC", weight=45, alpha=14, beta="dexterity", gamma=True)
-    c_items["Breastplate"] = Inanimate("Breastplate", item_code=2, cost=40000, details="Provides +14 AC", weight=20, alpha=14, beta="dexterity")
-    c_items["Half Plate"] = Inanimate("Half Plate", item_code=2, cost=75000, details="Provides +15 AC", weight=40, alpha=15, beta="dexterity", gamma=True)
+    c_items["Hide Armor"] = Inanimate("Hide Armor", item_code=2, cost=1000, details="Provides +12 AC", weight=12, alpha=12, beta="dexterity2")
+    c_items["Chain Shirt"] = Inanimate("Chain Shirt", item_code=2, cost=5000, details="Provides +13 AC", weight=20, alpha=13, beta="dexterity2")
+    c_items["Scale Mail"] = Inanimate("Scale Mail", item_code=2, cost=5000, details="Provides +14 AC", weight=45, alpha=14, beta="dexterity2", gamma=True)
+    c_items["Breastplate"] = Inanimate("Breastplate", item_code=2, cost=40000, details="Provides +14 AC", weight=20, alpha=14, beta="dexterity2")
+    c_items["Half Plate"] = Inanimate("Half Plate", item_code=2, cost=75000, details="Provides +15 AC", weight=40, alpha=15, beta="dexterity2", gamma=True)
 
     # # Heavy Armor
     c_items["Ring Mail"] = Inanimate("Ring Mail", item_code=2, cost=3000, details="Provides +14 AC", weight=40, alpha=14, beta=None, gamma=True)

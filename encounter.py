@@ -21,33 +21,33 @@ class Encounter:
         self.vendor = vendor
         self.is_combat = is_combat
         self.running_loop = True
-        self.commands = {
-            "roll": "Roll di(ce)",
-            "move": "Change your current location",
-            "inv": "View more options regarding the party's inventory",
-            "stats": "View a party member's stats",
-            "rest": "Allow party members a moment of rest to recover",
-            "exit": "save and quit."
-        }
-        self.inv_commands = {
-            "use": "Use an item in this member's inventory",
-            "equip": "Arrange this member's equipment",
-            "dequip": "Remove this member's current equipment",
-            "discard": "Discard an item from this member's inventory",
-            "give": "Give an item from this member's inventory to another member",
-            "sell": "Sell an item in exchange for currency",
-            "cancel": "return to command menu",
-        }
-        self.vend_commands = {
-            "buy": "Purchase something from the vendor",
-            "haggle": "Attempt to haggle with the vendor",
-            "roll": "Roll di(ce)",
-            "move": "Change your current location",
-            "inv": "View more options regarding the party's inventory",
-            "stats": "View a party member's stats",
-            "rest": "Allow party members a moment of rest to recover",
-            "exit": "save and quit."
-        }
+        # self.commands = {
+        #     "roll": "Roll di(ce)",
+        #     "move": "Change your current location",
+        #     "inv": "View more options regarding the party's inventory",
+        #     "stats": "View a party member's stats",
+        #     "rest": "Allow party members a moment of rest to recover",
+        #     "exit": "save and quit."
+        # }
+        # self.inv_commands = {
+        #     "use": "Use an item in this member's inventory",
+        #     "equip": "Arrange this member's equipment",
+        #     "dequip": "Remove this member's current equipment",
+        #     "discard": "Discard an item from this member's inventory",
+        #     "give": "Give an item from this member's inventory to another member",
+        #     "sell": "Sell an item in exchange for currency",
+        #     "cancel": "return to command menu",
+        # }
+        # self.vend_commands = {
+        #     "buy": "Purchase something from the vendor",
+        #     "haggle": "Attempt to haggle with the vendor",
+        #     "roll": "Roll di(ce)",
+        #     "move": "Change your current location",
+        #     "inv": "View more options regarding the party's inventory",
+        #     "stats": "View a party member's stats",
+        #     "rest": "Allow party members a moment of rest to recover",
+        #     "exit": "save and quit."
+        # }
 
     def get_name(self):
         return self.name
@@ -73,6 +73,14 @@ class Encounter:
                 non_player.append(ent)
         self.animate_list = non_player
         return returning
+
+    def read_players(self):
+        player_list = list()
+        for ent in self.animate_list:
+            if type(ent) == Player:
+                player_list.append(ent)
+
+        return player_list
 
     def get_anim(self):
         return self.animate_list

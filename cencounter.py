@@ -3,7 +3,8 @@ from enemy import Enemy
 from player import Player
 from inanimate import Inanimate
 from map import Map
-
+from math import floor
+from items import c_items
 
 class CEncounter(Encounter):
     def __init__(self, name, is_shop=False, is_combat=True, anim=None, inanim=None, bkgd="./assets/rivermouth.jpg",
@@ -162,7 +163,7 @@ class CEncounter(Encounter):
             actor.set_coors(x=x_dest, y=y_dest, z=z_dest)
             return [True, distance]
 
-        return False
+        return [False, 0]
 
     def get_hint(self):
         response = ""
@@ -234,7 +235,7 @@ class CEncounter(Encounter):
     def determineSurprise(self):
         for ent in self.animate_list:
             if ent.is_stealthy:
-                stealth = self.performCheck("Stealth", ent)
+                stealth = self.performCheck("Stealth", None, ent)
                 for ent2 in self.animate_list:
                     if type(ent) != type(ent2) and stealth > self.passiveCheck("Perception", ent2, False, False, False):
                         ent2.is_surprised = True
@@ -262,16 +263,19 @@ class CEncounter(Encounter):
         self.turnCounter = (self.turnCounter + 1) % len(self.animate_list + self.inanimate_list)
 
     def dealDMG(self, damage, target):
+        object_list = self.animate_list + self.inanimate_list
+        currentEntity = object_list[self.turnCounter]
+
         targetHealth = target.get_stat("Current HP")
         targetHealth -= damage
 
-        print(self.currentEntity.get_name(), "attacked", target.get_name(), "!!")
+        print(currentEntity.get_name(), "attacked", target.get_name(), "!!")
         print(target.get_name(), "took", damage, "damage!!")
 
         if type(target) == Enemy and targetHealth <= 0:  # HP is -/0, enemy -> INSTANT DEATH
             target.set_stats("Current HP", 0)
             print(target.get_name(), "has died!!")
-            self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
+            # self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
             self.animate_list.remove(target)
 
         elif targetHealth >= 0:  # HP is +/0, player -> DMG
@@ -282,9 +286,9 @@ class CEncounter(Encounter):
         elif (targetHealth * -1) >= target.get_stat("Max HP"):  # HP is -, exceeds max HP-> INSTANT DEATH
             target.set_stats("Current HP", 0)
             print(target.get_name(), "has died!!")
-            self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
+            # self.mapList[target.get_coors()[1] - 1][(target.get_coors()[0] + ((1 * target.get_coors()[0]) - 1))] = ' '
             self.animate_list.remove(target)
-            self.enc_update_map()
+            # self.enc_update_map()
 
         elif (targetHealth * -1) <= target.get_stat("Max HP"):  # HP is negative, doesn't exceed max HP -> UNCONSCIOUS
             target.set_stats("Current HP", 0)
@@ -295,17 +299,78 @@ class CEncounter(Encounter):
             print(target.get_name(), "is unconscious!!")
             target.mod_conditions(True, "Unconscious")
 
+    def parse_finesse(self, weapon):
+        desc = weapon.details
+        stripped_desc = ""
+        for c in desc:
+            if c.isalnum() or c.isspace():
+                stripped_desc+= c
+        if "Finesse" in stripped_desc:
+            return True
+        return False
+
     def attack(self, target, adv, disadv) -> None:
+        object_list = self.animate_list + self.inanimate_list
+        currentEntity = object_list[self.turnCounter]
+
         toHit = target.get_stat("Armor Class")
         attempt = 0
+        weapon = None
+        atk_mod = None
+        dmg_type = None
+        str_attempt = self.performCheck("Strength", None, currentEntity, adv, disadv)
+        dex_attempt = self.performCheck("Dexterity", None, currentEntity, adv, disadv)
+        # This will print two rolls to the console, but only the appropriate one will be used based on weapon
 
-        # if "melee" in self.currentEntity.get_weapon().get_use():
-        attempt = self.performCheck("Strength", None, self.currentEntity, adv, disadv)
-        # elif "ranged" in self.currentEntity.get_weapon().get_use():
-        #     attempt = self.performCheck("Dexterity", self.currentEntity, adv, disadv)
+        if currentEntity.type_tag is "player" and currentEntity.get_weapon() is not None:
+            weapon = c_items[currentEntity.get_weapon()]  # Weapon is object
+            dmg_type = weapon.properties["dmg_type"]
+
+        if weapon is None or weapon.properties["range_melee"] == 0:  # Melee attack
+            attempt = str_attempt
+            atk_mod = "Strength"
+
+        elif weapon.properties["range_melee"] == 1:  # Ranged Attack
+            attempt = dex_attempt
+            atk_mod = "Dexterity"
+
+        if weapon is not None and self.parse_finesse(weapon):  # FINESSE, picks better of STR & DEX
+            str_mod = self.modifier("Strength", currentEntity)
+            dex_mod = self.modifier("Dexterity", currentEntity)
+            if str_mod > dex_mod:
+                attempt = str_attempt
+                atk_mod = "Strength"
+                print("Strength chosen!")
+            else:
+                attempt = dex_attempt
+                atk_mod = "Dexterity"
+                print("Dexterity chosen!")
+
+        if weapon.name in currentEntity.weapon_prof:  # checks for proficiency
+            attempt += currentEntity.stat_block.get_stat("Proficiency Bonus")
+            print("You are proficient with this weapon! +{} to attempt against AC!".format(
+                currentEntity.stat_block.get_stat("Proficiency Bonus")))
 
         if attempt >= toHit:
-            damage = self.rollDice(1, 20, False)
+            if weapon is None:  # Unarmed
+                damage = self.rollDice(1, 20, print_results=False) + self.modifier("Strength", currentEntity)
+            else:
+                damage = self.rollDice(weapon.properties["dmg_dice"], weapon.properties["dmg_sides"],
+                                       print_results=False) + self.modifier(atk_mod, currentEntity)
+
+            if target.type_tag is "enemy":
+                if dmg_type in target.dmg_immunities:
+                    damage = 0
+                    # print("{} is immune to {}!".format(target.get_name(), dmg_type))
+                elif dmg_type in target.dmg_resistances:
+                    # print("Damage before: ", damage)
+                    damage = floor(damage / 2)
+                    # print("Damage after: ", damage)
+                    # print("{} is resistant to {}!".format(target.get_name(), dmg_type))
+                elif dmg_type in target.dmg_vulnerabilities:
+                    damage = damage * 2
+                    # print("{} is vulnerable to {}!".format(target.get_name(), dmg_type))
+
             self.dealDMG(damage, target)
         else:
             print("Attack failed!")

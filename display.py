@@ -130,6 +130,8 @@ def save():
     ENCOUNTERS[0] = ENC_INDEX
     pickle.dump(EMPTY_LIST, open("players.camp", "wb"))
     pickle.dump(EMPTY_LIST, open("savegame.camp", "wb"))
+
+    PLAYERS = ENCOUNTERS[ENC_INDEX].read_players()
     pickle.dump(PLAYERS, open("players.camp", "wb"))
     pickle.dump(ENCOUNTERS, open("savegame.camp", "wb"))
     ASK_SAVE = False
@@ -307,7 +309,7 @@ class Display:
     TO_MAIN_MENU = False
     TO_TRAVEL = False
 
-    global PLAYERS, ENCOUNTERS, ENC_INDEX, MODE, EMPTY_LIST
+    global PLAYERS, ENCOUNTERS, ENC_INDEX, EMPTY_LIST
 
     # Load Data
     # ==================================
@@ -410,7 +412,6 @@ class Display:
         entity_index = turn_index
         ENTITY = None
         entity_coors = [-1, -1]
-        num_entities = 0
 
         x_start, x_end, y_start, y_end = 0, 0, 0, 0
         rem_speed = 0
@@ -519,6 +520,7 @@ class Display:
                 b_move = TextButton(parent=self.SCREEN, text="Move", left=b_endturn.rect.left - BB_WID - 10,
                                     top=b_endturn.rect.top, width=BB_WID, height=Q_HT)
 
+                b_inv = None
                 if turn_index == entity_index:
                     b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=b_move.rect.left - BB_WID - 10,
                                        top=b_endturn.rect.top, width=BB_WID, height=Q_HT)
@@ -584,10 +586,17 @@ class Display:
                     ENCOUNTERS[ENC_INDEX].next_turn()
                     turn_index = ENCOUNTERS[ENC_INDEX].get_turn()
                     entity_index = turn_index
+                    rem_speed = ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Speed")
                     ASK_SAVE = True
                     map_reload = True
+                elif b_inv is not None and b_inv.rect.collidepoint(mouse):
+                    # print(ENTITY.get_name())
+                    # print(ENTITY)
+                    # print(PLAYERS)
+                    self.inv_prompt(ENTITY, 120, PLAYERS.index(ENTITY))
+                    map_reload = True
                 elif b_move.rect.collidepoint(mouse) and ENTITY is not None:
-                    rem_speed = ENTITY.get_stat("Speed")
+                    # rem_speed = ENTITY.get_stat("Speed")
 
                     x_start = max(0, entity_coors[0] - int(rem_speed / 5))
                     x_end = min(MAP_MAX_X, entity_coors[0] + int(rem_speed / 5))
@@ -891,6 +900,7 @@ class Display:
                         if b_equip.rect.collidepoint(mouse):
                             player.inv_equip(items_to_show[item_sel_index])
                             ASK_SAVE = True
+
                     elif sel_button == DQP:
                         if b_dequip.rect.collidepoint(mouse):
                             if item_sel_index == -1:
@@ -899,7 +909,8 @@ class Display:
                             if item_sel_index == -2:
                                 player.inv_dequip(player.get_armor())
                                 ASK_SAVE = True
-                    elif b_discard.rect.collidepoint(mouse):
+
+                    if b_discard.rect.collidepoint(mouse):
                         amt = self.number_prompt("Discard Item", player.inventory[items_to_show[item_sel_index]],
                                                  desc_left, tb_desc.rect.bottom, width=desc_width, height=desc_height)
                         if amt:
