@@ -79,10 +79,13 @@ class CEncounter(Encounter):
         self.map = Map(self.map_max_x, self.map_max_y, self.animate_list, self.inanimate_list)
 
     def enemyInRange(self):
-        location = self.currentEntity.get_coors()
+        object_list = self.animate_list + self.inanimate_list
+        location = object_list[self.turnCounter].get_coors()
         x, y, z = location[0], location[1], location[2]
         nearbyCoors = []
-        inRange = []
+        enemy_attacker = False
+        player_attacker = False
+        # inRange = []
 
         if y > 1:  # N
             nearbyCoors.append([x, y - 1, z])
@@ -101,21 +104,33 @@ class CEncounter(Encounter):
         if x > 1 and y > 1:  # NW
             nearbyCoors.append([x - 1, y - 1, z])
 
-        if not self.currentEntity.get_iff():  # if attacker is a player
-            for ent in self.animate_list:
-                if ent.get_iff():
-                    otherCoors = ent.get_coors()
-                    if otherCoors in nearbyCoors:
-                        inRange.append(ent)
+        if type(self.get_entity(self.turnCounter)) is Enemy:
+            enemy_attacker = True
+        elif type(self.get_entity(self.turnCounter)) is Player:
+            player_attacker = True
 
-        else:  # if attacker is an enemy
-            for ent in self.animate_list:
-                if not ent.get_iff():
-                    otherCoors = ent.get_coors()
-                    if otherCoors in nearbyCoors:
-                        inRange.append(ent)
+        for coors in nearbyCoors:
+            index = self.entity_at(coors[0], coors[1])
+            if index is not None and player_attacker and type(self.get_entity(index)) is Enemy:
+                return True
+            if index is not None and enemy_attacker and type(self.get_entity(index)) is Player:
+                return True
 
-        return inRange
+        return False
+        # if not self.currentEntity.get_iff():  # if attacker is a player
+        #     for ent in self.animate_list:
+        #         if ent.get_iff():
+        #             otherCoors = ent.get_coors()
+        #             if otherCoors in nearbyCoors:
+        #                 inRange.append(ent)
+        #
+        # else:  # if attacker is an enemy
+        #     for ent in self.animate_list:
+        #         if not ent.get_iff():
+        #             otherCoors = ent.get_coors()
+        #             if otherCoors in nearbyCoors:
+        #                 inRange.append(ent)
+
 
     # ===============================================================================
     # Map, Movement, and Hint Methods

@@ -525,6 +525,10 @@ class Display:
                     b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=b_move.rect.left - BB_WID - 10,
                                        top=b_endturn.rect.top, width=BB_WID, height=Q_HT)
 
+                if ENCOUNTERS[ENC_INDEX].enemyInRange():
+                    b_attack = TextButton(parent=self.SCREEN, text="Attack", left=b_move.rect.left,
+                                          top=b_endturn.rect.top - Q_HT - 10, width=BB_WID, height=Q_HT)
+
                 # Blit out Entities:
                 # ==================================
                 entity_list = ENCOUNTERS[ENC_INDEX].get_inanim() + ENCOUNTERS[ENC_INDEX].get_anim()
