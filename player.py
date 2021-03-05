@@ -58,6 +58,7 @@ class Player(Animate):
         self.death_strikes = 0
         self.death_evasions = 0
         self.is_stable = True
+        self.weapon_prof = set()
 
     # ==================================
     # Inventory

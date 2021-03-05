@@ -411,6 +411,7 @@ class Display:
         turn_index = ENCOUNTERS[ENC_INDEX].get_turn()
         entity_index = turn_index
         ENTITY = None
+        TARGET = None
         entity_coors = [-1, -1]
 
         x_start, x_end, y_start, y_end = 0, 0, 0, 0
@@ -525,9 +526,12 @@ class Display:
                     b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=b_move.rect.left - BB_WID - 10,
                                        top=b_endturn.rect.top, width=BB_WID, height=Q_HT)
 
-                if ENCOUNTERS[ENC_INDEX].enemyInRange():
+                b_attack = None
+                target_found, TARGET = ENCOUNTERS[ENC_INDEX].enemyInRange()[0], ENCOUNTERS[ENC_INDEX].enemyInRange()[1]
+                if target_found:
                     b_attack = TextButton(parent=self.SCREEN, text="Attack", left=b_move.rect.left,
                                           top=b_endturn.rect.top - Q_HT - 10, width=BB_WID, height=Q_HT)
+                    TARGET = ENCOUNTERS[ENC_INDEX].get_entity(TARGET)
 
                 # Blit out Entities:
                 # ==================================
@@ -599,6 +603,14 @@ class Display:
                     # print(PLAYERS)
                     self.inv_prompt(ENTITY, 120, PLAYERS.index(ENTITY))
                     map_reload = True
+                elif b_attack is not None and b_attack.rect.collidepoint(mouse):
+                    attacker = ENCOUNTERS[ENC_INDEX].get_entity(turn_index)
+                    print(attacker.get_name(), attacker.get_stat("Current HP"))
+                    print(TARGET.get_name(), TARGET.get_stat("Current HP"))
+                    ENCOUNTERS[ENC_INDEX].attack(TARGET, False, False)
+                    print(attacker.get_name(), attacker.get_stat("Current HP"))
+                    print(TARGET.get_name(), TARGET.get_stat("Current HP"))
+
                 elif b_move.rect.collidepoint(mouse) and ENTITY is not None:
                     # rem_speed = ENTITY.get_stat("Speed")
 

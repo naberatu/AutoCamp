@@ -12,48 +12,50 @@ except:
 
     # Weapons ==========================================================================================================
     # # Simple Melee Weapons
-    c_items["Club"] = Inanimate("Club", item_code=1, cost=10, details="A wooden club. {Light}", weight=2, alpha=1, beta=4, gamma="bludgeoning")
-    c_items["Dagger"] = Inanimate("Dagger", item_code=1, cost=200, details="An iron dagger. {Finesse, light, thrown (range 20/60)}", weight=1, alpha=1, beta=4, gamma="piercing")
-    c_items["Greatclub"] = Inanimate("Greatclub", item_code=1, cost=20, details="A massive club. {Two-handed}", weight=10, alpha=1, beta=8, gamma="bludgeoning")
-    c_items["Handaxe"] = Inanimate("Handaxe", item_code=1, cost=500, details="A simple handaxe. {Light, thrown (range 20/60)}", weight=2, alpha=1, beta=6, gamma="slashing")
-    c_items["Javelin"] = Inanimate("Javelin", item_code=1, cost=50, details="A sturdy javelin. {Thrown (range 30/120)}", weight=2, alpha=1, beta=6, gamma="slashing")
-    c_items["Light Hammer"] = Inanimate("Light Hammer", item_code=1, cost=200, details="A smaller, lighter hammer. {Light, thrown (range 20/60)}", weight=2, alpha=1, beta=4, gamma="bludgeoning")
-    c_items["Mace"] = Inanimate("Mace", item_code=1, cost=5, details="A weapon with a bladed head.", weight=4, alpha=1, beta=6, gamma="bludgeoning")
-    c_items["Quarterstaff"] = Inanimate("Quarterstaff", item_code=1, cost=200, details="A light and powerful staff. {Versatile (1d8)}", weight=4, alpha=1, beta=6, gamma="bludgeoning")
-    c_items["Sickle"] = Inanimate("Sickle", item_code=1, cost=100, details="A sharp sickle. {Light}", weight=2, alpha=1, beta=6, gamma="slashing")
-    c_items["Spear"] = Inanimate("Spear", item_code=1, cost=100, details="A sharpened spear. {Thrown (range 20/60), versatile (1d8)}", weight=3, alpha=1, beta=6, gamma="piercing")
+    c_items["Club"] = Inanimate("Club", item_code=1, cost=10, details="A wooden club. {Light}", weight=2, alpha=1, beta=4, gamma="bludgeoning", delta=0)
+    c_items["Dagger"] = Inanimate("Dagger", item_code=1, cost=200, details="An iron dagger. {Finesse, light, thrown (range 20/60)}", weight=1, alpha=1, beta=4, gamma="piercing", delta=0)
+    c_items["Greatclub"] = Inanimate("Greatclub", item_code=1, cost=20, details="A massive club. {Two-handed}", weight=10, alpha=1, beta=8, gamma="bludgeoning", delta=0)
+    c_items["Handaxe"] = Inanimate("Handaxe", item_code=1, cost=500, details="A simple handaxe. {Light, thrown (range 20/60)}", weight=2, alpha=1, beta=6, gamma="slashing", delta=0)
+    c_items["Javelin"] = Inanimate("Javelin", item_code=1, cost=50, details="A sturdy javelin. {Thrown (range 30/120)}", weight=2, alpha=1, beta=6, gamma="slashing", delta=0)
+    c_items["Light Hammer"] = Inanimate("Light Hammer", item_code=1, cost=200, details="A smaller, lighter hammer. {Light, thrown (range 20/60)}", weight=2, alpha=1, beta=4, gamma="bludgeoning", delta=0)
+    c_items["Mace"] = Inanimate("Mace", item_code=1, cost=5, details="A weapon with a bladed head.", weight=4, alpha=1, beta=6, gamma="bludgeoning", delta=0)
+    c_items["Quarterstaff"] = Inanimate("Quarterstaff", item_code=1, cost=200, details="A light and powerful staff. {Versatile (1d8)}", weight=4, alpha=1, beta=6, gamma="bludgeoning", delta=0)
+    c_items["Sickle"] = Inanimate("Sickle", item_code=1, cost=100, details="A sharp sickle. {Light}", weight=2, alpha=1, beta=6, gamma="slashing", delta=0)
+    c_items["Spear"] = Inanimate("Spear", item_code=1, cost=100, details="A sharpened spear. {Thrown (range 20/60), versatile (1d8)}", weight=3, alpha=1, beta=6, gamma="piercing", delta=0)
 
     # # Simple Ranged Weapons
-    c_items["Crossbow (Light)"] = Inanimate("Crossbow (Light)", item_code=1, cost=2500, details="A light-weight crossbow. {Ammunition (range 80/320), loading, two-handed}", weight=5, alpha=1, beta=8, gamma="piercing")
-    c_items["Dart"] = Inanimate("Dart", item_code=1, cost=5, details="A small, pointed projectile. {Finesse, thrown (range 20/60)}", weight=.25, alpha=1, beta=4, gamma="piercing")
-    c_items["Shortbow"] = Inanimate("Shortbow", item_code=1, cost=2500, details="A smaller arrow-shooter. {Ammunition (range 80/320), two-handed}", weight=2, alpha=1, beta=6, gamma="piercing")
-    c_items["Sling"] = Inanimate("Sling", item_code=1, cost=10, details="A forked stick with a leather strap. {Ammunition (range 30/120)}", weight=0, alpha=1, beta=4, gamma="bludgeoning")
+    c_items["Crossbow (Light)"] = Inanimate("Crossbow (Light)", item_code=1, cost=2500, details="A light-weight crossbow. {Ammunition (range 80/320), loading, two-handed}", weight=5, alpha=1, beta=8, gamma="piercing", delta=1)
+    c_items["Dart"] = Inanimate("Dart", item_code=1, cost=5, details="A small, pointed projectile. {Finesse, thrown (range 20/60)}", weight=.25, alpha=1, beta=4, gamma="piercing", delta=1)
+    c_items["Shortbow"] = Inanimate("Shortbow", item_code=1, cost=2500, details="A smaller arrow-shooter. {Ammunition (range 80/320), two-handed}", weight=2, alpha=1, beta=6, gamma="piercing", delta=1)
+    c_items["Sling"] = Inanimate("Sling", item_code=1, cost=10, details="A forked stick with a leather strap. {Ammunition (range 30/120)}", weight=0, alpha=1, beta=4, gamma="bludgeoning", delta=1)
 
     # # Martial Melee Weapons
-    c_items["Battleaxe"] = Inanimate("Battleaxe", item_code=1, cost=1000, details="An axe, ready for battle. {Versatile (1d10)}", weight=4, alpha=1, beta=8, gamma="slashing")
-    c_items["Flail"] = Inanimate("Flail", item_code=1, cost=1000, details="A wooden staff with a short heavy stick swinging from it.", weight=2, alpha=1, beta=8, gamma="bludgeoning")
-    c_items["Glaive"] = Inanimate("Glaive", item_code=1, cost=2000, details="A sword. {Heavy, reach, two-handed}", weight=6, alpha=1, beta=10, gamma="slashing")
-    c_items["Greataxe"] = Inanimate("Greataxe", item_code=1, cost=3000, details="A large, heavy battleaxe with a double-bladed head. {Heavy, two-handed}", weight=7, alpha=1, beta=12, gamma="slashing")
-    c_items["Greatsword"] = Inanimate("Greatsword", item_code=1, cost=5000, details="A massive, two-handed Medieval sword. {Heavy, two-handed}", weight=6, alpha=2, beta=6, gamma="slashing")
-    c_items["Halberd"] = Inanimate("Halberd", item_code=1, cost=2000, details="A combined spear and battleaxe. {Heavy, reach, two-handed}", weight=6, alpha=1, beta=10, gamma="slashing")
-    c_items["Lance"] = Inanimate("Lance", item_code=1, cost=1000, details="A long weapon for thrusting, having a wooden shaft and a pointed steel head. {Reach, special}", weight=6, alpha=1, beta=12, gamma="piercing")
-    c_items["Longsword"] = Inanimate("Longsword", item_code=1, cost=1500, details="A straight double-edged blade. {Versatile (1d10)}", weight=3, alpha=1, beta=8, gamma="slashing")
-    c_items["Maul"] = Inanimate("Maul", item_code=1, cost=1000, details="A heavy wooden-headed hammer. {Heavy, two-handed}", weight=10, alpha=2, beta=6, gamma="bludgeoning")
-    c_items["Morningstar"] = Inanimate("Morningstar", item_code=1, cost=1500, details="A club with a heavy spiked head.", weight=4, alpha=1, beta=8, gamma="piercing")
-    c_items["Pike"] = Inanimate("Pike", item_code=1, cost=500, details="A long wooden shaft with a pointed metal head. {Heavy, reach, two-handed}", weight=18, alpha=1, beta=10, gamma="piercing")
-    c_items["Rapier"] = Inanimate("Rapier", item_code=1, cost=2500, details="A thin, light sharp-pointed sword used for thrusting. {Finesse}", weight=2, alpha=1, beta=8, gamma="piercing")
-    c_items["Scimitar"] = Inanimate("Scimitar", item_code=1, cost=2500, details="A short sword with a curved blade that broadens toward the point. {Finesse, light}", weight=3, alpha=1, beta=6, gamma="slashing")
-    c_items["Shortsword"] = Inanimate("Shortsword", item_code=1, cost=1000, details="A steel shortsword. {Finesse, light}", weight=2, alpha=1, beta=6, gamma="piercing")
-    c_items["Trident"] = Inanimate("Trident", item_code=1, cost=500, details="A three-pronged spear. {Thrown (range 20/60), versatile (1d8)}", weight=4, alpha=1, beta=6, gamma="piercing")
-    c_items["War Pick"] = Inanimate("War Pick", item_code=1, cost=500, details="A war hammer with a very long spike on the reverse of the hammer head.", weight=2, alpha=1, beta=8, gamma="piercing")
-    c_items["Warhammer"] = Inanimate("Warhammer", item_code=1, cost=1500, details="A long-handled metal hammer. {Versatile (1d10)}", weight=2, alpha=1, beta=8, gamma="bludgeoning")
-    c_items["Whip"] = Inanimate("Whip", item_code=1, cost=200, details="A strip of leather fastened to a handle. {Finesse, reach}", weight=3, alpha=1, beta=4, gamma="slashing")
+    c_items["Battleaxe"] = Inanimate("Battleaxe", item_code=1, cost=1000, details="An axe, ready for battle. {Versatile (1d10)}", weight=4, alpha=1, beta=8, gamma="slashing", delta=0)
+    c_items["Flail"] = Inanimate("Flail", item_code=1, cost=1000, details="A wooden staff with a short heavy stick swinging from it.", weight=2, alpha=1, beta=8, gamma="bludgeoning", delta=0)
+    c_items["Glaive"] = Inanimate("Glaive", item_code=1, cost=2000, details="A sword. {Heavy, reach, two-handed}", weight=6, alpha=1, beta=10, gamma="slashing", delta=0)
+    c_items["Greataxe"] = Inanimate("Greataxe", item_code=1, cost=3000, details="A large, heavy battleaxe with a double-bladed head. {Heavy, two-handed}", weight=7, alpha=1, beta=12, gamma="slashing", delta=0)
+    c_items["Greatsword"] = Inanimate("Greatsword", item_code=1, cost=5000, details="A massive, two-handed Medieval sword. {Heavy, two-handed}", weight=6, alpha=2, beta=6, gamma="slashing", delta=0)
+    c_items["Halberd"] = Inanimate("Halberd", item_code=1, cost=2000, details="A combined spear and battleaxe. {Heavy, reach, two-handed}", weight=6, alpha=1, beta=10, gamma="slashing", delta=0)
+    c_items["Lance"] = Inanimate("Lance", item_code=1, cost=1000, details="A long weapon for thrusting, having a wooden shaft and a pointed steel head. {Reach, special}", weight=6, alpha=1, beta=12, gamma="piercing", delta=0)
+    c_items["Longsword"] = Inanimate("Longsword", item_code=1, cost=1500, details="A straight double-edged blade. {Versatile (1d10)}", weight=3, alpha=1, beta=8, gamma="slashing", delta=0)
+    c_items["Maul"] = Inanimate("Maul", item_code=1, cost=1000, details="A heavy wooden-headed hammer. {Heavy, two-handed}", weight=10, alpha=2, beta=6, gamma="bludgeoning", delta=0)
+    c_items["Morningstar"] = Inanimate("Morningstar", item_code=1, cost=1500, details="A club with a heavy spiked head.", weight=4, alpha=1, beta=8, gamma="piercing", delta=0)
+    c_items["Pike"] = Inanimate("Pike", item_code=1, cost=500, details="A long wooden shaft with a pointed metal head. {Heavy, reach, two-handed}", weight=18, alpha=1, beta=10, gamma="piercing", delta=0)
+    c_items["Rapier"] = Inanimate("Rapier", item_code=1, cost=2500, details="A thin, light sharp-pointed sword used for thrusting. {Finesse}", weight=2, alpha=1, beta=8, gamma="piercing", delta=0)
+    c_items["Scimitar"] = Inanimate("Scimitar", item_code=1, cost=2500, details="A short sword with a curved blade that broadens toward the point. {Finesse, light}", weight=3, alpha=1, beta=6, gamma="slashing", delta=0)
+    c_items["Shortsword"] = Inanimate("Shortsword", item_code=1, cost=1000, details="A steel shortsword. {Finesse, light}", weight=2, alpha=1, beta=6, gamma="piercing", delta=0)
+    c_items["Trident"] = Inanimate("Trident", item_code=1, cost=500, details="A three-pronged spear. {Thrown (range 20/60), versatile (1d8)}", weight=4, alpha=1, beta=6, gamma="piercing", delta=0)
+    c_items["War Pick"] = Inanimate("War Pick", item_code=1, cost=500, details="A war hammer with a very long spike on the reverse of the hammer head.", weight=2, alpha=1, beta=8, gamma="piercing", delta=0)
+    c_items["Warhammer"] = Inanimate("Warhammer", item_code=1, cost=1500, details="A long-handled metal hammer. {Versatile (1d10)}", weight=2, alpha=1, beta=8, gamma="bludgeoning", delta=0)
+    c_items["Whip"] = Inanimate("Whip", item_code=1, cost=200, details="A strip of leather fastened to a handle. {Finesse, reach}", weight=3, alpha=1, beta=4, gamma="slashing", delta=0)
 
     # # Martial Ranged Weapons
-    c_items["Blowgun"] = Inanimate("Blowgun", item_code=1, cost=1000, details="A long tube. {Ammunition (range 25/100), loading}", weight=1, alpha=1, beta=1, gamma="piercing")
-    c_items["Crossbow (Hand)"] = Inanimate("Crossbow (Hand)", item_code=1, cost=7500, details="A smaller crossbow. {Ammunition (range 30/120), light, loading}", weight=3, alpha=1, beta=6, gamma="piercing")
-    c_items["Crossbow (Heavy)"] = Inanimate("Crossbow (Heavy)", item_code=1, cost=5000, details="A heavy-weight crossbow. {Ammunition (range 100/400), heavy, loading, two-handed}", weight=18, alpha=1, beta=10, gamma="piercing")
-    c_items["Longbow"] = Inanimate("Longbow", item_code=1, cost=5000, details="A large bow drawn by hand. {Ammunition (range 150/600), heavy, two-handed}", weight=2, alpha=1, beta=8, gamma="piercing")
+    # For the blowgun, does 1 piercing dmg
+    c_items["Blowgun"] = Inanimate("Blowgun", item_code=1, cost=1000, details="A long tube. {Ammunition (range 25/100), loading}", weight=1, alpha=1, beta=1, gamma="piercing", delta=1)
+    c_items["Crossbow (Hand)"] = Inanimate("Crossbow (Hand)", item_code=1, cost=7500, details="A smaller crossbow. {Ammunition (range 30/120), light, loading}", weight=3, alpha=1, beta=6, gamma="piercing", delta=1)
+    c_items["Crossbow (Heavy)"] = Inanimate("Crossbow (Heavy)", item_code=1, cost=5000, details="A heavy-weight crossbow. {Ammunition (range 100/400), heavy, loading, two-handed}", weight=18, alpha=1, beta=10, gamma="piercing", delta=1)
+    c_items["Longbow"] = Inanimate("Longbow", item_code=1, cost=5000, details="A large bow drawn by hand. {Ammunition (range 150/600), heavy, two-handed}", weight=2, alpha=1, beta=8, gamma="piercing", delta=1)
+    # For the net, does no dmg
     c_items["Net"] = Inanimate("Net", item_code=1, cost=100, details="An open-meshed fabric woven together at regular intervals. {Special, thrown (range 5/15)}", weight=3)
 
     # Armor ============================================================================================================
@@ -190,12 +192,50 @@ except:
     c_items["Whetstone"] = Inanimate("Whetstone", item_code=4, cost=1, details="A standard whetstone used to sharpen blades.", max_stack=100, weight=1)
 
     # Tools ============================================================================================================
-    # # Consumable
+    # # Artisan's Tools
+    c_items["Alchemist's Supplies"] = Inanimate("Alchemist's Supplies", item_code=4, cost=5000, details="Special tools needed to pursue alchemy. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=8)
+    c_items["Brewer's Supplies"] = Inanimate("Brewer's Supplies", item_code=4, cost=2000, details="Special tools needed to pursue brewing. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=9)
+    c_items["Calligrapher's Supplies"] = Inanimate("Calligrapher's Supplies", item_code=4, cost=1000, details="Special tools needed to pursue calligraphy. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=5)
+    c_items["Carpenter's Tools"] = Inanimate("Carpenter's Tools", item_code=4, cost=500, details="Special tools needed to pursue carpentry. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=6)
+    c_items["Cartographer's Tools"] = Inanimate("Cartographer's Tools", item_code=4, cost=1500, details="Special tools needed to pursue cartography. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=6)
+    c_items["Cobbler's Tools"] = Inanimate("Cobbler's Tools", item_code=4, cost=500, details="Special tools needed to pursue cobbling. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=5)
+    c_items["Cook's Utensils"] = Inanimate("Cook's Utensils", item_code=4, cost=100, details="Special tools needed to pursue cooking. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=8)
+    c_items["Glassblower's Tools"] = Inanimate("Glassblower's Tools", item_code=4, cost=3000, details="Special tools needed to pursue glassblowing. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=5)
+    c_items["Jeweler's Tools"] = Inanimate("Jeweler's Tools", item_code=4, cost=2500, details="Special tools needed to pursue jeweling. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=2)
+    c_items["Leatherworker's Tools"] = Inanimate("Leatherworker's Tools", item_code=4, cost=500, details="Special tools needed to pursue leatherworking. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=5)
+    c_items["Mason's Tools"] = Inanimate("Mason's Tools", item_code=4, cost=1000, details="Special tools needed to pursue masonry. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=8)
+    c_items["Painter's Supplies"] = Inanimate("Painter's Supplies", item_code=4, cost=1000, details="Special tools needed to pursue painting. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=5)
+    c_items["Potter's Tools"] = Inanimate("Potter's Tools", item_code=4, cost=1000, details="Special tools needed to pursue pottery. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=3)
+    c_items["Smith's Tools"] = Inanimate("Smith's Tools", item_code=4, cost=2000, details="Special tools needed to pursue smithing. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=8)
+    c_items["Tinker's Tools"] = Inanimate("Tinker's Tools", item_code=4, cost=5000, details="Special tools needed to pursue tinkering. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=10)
+    c_items["Weaver's Tools"] = Inanimate("Weaver's Tools", item_code=4, cost=100, details="Special tools needed to pursue weaving. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=5)
+    c_items["Woodcarver's Tools"] = Inanimate("Woodcarver's Tools", item_code=4, cost=100, details="Special tools needed to pursue woodcarving. Proficiency with this set of tools lets you add your proficiency bonus to any ability checks you make using the tools in your craft.", max_stack=100, weight=5)
 
-    # Mounts & Vehicles ================================================================================================
+    # # Gaming Set
+    c_items["Dice Set"] = Inanimate("Dice Set", item_code=4, cost=10, details="A set of dice. If you are proficient with a gaming set, you can add your proficiency bonus to ability checks you make to play a game with that set.", max_stack=100, weight=0)
+    c_items["Dragonchess Set"] = Inanimate("Dragonchess Set", item_code=4, cost=100, details="A set of pieces needed for dragonchess. If you are proficient with a gaming set, you can add your proficiency bonus to ability checks you make to play a game with that set.", max_stack=100, weight=0.5)
+    c_items["Playing Card Set"] = Inanimate("Playing Card Set", item_code=4, cost=50, details="A full deck of playing cards. If you are proficient with a gaming set, you can add your proficiency bonus to ability checks you make to play a game with that set.", max_stack=100, weight=0)
+    c_items["Three-Dragon Ante Set"] = Inanimate("Three-Dragon Ante Set", item_code=4, cost=100, details="All the stuff you need for a game of three-dragon ante, a card game of luck and skill. If you are proficient with a gaming set, you can add your proficiency bonus to ability checks you make to play a game with that set.", max_stack=100, weight=0)
 
-    # Trade Goods ======================================================================================================
+    # # Musical Instruments
+    c_items["Bagpipes"] = Inanimate("Bagpipes", item_code=4, cost=3000, details="A woodwind instrument using enclosed reeds fed from a constant reservoir of air in the form of a bag. If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=6)
+    c_items["Drum"] = Inanimate("Drum", item_code=4, cost=600, details="A percussion instrument sounded by being struck with sticks or the hands. If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=3)
+    c_items["Dulcimer"] = Inanimate("Dulcimer", item_code=4, cost=2500, details="A musical instrument with a long rounded body and a fretted fingerboard, played by bowing, plucking, and strumming. If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=10)
+    c_items["Flute"] = Inanimate("Flute", item_code=4, cost=200, details="A wind instrument made from a tube with holes along it that are stopped by the fingers or keys. If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=1)
+    c_items["Lute"] = Inanimate("Lute", item_code=4, cost=3500, details="A plucked stringed instrument with a long neck bearing frets and a rounded body with a flat front that is shaped like a halved egg. If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=2)
+    c_items["Lyre"] = Inanimate("Lyre", item_code=4, cost=3000, details="A stringed instrument like a small U-shaped harp with strings fixed to a crossbar. If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus. ", max_stack=100, weight=2)
+    c_items["Horn"] = Inanimate("Horn", item_code=4, cost=300, details="A wind instrument, conical in shape or wound into a spiral. If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=2)
+    c_items["Pan Flute"] = Inanimate("Pan Flute", item_code=4, cost=1200, details="A wind instrument consisting of multiple pipes of gradually increasing length and occasionally girth. If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=2)
+    c_items["Shawm"] = Inanimate("Shawm", item_code=4, cost=200, details="A wind instrument with a double reed enclosed in a wooden mouthpiece, and having a penetrating tone.  If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=1)
+    c_items["Viol"] = Inanimate("Viol", item_code=4, cost=3000, details="A musical instrument, typically six-stringed, held vertically and played with a bow.  If you have proficiency with a given musical instrument, you can add your proficiency bonus to any ability checks you make to play music with the instrument. A bard can use a musical instrument as a spellcasting focus.", max_stack=100, weight=1)
 
+    # # Other kits + tools
+    c_items["Disguise Kit"] = Inanimate("Disguise Kit", item_code=4, cost=2500, details="This pouch of cosmetics, hair dye, and small props lets you create disguises that change your physical appearance. Proficiency with this kit lets you add your proficiency bonus to any ability checks you make to create a visual disguise.", max_stack=100, weight=3)
+    c_items["Forgery Kit"] = Inanimate("Forgery Kit", item_code=4, cost=1500, details="This small box contains a variety of papers and parchments, pens and inks, seals and sealing wax, gold and silver leaf, and other supplies necessary to create convincing forgeries of physical documents. Proficiency with this kit lets you add your proficiency bonus to any ability checks you make to create a physical forgery of a document.", max_stack=100, weight=5)
+    c_items["Herbalism Kit"] = Inanimate("Herbalism Kit", item_code=4, cost=500, details="This kit contains a variety of instruments such as clippers, mortar and pestle, and pouches and vials used by herbalists to create remedies and potions. Proficiency with this kit lets you add your proficiency bonus to any ability checks you make to identify or apply herbs. Also, proficiency with this kit is required to create antitoxin and potions of healing.", max_stack=100, weight=3)
+    c_items["Navigator's Tools"] = Inanimate("Navigator's Tools", item_code=4, cost=2500, details="This set of instruments is used for navigation at sea. Proficiency with navigator's tools lets you chart a ship's course and follow navigation charts. In addition, these tools allow you to add your proficiency bonus to any ability check you make to avoid getting lost at sea.", max_stack=100, weight=2)
+    c_items["Poisoner's Kit"] = Inanimate("Poisoner's Kit", item_code=4, cost=5000, details="A poisoner’s kit includes the vials, chemicals, and other equipment necessary for the creation of poisons. Proficiency with this kit lets you add your proficiency bonus to any ability checks you make to craft or use poisons.", max_stack=100, weight=2)
+    c_items["Thieves' Tools"] = Inanimate("Thieves' Tools", item_code=4, cost=2500, details="This set of tools includes a small file, a set of lock picks, a small mirror mounted on a metal handle, a set of narrow-bladed scissors, and a pair of pliers. Proficiency with these tools lets you add your proficiency bonus to any ability checks you make to disarm traps or open locks.", max_stack=100, weight=1)
 
     # Food & Drink =====================================================================================================
     c_items["Ale (Gallon)"] = Inanimate("Ale (Gallon)", item_code=3, cost=20, details="A type of beer with a bitter flavor and higher alcoholic content. Now served by the gallon.", max_stack=100, alpha="drink", beta=1.0)
@@ -206,6 +246,25 @@ except:
     c_items["Meat (Chunk)"] = Inanimate("Meat (Chunk)", item_code=3, cost=30, details="A chunk of roasted animal flesh.", max_stack=100, alpha="food", beta=1.0)
     c_items["Common Wine (Pitcher)"] = Inanimate("Common Wine (Pitcher)", item_code=3, cost=20, details="An alcoholic drink made from fermented grape juice. Cheap but it gets the job done.", max_stack=100, alpha="food", beta=1.0)
     c_items["Fine Wine (Bottle)"] = Inanimate("Fine Wine (Bottle)", item_code=3, cost=1000, details="An alcoholic drink made from fermented grape juice. The bottle looks quite luxurious.", max_stack=100, alpha="food", beta=1.0)
+
+    # Packs ============================================================================================================
+    # # Pack Exclusive
+    c_items["String (10 feet)"] = Inanimate("String", item_code=4, cost=0, details="A 10-foot length of string, typically found in a burglar's pack.", max_stack=100, weight=0)
+    c_items["Little Bag of Sand"] = Inanimate("Little Bag of Sand", item_code=4, cost=0, details="A small bag of sand, typically found in a scholar's pack.", max_stack=100, weight=0)
+    c_items["Small Knife"] = Inanimate("Small Knife", item_code=4, cost=0, details="A small knife, typically found in a scholar's pack.", max_stack=100, weight=0)
+    c_items["Alms Box"] = Inanimate("Alms Box", item_code=4, cost=0, details="A small box for alms, typically found in a priest's pack.", max_stack=100, weight=0)
+    c_items["Censer"] = Inanimate("Censer", item_code=4, cost=0, details="A censer, typically found in a priest's pack.", max_stack=100, weight=0)
+    c_items["Block of Incense"] = Inanimate("Block of Incense", item_code=3, cost=0, details="A block of incense, typically found in a priest's pack.", max_stack=100, weight=0, alpha="utility", beta=1.0)
+    c_items["Vestments"] = Inanimate("Vestments", item_code=4, cost=0, details="Religious clothing, typically found in a priest's pack.", max_stack=100, weight=0)
+
+    # # The Packs
+    c_items["Burglar's Pack"] = Inanimate("Burglar's Pack", item_code=5, cost=1600, details={"Backpack": 1, "Ball Bearings (Bag of 1,000)": 1, "String (10 feet)": 1, "Bell": 1, "Candle": 5, "Crowbar": 1, "Hammer": 1, "Piton": 10, "Lantern (Hooded)": 1, "Oil (Flask)": 2, "Rations (1 day)": 5, "Tinderbox": 1, "Waterskin": 1, "Hempen Rope (50 Feet)": 1})
+    c_items["Diplomat's Pack"] = Inanimate("Diplomat's Pack", item_code=5, cost=3900, details={"Chest": 1, "Map or Scroll Case": 2, "Clothes (Fine)": 1, "Ink (1 ounce bottle)": 1, "Ink Pen": 1, "Lamp": 1, "Oil (Flask)": 2, "Paper (One Sheet)": 5, "Perfume (Vial)": 1, "Sealing Wax": 1, "Soap": 1})
+    c_items["Dungeoneer's Pack"] = Inanimate("Dungeoneer's Pack", item_code=5, cost=1200, details={"Backpack": 1, "Crowbar": 1, "Hammer": 1, "Piton": 10, "Torch": 10, "Tinderbox": 1, "Rations (1 day)": 10, "Waterskin": 1, "Hempen Rope (50 Feet)": 1})
+    c_items["Entertainer's Pack"] = Inanimate("Entertainer's Pack", item_code=5, cost=4000, details={"Backpack": 1, "Bedroll": 1, "Clothes (Costume)": 2, "Candle": 5, "Rations (1 day)": 5, "Waterskin": 1, "Disguise Kit": 1})
+    c_items["Explorer's Pack"] = Inanimate("Explorer's Pack", item_code=5, cost=1000, details={"Backpack": 1, "Bedroll": 1, "Mess Kit": 1, "Tinderbox": 1, "Torch": 10, "Rations (1 day)": 10, "Waterskin": 1, "Hempen Rope (50 Feet)": 1})
+    c_items["Priest's Pack"] = Inanimate("Priest's Pack", item_code=5, cost=1900, details={"Backpack": 1, "Blanket": 1, "Candle": 10, "Tinderbox": 1, "Alms Box": 1, "Block of Incense": 2, "Censer": 1, "Vestments": 1, "Rations (1 day)": 2, "Waterskin": 1})
+    c_items["Scholar's Pack"] = Inanimate("Scholar's Pack", item_code=5, cost=4000, details={"Backpack": 1, "Book": 1, "Ink (1 ounce bottle)": 1, "Ink Pen": 1, "Parchment (One sheet)": 10, "Little Bag of Sand": 1, "Small Knife": 1})
 
     pickle.dump(c_items, open("items_main.camp", "wb"))
 

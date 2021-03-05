@@ -25,7 +25,8 @@ class Inanimate(Entity):
             self.is_weapon = True
             self.properties = {"dmg_dice": alpha,
                                "dmg_sides": beta,
-                               "dmg_type": gamma}
+                               "dmg_type": gamma,
+                               "range_melee": delta}
         elif item_code == 2:
             self.is_armor = True
             self.properties = {"armor_class": alpha,

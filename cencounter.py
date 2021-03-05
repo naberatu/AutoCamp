@@ -112,25 +112,10 @@ class CEncounter(Encounter):
         for coors in nearbyCoors:
             index = self.entity_at(coors[0], coors[1])
             if index is not None and player_attacker and type(self.get_entity(index)) is Enemy:
-                return True
+                return [True, index]
             if index is not None and enemy_attacker and type(self.get_entity(index)) is Player:
-                return True
-
-        return False
-        # if not self.currentEntity.get_iff():  # if attacker is a player
-        #     for ent in self.animate_list:
-        #         if ent.get_iff():
-        #             otherCoors = ent.get_coors()
-        #             if otherCoors in nearbyCoors:
-        #                 inRange.append(ent)
-        #
-        # else:  # if attacker is an enemy
-        #     for ent in self.animate_list:
-        #         if not ent.get_iff():
-        #             otherCoors = ent.get_coors()
-        #             if otherCoors in nearbyCoors:
-        #                 inRange.append(ent)
-
+                return [True, index]
+        return [False, -1]
 
     # ===============================================================================
     # Map, Movement, and Hint Methods
@@ -337,7 +322,7 @@ class CEncounter(Encounter):
         dex_attempt = self.performCheck("Dexterity", None, currentEntity, adv, disadv)
         # This will print two rolls to the console, but only the appropriate one will be used based on weapon
 
-        if currentEntity.type_tag is "player" and currentEntity.get_weapon() is not None:
+        if type(currentEntity) is Player and currentEntity.get_weapon() is not None:
             weapon = c_items[currentEntity.get_weapon()]  # Weapon is object
             dmg_type = weapon.properties["dmg_type"]
 
@@ -361,10 +346,10 @@ class CEncounter(Encounter):
                 atk_mod = "Dexterity"
                 print("Dexterity chosen!")
 
-        if weapon.name in currentEntity.weapon_prof:  # checks for proficiency
-            attempt += currentEntity.stat_block.get_stat("Proficiency Bonus")
+        if type(currentEntity) is Player and weapon.get_name() in currentEntity.weapon_prof:  # checks for proficiency
+            attempt += currentEntity.get_stat("Proficiency Bonus")
             print("You are proficient with this weapon! +{} to attempt against AC!".format(
-                currentEntity.stat_block.get_stat("Proficiency Bonus")))
+                currentEntity.get_stat("Proficiency Bonus")))
 
         if attempt >= toHit:
             if weapon is None:  # Unarmed
@@ -373,14 +358,16 @@ class CEncounter(Encounter):
                 damage = self.rollDice(weapon.properties["dmg_dice"], weapon.properties["dmg_sides"],
                                        print_results=False) + self.modifier(atk_mod, currentEntity)
 
-            if target.type_tag is "enemy":
+            damage = max(0, damage)
+
+            if type(target) is Enemy:
                 if dmg_type in target.dmg_immunities:
                     damage = 0
                     # print("{} is immune to {}!".format(target.get_name(), dmg_type))
                 elif dmg_type in target.dmg_resistances:
-                    # print("Damage before: ", damage)
+                    print("Damage before: ", damage)
                     damage = floor(damage / 2)
-                    # print("Damage after: ", damage)
+                    print("Damage after: ", damage)
                     # print("{} is resistant to {}!".format(target.get_name(), dmg_type))
                 elif dmg_type in target.dmg_vulnerabilities:
                     damage = damage * 2
