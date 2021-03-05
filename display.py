@@ -581,9 +581,11 @@ class Display:
                 # ==================================
                 entity_list = ENCOUNTERS[ENC_INDEX].get_inanim() + ENCOUNTERS[ENC_INDEX].get_anim()
 
-                for ent in entity_list:
+                for index, ent in enumerate(entity_list):
                     coors = [ent.get_coors()[0], ent.get_coors()[1]]
                     tile_rect = pygame.Rect(TILE_SIZE * coors[0], TILE_SIZE * coors[1], TILE_SIZE, TILE_SIZE)
+                    # if index == turn_index and type(ent) is not Inanimate:
+                    #     self.SCREEN.blit(load_image("./assets/b_credits.png", TILE_SIZE, TILE_SIZE), tile_rect)
                     if coors == ent_coors:
                         self.SCREEN.blit(load_image("./assets/button.png", TILE_SIZE, TILE_SIZE), tile_rect)
                     self.SCREEN.blit(load_image(ent.get_icon(), TILE_SIZE, TILE_SIZE), tile_rect)
@@ -629,11 +631,14 @@ class Display:
                 elif b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return
+
                 elif b_save.rect.collidepoint(mouse):
                     save()
+
                 elif b_travel.rect.collidepoint(mouse):
                     self.travel_prompt()
                     return
+
                 elif b_endturn.rect.collidepoint(mouse):
                     ENCOUNTERS[ENC_INDEX].next_turn()
                     turn_index = ENCOUNTERS[ENC_INDEX].get_turn()
@@ -641,15 +646,15 @@ class Display:
                     rem_speed = ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Speed")
                     ASK_SAVE = True
                     action_used = False
-                elif b_inv is not None and b_inv.rect.collidepoint(mouse):
-                    pl_index = None
-                    for index, ent in enumerate(ENCOUNTERS[ENC_INDEX].get_anim()):
-                        if type(ent) == Player:
-                            if ent.get_name() == ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_name():
-                                pl_index = index
 
+                elif b_inv is not None and b_inv.rect.collidepoint(mouse):
+                    pl_index = None  # TODO: Figure out better fix for inv-startup bug.
+                    for index, ent in enumerate(ENCOUNTERS[ENC_INDEX].get_anim()):
+                        if type(ent) == Player and ent.get_name() == ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_name():
+                            pl_index = index
                     if pl_index is not None:
                         self.inv_prompt(ent_select, 120, pl_index)
+
                 elif b_attack is not None and b_attack.rect.collidepoint(mouse) and not action_used:
                     attacker = ENCOUNTERS[ENC_INDEX].get_entity(turn_index)
                     print(attacker.get_name(), attacker.get_stat("Current HP"))
@@ -658,6 +663,10 @@ class Display:
                     print(attacker.get_name(), attacker.get_stat("Current HP"))
                     print(ent_target.get_name(), ent_target.get_stat("Current HP"))
                     action_used = True
+                    ASK_SAVE = True
+
+                elif b_stats.rect.collidepoint(mouse):
+                    pass        # TODO: Add stats prompt.
 
                 elif b_move is not None and b_move.rect.collidepoint(mouse) and ent_select is not None\
                         and rem_speed > 0:
@@ -676,6 +685,7 @@ class Display:
                             if ENCOUNTERS[ENC_INDEX].entity_at(x_coor, y_coor) is None:
                                 move_tiles[x_coor][y_coor] = map_tile[x_coor][y_coor]
                                 move_reload = True
+
                 else:
                     flag = False
                     for x_coor in range(MAP_MAX_X):
@@ -1023,6 +1033,9 @@ class Display:
 
             self.end_page()
 
+    def stats_prompt(self, entity):
+        return
+
     def travel_prompt(self):
         self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
         e_top = 10
@@ -1309,6 +1322,7 @@ class Display:
             self.end_page()
 
     def prompt_quit(self):
+        global ASK_SAVE     # TODO: Fix bug where encounter won't reset after decline without exit.
         if not ASK_SAVE:
             self.TO_MAIN_MENU = True
             return True
@@ -1333,10 +1347,12 @@ class Display:
                 self.CLICK = False
                 if b_yes.rect.collidepoint(mouse):
                     save()
+                    ASK_SAVE = False
                     self.TO_MAIN_MENU = True
                     return True
                 elif b_no.rect.collidepoint(mouse):
                     self.TO_MAIN_MENU = True
+                    ASK_SAVE = True
                     return True
                 elif b_close.rect.collidepoint(mouse):
                     return False
