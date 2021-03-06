@@ -1,4 +1,4 @@
-import subprocess
+
 from random import randint
 import pygame
 import pickle
@@ -11,6 +11,7 @@ from items import c_items
 from copy import deepcopy
 
 from os import environ
+import subprocess
 import sys
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
@@ -112,10 +113,7 @@ def load_image(path="./assets", x=1, y=1):
 
 
 def load_pdf(path):
-    try:
-        subprocess.Popen(path, shell=True)
-    except:
-        pass
+    subprocess.call(["qpdfview", "/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf"])
 
 def change_enc(index):
     global PLAYERS, ENCOUNTERS, ENC_INDEX, ASK_SAVE, RELOAD_ENC
@@ -698,7 +696,7 @@ class Display:
                     ASK_SAVE = True
 
                 elif b_stats.rect.collidepoint(mouse):
-                    load_pdf("./assets/PlayerHandbook.pdf")
+                    load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
                     pass        # TODO: Add stats prompt.
 
                 elif b_dice.rect.collidepoint(mouse):
