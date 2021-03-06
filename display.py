@@ -376,6 +376,8 @@ class Display:
                                 top=B_YPOS + 5, width=B_WIDTH, height=B_HEIGHT)
 
             # TODO: Integrate Character Creation Loop
+            # TODO: Add PHB button next to Credits.
+            # TODO: Update credits to include game-icons.net
 
             # Button Functions
             # ==================================
@@ -596,7 +598,7 @@ class Display:
                         t_color = RED
                     else:
                         t_color = WHITE
-                    b_attack = TextButton(parent=self.SCREEN, text=action_text, left=b_save.rect.left, t_color=t_color,
+                    b_attack = TextButton(parent=self.SCREEN, text=action_text, left=b_stats.rect.left, t_color=t_color,
                                           top=b_dice.rect.top - Q_HT - 10, width=AB_WID, height=Q_HT)
                     ent_target = ENCOUNTERS[ENC_INDEX].get_entity(ent_target)
 
@@ -709,7 +711,6 @@ class Display:
 
                 elif b_move is not None and b_move.rect.collidepoint(mouse) and ent_select is not None\
                         and rem_speed > 0:
-                    ENCOUNTERS[ENC_INDEX].get_entity(ent_index).set_name("")
                     x_start = max(0, ent_coors[0] - int(rem_speed / 5))
                     x_end = min(MAP_MAX_X, ent_coors[0] + int(rem_speed / 5))
                     y_start = max(0, ent_coors[1] - int(rem_speed / 5))
@@ -728,8 +729,6 @@ class Display:
 
                 # TODO: Integrate hint system.
 
-
-
                 else:
                     flag = False
                     for x_coor in range(MAP_MAX_X):
@@ -745,8 +744,6 @@ class Display:
                                 break
 
             self.end_page()
-
-    # TODO: Integrate Handbook reading
 
     def page_nce(self):
         global ASK_SAVE
