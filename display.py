@@ -1,3 +1,4 @@
+import subprocess
 from random import randint
 import pygame
 import pickle
@@ -109,6 +110,12 @@ def load_image(path="./assets", x=1, y=1):
     IMAGE = pygame.transform.scale(IMAGE, (x, y))
     return IMAGE
 
+
+def load_pdf(path):
+    try:
+        subprocess.Popen(path, shell=True)
+    except:
+        pass
 
 def change_enc(index):
     global PLAYERS, ENCOUNTERS, ENC_INDEX, ASK_SAVE, RELOAD_ENC
@@ -691,6 +698,7 @@ class Display:
                     ASK_SAVE = True
 
                 elif b_stats.rect.collidepoint(mouse):
+                    load_pdf("./assets/PlayerHandbook.pdf")
                     pass        # TODO: Add stats prompt.
 
                 elif b_dice.rect.collidepoint(mouse):
@@ -698,6 +706,7 @@ class Display:
 
                 elif b_move is not None and b_move.rect.collidepoint(mouse) and ent_select is not None\
                         and rem_speed > 0:
+                    ENCOUNTERS[ENC_INDEX].get_entity(ent_index).set_name("")
                     x_start = max(0, ent_coors[0] - int(rem_speed / 5))
                     x_end = min(MAP_MAX_X, ent_coors[0] + int(rem_speed / 5))
                     y_start = max(0, ent_coors[1] - int(rem_speed / 5))
