@@ -177,10 +177,8 @@ class CEncounter(Encounter):
             for i in range(0, len(self.animate_list)):
                 if (type(self.animate_list[i]) == Enemy) and self.distance_between(actor, self.animate_list[i]) <= 5:
                     enemies_in_attack_range.append(self.animate_list[i])
-                if (type(self.animate_list[i]) == Enemy) and self.distance_between(actor,
-                                                                                   self.animate_list[
-                                                                                      i]) <= actor.get_stat(
-                    "Speed"):
+                if (type(self.animate_list[i]) == Enemy) and self.distance_between(actor, self.animate_list[i]) \
+                                                                        <= actor.get_stat("Speed"):
                     enemies_in_range.append(self.animate_list[i])
             if len(enemies_in_attack_range) != 0:
                 min_health_remaining = float('inf')
@@ -266,25 +264,28 @@ class CEncounter(Encounter):
         object_list = self.animate_list + self.inanimate_list
         currentEntity = object_list[self.turnCounter]
 
+        # TODO: Make sure all prints are commented
+        # TODO: Destructible inanimate objects
+
         targetHealth = target.get_stat("Current HP")
         targetHealth -= damage
 
-        print(currentEntity.get_name(), "attacked", target.get_name(), "!!")
-        print(target.get_name(), "took", damage, "damage!!")
+        # print(currentEntity.get_name(), "attacked", target.get_name(), "!!")
+        # print(target.get_name(), "took", damage, "damage!!")
 
         if type(target) == Enemy and targetHealth <= 0:  # HP is -/0, enemy -> INSTANT DEATH
             target.set_stats("Current HP", 0)
-            print(target.get_name(), "has died!!")
+            # print(target.get_name(), "has died!!")
             self.animate_list.remove(target)
 
         elif targetHealth >= 0:  # HP is +/0, player -> DMG
             target.set_stats("Current HP", targetHealth)
-            print(target.get_name(), "is now at", target.get_stat("Current HP"), "/",
-                  target.get_stat("Max HP"), "HP.")
+            # print(target.get_name(), "is now at", target.get_stat("Current HP"), "/",
+            #       target.get_stat("Max HP"), "HP.")
 
         elif (targetHealth * -1) >= target.get_stat("Max HP"):  # HP is -, exceeds max HP-> INSTANT DEATH
             target.set_stats("Current HP", 0)
-            print(target.get_name(), "has died!!")
+            # print(target.get_name(), "has died!!")
             self.animate_list.remove(target)
 
         elif (targetHealth * -1) <= target.get_stat("Max HP"):  # HP is negative, doesn't exceed max HP -> UNCONSCIOUS
@@ -293,7 +294,7 @@ class CEncounter(Encounter):
                 target.set_stability(False)
             if "unconscious" in target.get_conditions():  # if already unconscious when hit
                 target.set_death_strikes(target.get_death_strikes() + 1)
-            print(target.get_name(), "is unconscious!!")
+            # print(target.get_name(), "is unconscious!!")
             target.mod_conditions(True, "Unconscious")
 
         return damage
@@ -303,7 +304,7 @@ class CEncounter(Encounter):
         stripped_desc = ""
         for c in desc:
             if c.isalnum() or c.isspace():
-                stripped_desc+= c
+                stripped_desc += c
         if "Finesse" in stripped_desc:
             return True
         return False
@@ -339,16 +340,16 @@ class CEncounter(Encounter):
             if str_mod > dex_mod:
                 attempt = str_attempt
                 atk_mod = "Strength"
-                print("Strength chosen!")
+                # print("Strength chosen!")
             else:
                 attempt = dex_attempt
                 atk_mod = "Dexterity"
-                print("Dexterity chosen!")
+                # print("Dexterity chosen!")
 
         if type(currentEntity) is Player and weapon.get_name() in currentEntity.weapon_prof:  # checks for proficiency
             attempt += currentEntity.get_stat("Proficiency Bonus")
-            print("You are proficient with this weapon! +{} to attempt against AC!".format(
-                currentEntity.get_stat("Proficiency Bonus")))
+            # print("You are proficient with this weapon! +{} to attempt against AC!".format(
+            #     currentEntity.get_stat("Proficiency Bonus")))
 
         if attempt >= toHit:
             if weapon is None:  # Unarmed
@@ -374,5 +375,5 @@ class CEncounter(Encounter):
 
             return self.dealDMG(damage, target)
         else:
-            print("Attack failed!")
+            # print("Attack failed!")
             return None

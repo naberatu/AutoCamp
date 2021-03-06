@@ -370,6 +370,8 @@ class Display:
             b_quit = TextButton(parent=self.SCREEN, text="Exit", t_font=st_font, left=B_CENTER,
                                 top=B_YPOS + 5, width=B_WIDTH, height=B_HEIGHT)
 
+            # TODO: Integrate Character Creation Loop
+
             # Button Functions
             # ==================================
             mouse = pygame.mouse.get_pos()
@@ -541,10 +543,10 @@ class Display:
                 try:
                     str_1, str_2 = show_message.split("|")
 
-                    drawText(self.SCREEN, str_1, BLACK, message_rect, use_font(20, "nodesto"))
+                    drawText(self.SCREEN, str_1, BLACK, message_rect, use_font(20, "scaly"))
 
                     message_rect.top = menu_rect.centery - 20
-                    drawText(self.SCREEN, str_2, BLACK, message_rect, use_font(20, "nodesto"))
+                    drawText(self.SCREEN, str_2, BLACK, message_rect, use_font(20, "scaly"))
                 except: pass
 
                 # ==================================
@@ -651,6 +653,8 @@ class Display:
                     save()
 
                 elif b_travel.rect.collidepoint(mouse):
+
+                    # TODO: Add some kind of encounter reset
                     self.travel_prompt()
                     return
 
@@ -671,6 +675,9 @@ class Display:
                         self.inv_prompt(ent_select, 120, pl_index)
 
                 elif b_attack is not None and b_attack.rect.collidepoint(mouse) and not action_used:
+
+                    # TODO: Account for unconsciousness during battle.
+
                     attacker = ENCOUNTERS[ENC_INDEX].get_entity(turn_index)
                     damage = ENCOUNTERS[ENC_INDEX].attack(ent_target, False, False)
                     if damage is not None:
@@ -707,6 +714,10 @@ class Display:
                                 move_tiles[x_coor][y_coor] = map_tile[x_coor][y_coor]
                                 move_reload = True
 
+                # TODO: Integrate hint system.
+
+
+
                 else:
                     flag = False
                     for x_coor in range(MAP_MAX_X):
@@ -722,6 +733,8 @@ class Display:
                                 break
 
             self.end_page()
+
+    # TODO: Integrate Handbook reading
 
     def page_nce(self):
         global ASK_SAVE
@@ -740,8 +753,13 @@ class Display:
                 save_text = "Saved!"
 
             self.SCREEN.blit(background, ORIGIN)
-            title = TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENC_INDEX].get_name(), t_size=24, t_font="hylia",
-                               left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
+
+            # TODO: Integrate Stat viewing here.
+            # TODO: Integrate Resting here.
+            # TODO: Integrate vendor interactions.
+
+            TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENC_INDEX].get_name(), t_size=24, t_font="hylia",
+                       left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
             b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
             b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=cwid)
@@ -1225,6 +1243,11 @@ class Display:
             self.end_page()
 
     def dice_prompt(self):
+
+        # TODO: Add ability checks
+        # TODO: Add advantage/disadvantage checkboxes.
+        # TODO: Fix title placement.
+
         dice_options = ["d4", "d6", "d8", "d10", "d12", "d20"]
         width, height = 335, 320
         rect = pygame.Rect(int(WIDTH/2) - int(width / 2), int(HEIGHT * 0.2), width, height)
