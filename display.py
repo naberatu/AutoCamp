@@ -581,7 +581,7 @@ class Display:
                 b_attack = None
                 target_found, ent_target = ENCOUNTERS[ENC_INDEX].enemyInRange()[0], ENCOUNTERS[ENC_INDEX].enemyInRange()[1]
 
-                if target_found:
+                if target_found and turn_index == ent_index:
                     if not action_used:
                         action_text = "Attack"
                         t_color = RED
