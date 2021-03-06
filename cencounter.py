@@ -296,6 +296,8 @@ class CEncounter(Encounter):
             print(target.get_name(), "is unconscious!!")
             target.mod_conditions(True, "Unconscious")
 
+        return damage
+
     def parse_finesse(self, weapon):
         desc = weapon.details
         stripped_desc = ""
@@ -370,6 +372,7 @@ class CEncounter(Encounter):
                     damage = damage * 2
                     # print("{} is vulnerable to {}!".format(target.get_name(), dmg_type))
 
-            self.dealDMG(damage, target)
+            return self.dealDMG(damage, target)
         else:
             print("Attack failed!")
+            return None

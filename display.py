@@ -7,7 +7,7 @@ from enemy import Enemy
 from cencounter import CEncounter
 from campaign_default import load_default_camp
 from items import c_items
-import copy
+from copy import deepcopy
 
 from os import environ
 import sys
@@ -527,12 +527,26 @@ class Display:
                 TextBox(parent=self.SCREEN, text=turn_title, t_size=26, t_color=BLACK, t_font="hylia",
                         center=True, rect=menu_rect, top=135)
                 text_hp = "HP: " + str(ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Current HP")) \
-                            + " / " + str(ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Max HP"))
+                          + " / " + str(ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Max HP"))
 
                 TextBox(parent=self.SCREEN, text=text_hp, t_size=20, t_color=BLACK, t_font="hylia",
                         center=True, rect=menu_rect, top=110)
-                TextBox(parent=self.SCREEN, text=show_message, t_size=20, t_color=BLACK, t_font="hylia",
-                        center=True, rect=menu_rect, top=50)
+
+                message_rect = deepcopy(menu_rect)
+                message_rect.top = menu_rect.centery - 60
+                message_rect.left = menu_rect.left + 20
+                message_rect.height = 50
+                message_rect.width = menu_rect.width - 20
+
+                try:
+                    str_1, str_2 = show_message.split("|")
+
+                    drawText(self.SCREEN, str_1, BLACK, message_rect, use_font(20, "nodesto"))
+
+                    message_rect.top = menu_rect.centery - 20
+                    drawText(self.SCREEN, str_2, BLACK, message_rect, use_font(20, "nodesto"))
+                except: pass
+
                 # ==================================
                 AB_WID = int((menu_rect.width - 35) / 2)
                 right = b_quitgame.rect.right - AB_WID
@@ -607,6 +621,7 @@ class Display:
             if self.CLICK:
                 self.CLICK = False
                 map_reload = True
+                show_message = ""
 
                 if move_select:
                     move_select = False
@@ -657,11 +672,14 @@ class Display:
 
                 elif b_attack is not None and b_attack.rect.collidepoint(mouse) and not action_used:
                     attacker = ENCOUNTERS[ENC_INDEX].get_entity(turn_index)
-                    print(attacker.get_name(), attacker.get_stat("Current HP"))
-                    print(ent_target.get_name(), ent_target.get_stat("Current HP"))
-                    ENCOUNTERS[ENC_INDEX].attack(ent_target, False, False)
-                    print(attacker.get_name(), attacker.get_stat("Current HP"))
-                    print(ent_target.get_name(), ent_target.get_stat("Current HP"))
+                    damage = ENCOUNTERS[ENC_INDEX].attack(ent_target, False, False)
+                    if damage is not None:
+                        show_message = attacker.get_name() + " attacked " + ent_target.get_name() + ", dealing " \
+                                       + str(damage) + " damage! | " + ent_target.get_name() + " HP: " \
+                                       + str(ent_target.get_stat("Current HP")) + " / " \
+                                       + str(ent_target.get_stat("Max HP"))
+                    else:
+                        show_message = attacker.get_name() + " attacked " + ent_target.get_name() + ", but failed! | "
                     action_used = True
                     ASK_SAVE = True
 
