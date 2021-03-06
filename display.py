@@ -113,7 +113,8 @@ def load_image(path="./assets", x=1, y=1):
 
 
 def load_pdf(path):
-    subprocess.call(["qpdfview", "/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf"])
+    subprocess.call(["qpdfview", path])
+
 
 def change_enc(index):
     global PLAYERS, ENCOUNTERS, ENC_INDEX, ASK_SAVE, RELOAD_ENC
@@ -293,7 +294,6 @@ class TextBox:
         parent.blit(self.text, self.textbox)
 
 
-# test comment
 class Display:
     pygame.init()
 
@@ -521,13 +521,15 @@ class Display:
 
                 # Control Buttons
                 # ==================================
-                BT_WID = 100
+                BT_WID = 73
                 b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=WIDTH - BT_WID - 10, top=10,
                                         width=BT_WID, height=Q_HT)
                 b_travel = TextButton(parent=self.SCREEN, text=leave_message, left=b_quitgame.rect.left - BT_WID - 10,
                                       top=b_quitgame.rect.top, width=BT_WID, height=Q_HT)
                 b_save = TextButton(parent=self.SCREEN, text=save_text, left=b_travel.rect.left - BT_WID - 10,
                                     top=b_quitgame.rect.top, width=BT_WID, height=Q_HT)
+                b_handbook = TextButton(parent=self.SCREEN, text="PHB", left=b_save.rect.left - BT_WID - 10,
+                                        top=b_quitgame.rect.top, width=BT_WID, height=Q_HT)
 
                 # ==================================
                 turn_title = "- " + ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_name() + "'s Turn -"
@@ -560,17 +562,17 @@ class Display:
                 b_endturn = TextButton(parent=self.SCREEN, text=">> End Turn >>", left=right,
                                        top=HEIGHT - Q_HT - 10, width=AB_WID, height=Q_HT)
 
+                b_stats = TextButton(parent=self.SCREEN, text="View Stats", left=b_endturn.rect.left - AB_WID - 10,
+                                     top=b_endturn.rect.top, width=AB_WID, height=Q_HT)
+
                 b_dice = TextButton(parent=self.SCREEN, text="Roll Dice", left=b_endturn.rect.left,
                                     top=b_endturn.rect.top - Q_HT - 10, width=AB_WID, height=Q_HT)
-
-                b_stats = TextButton(parent=self.SCREEN, text="View Stats", left=b_save.rect.left,
-                                     top=b_endturn.rect.top, width=AB_WID, height=Q_HT)
 
                 b_inv, b_move = None, None
                 if turn_index == ent_index:
                     if rem_speed > 0:
                         move_text = "Move"
-                    b_move = TextButton(parent=self.SCREEN, text=move_text, left=b_save.rect.left,
+                    b_move = TextButton(parent=self.SCREEN, text=move_text, left=b_stats.rect.left,
                                         top=b_dice.rect.top, width=AB_WID, height=Q_HT)
 
                     if type(ENCOUNTERS[ENC_INDEX].get_entity(turn_index)) is Player:
@@ -662,6 +664,9 @@ class Display:
                     # TODO: Add some kind of encounter reset
                     self.travel_prompt()
                     return
+
+                elif b_handbook.rect.collidepoint(mouse):
+                    load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
 
                 elif b_endturn.rect.collidepoint(mouse):
                     ENCOUNTERS[ENC_INDEX].next_turn()
@@ -769,9 +774,11 @@ class Display:
                        left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
             b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
+            b_handbook = TextButton(parent=self.SCREEN, text="PHB", left=b_save.rect.left - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
             b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=cwid)
             b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=cwid)
             b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=menu_left-(2*offs), top=menu_top, width=cwid)
+
 
             # ==================================
             # Player Buttons
@@ -805,6 +812,8 @@ class Display:
                     return
                 elif b_roll.rect.collidepoint(mouse):
                     self.dice_prompt()
+                elif b_handbook.rect.collidepoint(mouse):
+                    load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
                 elif b_inv.rect.collidepoint(mouse):
                     self.inv_prompt(current_player, cwid, player_index)
                 else:
