@@ -1369,18 +1369,18 @@ class Display:
 
         c_dim = 20
         cbox1 = pygame.Rect(dicepad[5].rect.right + 20, dice_box.bottom + 10, c_dim, c_dim)
-        cbox2 = pygame.Rect(dicepad[5].rect.right + 20, dice_box.bottom + 10, c_dim, c_dim)
         cbox1.center = (checklist[0].rect.left + int(c_dim / 2), dicepad[3].rect.centery)
-        cbox2.center = (checklist[3].rect.left + int(c_dim / 2), dicepad[3].rect.centery)
+        cbox2 = deepcopy(cbox1)
+        cbox2.centerx = checklist[3].rect.left + int(c_dim / 2)
 
         cbox_adv = CheckBox(parent=self.SCREEN, rect=cbox1, center=True, state=False)
         cbox_dis = CheckBox(parent=self.SCREEN, rect=cbox2, center=True, state=False)
 
-        cbox1.left = cbox_adv.urect.right + 5
-        TextBox(parent=self.SCREEN, text="Advant.", t_size=16, t_font="nodesto", rect=cbox1, bind_2_rect=True)
-        cbox2.left = cbox_dis.urect.right + 5
-        TextBox(parent=self.SCREEN, text="Disadv.", t_size=16, t_font="nodesto", rect=cbox2, bind_2_rect=True)
-
+        c_temp = deepcopy(cbox1)
+        c_temp.left = cbox_adv.urect.right + 5
+        TextBox(parent=self.SCREEN, text="Advant.", t_size=16, t_font="nodesto", rect=c_temp, bind_2_rect=True)
+        c_temp.left = cbox_dis.urect.right + 5
+        TextBox(parent=self.SCREEN, text="Disadv.", t_size=16, t_font="nodesto", rect=c_temp, bind_2_rect=True)
 
         # ==================================
         # Mouse Events
@@ -1388,10 +1388,11 @@ class Display:
         while True:
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
+                self.CLICK = False
                 if b_close.rect.collidepoint(mouse):
                     return
 
-                if b_sum.rect.collidepoint(mouse):
+                elif b_sum.rect.collidepoint(mouse):
                     try:
                         int(result) == int
                     except:
@@ -1405,7 +1406,7 @@ class Display:
                     dice_box.update_result(result)
                     can_clr = True
 
-                if b_set.rect.collidepoint(mouse):
+                elif b_set.rect.collidepoint(mouse):
                     try:
                         int(result) == int
                     except:
@@ -1417,6 +1418,17 @@ class Display:
 
                     dice_box.update_result(result)
                     can_clr = True
+
+                elif cbox_adv.urect.collidepoint(mouse):
+                    if cbox_adv.is_checked:
+                        cbox_adv.uncheck()
+                    else:
+                        cbox_adv.check()
+                elif cbox_dis.urect.collidepoint(mouse):
+                    if cbox_dis.is_checked:
+                        cbox_dis.uncheck()
+                    else:
+                        cbox_dis.check()
 
                 for num, key in enumerate(keypad):
                     if key.rect.collidepoint(mouse):
