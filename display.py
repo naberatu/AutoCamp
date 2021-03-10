@@ -173,7 +173,7 @@ class DiceBox:
 
         title, title_box = text_objects("Dice Tray", use_font(20, "hylia"), WHITE)
         title_box.center = rect.center
-        title_box.top = rect.top + 10
+        title_box.top = rect.top
 
         self.results, self.res_rect = text_objects(t_res, use_font(20, "nodesto"), BLACK)
         self.result_field = pygame.Rect(rect.center[0]-100, title_box.bottom + 10, 200, 25)
@@ -275,7 +275,7 @@ class TextButton:
 
 class TextBox:
     def __init__(self, parent=None, center=False, text="test", t_size=20, t_color=WHITE, t_font="scaly",
-                 left=0, top=0, rect=None):
+                 left=0, top=0, rect=None, bind_2_rect=False):
 
         self.t_size, self.t_color = t_size, t_color
         self.t_font = use_font(size=t_size, font=t_font)
@@ -285,7 +285,9 @@ class TextBox:
             self.rect = rect
 
         self.text, self.textbox = text_objects(text, self.t_font, t_color)
-        if center:
+        if bind_2_rect:
+            self.textbox = self.rect
+        elif center:
             self.textbox.center = self.rect.center
             if rect is None:
                 self.textbox.top = top
@@ -296,6 +298,34 @@ class TextBox:
             self.textbox.top = top
 
         parent.blit(self.text, self.textbox)
+
+
+class CheckBox:
+    def __init__(self, parent=None, rect=None, center=False, coors=(None, None), state=False):
+        self.parent = parent
+        self.urect = rect
+
+        if center and coors != (None, None):
+            self.urect.center = coors
+        elif coors != (None, None):
+            self.urect.left = coors[0]
+            self.urect.top = coors[1]
+
+        self.crect = pygame.Rect(0, 0, int(0.8 * self.urect.width), int(0.8 * self.urect.height))
+        self.crect.center = self.urect.center
+        self.is_checked = state
+        if self.is_checked:
+            self.check()
+        else:
+            self.uncheck()
+
+    def check(self):
+        self.is_checked = True
+        pygame.draw.rect(self.parent, BLACK, self.crect)
+
+    def uncheck(self):
+        self.is_checked = False
+        pygame.draw.rect(self.parent, WHITE, self.urect)
 
 
 class Display:
@@ -383,7 +413,6 @@ class Display:
                                 top=B_YPOS + 5, width=B_WIDTH, height=B_HEIGHT)
 
             # TODO: Integrate Character Creation Loop
-            # TODO: Update credits to include game-icons.net
 
             # Button Functions
             # ==================================
@@ -833,7 +862,7 @@ class Display:
             self.SCREEN.fill(BLACK)
 
             tb_title = TextBox(parent=self.SCREEN, text="AutoCamp Team", t_font="hylia", t_size=30,
-                               top=30, center=True)
+                               top=30, center=True, t_color=GOLD)
             tb_member1 = TextBox(parent=self.SCREEN, text="Nader Atout", t_font="hylia", t_size=20, center=True,
                                  top=tb_title.textbox.top + tb_title.textbox.height)
             tb_member2 = TextBox(parent=self.SCREEN, text="Diana Penalba", t_font="hylia", t_size=20, center=True,
@@ -842,16 +871,16 @@ class Display:
                                  top=tb_member2.textbox.top + tb_member2.textbox.height)
 
             tb_advisor = TextBox(parent=self.SCREEN, text="Team Advisor", t_font="hylia", t_size=30, center=True,
-                                 top=tb_member3.textbox.top + tb_member3.textbox.height + 20)
+                                 top=tb_member3.textbox.top + tb_member3.textbox.height + 20, t_color=GREEN)
             tb_advname = TextBox(parent=self.SCREEN, text="Asst. Prof. Salma Elmalaki", t_font="hylia", t_size=20,
                                  center=True, top=tb_advisor.textbox.top + tb_advisor.textbox.height)
 
             tb_game = TextBox(parent=self.SCREEN, text="Original Tabletop Game", t_font="hylia", t_size=30,
-                              center=True, top=tb_advname.textbox.top + tb_advname.textbox.height + 20)
+                              center=True, top=tb_advname.textbox.top + tb_advname.textbox.height + 20, t_color=RED)
             tb_wizards = TextBox(parent=self.SCREEN, text="Wizards of the Coast", t_font="hylia", t_size=20,
                                  center=True, top=tb_game.textbox.top + tb_game.textbox.height)
 
-            tb_images = TextBox(parent=self.SCREEN, text="All artwork found through Google Images", t_font="hylia",
+            tb_images = TextBox(parent=self.SCREEN, text="All artwork and sprites found through Google Images and Game-Icons.net", t_font="hylia",
                                 t_size=20, center=True, top=tb_wizards.textbox.top + tb_wizards.textbox.height + 20)
 
             b_back = TextButton(parent=self.SCREEN, path="./assets/b_credits.png", text="Back", left=B_CENTER,
@@ -1267,24 +1296,23 @@ class Display:
 
         # TODO: Add ability checks
         # TODO: Add advantage/disadvantage checkboxes.
-        # TODO: Fix title placement.
 
         dice_options = ["d4", "d6", "d8", "d10", "d12", "d20"]
-        width, height = 335, 320
-        rect = pygame.Rect(int(WIDTH/2) - int(width / 2), int(HEIGHT * 0.2), width, height)
+        width, height = 515, 320
+        rect = pygame.Rect(int(WIDTH / 2) - int(width / 2), int(HEIGHT * 0.2), width, height)
         cl_left = rect.left + width - 30
         kp_dim = 50
         can_clr = False
         result = ""
         keypad = list()
         dicepad = list()
+        checklist = list()
 
         dice_box = DiceBox(self.SCREEN, width, height, result, rect)
         kp_top = dice_box.bottom + 10
-        kp_left = rect.left + 10
+        kp_left = rect.left + 15
 
         dp_size = 60
-        dp_left = rect.right - 20 - (2 * dp_size)
         b_sum = 0       # Just to start it off.
         b_set = 0       # Just to start it off.
 
@@ -1303,11 +1331,13 @@ class Display:
                                          left=kp_left, top=kp_top, width=kp_dim, height=kp_dim))
 
             if num % 3 == 0:
-                kp_left, kp_top = rect.left + 10, kp_top + kp_dim + 5
+                kp_left, kp_top = rect.left + 15, kp_top + kp_dim + 5
             else:
                 kp_left += kp_dim + 5
 
         kp_top = dice_box.bottom + 10
+        dp_left = kp_left + kp_dim + 15
+
         for num in range(6):
             dicepad.append(TextButton(parent=self.SCREEN, text=dice_options[num], t_font="hylia", t_size=20,
                                       left=dp_left, top=kp_top, width=dp_size, height=kp_dim))
@@ -1322,6 +1352,35 @@ class Display:
                 if num == 5:
                     b_sum = TextButton(parent=self.SCREEN, text="Sum", t_font="hylia", t_size=24, left=dp_left,
                                        top=kp_top, width=dp_size, height=kp_dim)
+
+        dp_left = dicepad[5].rect.right + 20
+        kp_top = dicepad[1].rect.top
+        chk_size = 80
+
+        stat_name = ["Strength", "Dexterity", "Constitution", "Wisdom", "Intellect", "Charisma"]
+        for num in range(6):
+            checklist.append(TextButton(parent=self.SCREEN, text=stat_name[num][0:3], t_font="hylia", t_size=24,
+                                        left=dp_left, top=kp_top, width=chk_size, height=kp_dim))
+            if num == 2:
+                kp_top = dicepad[1].rect.top
+                dp_left += chk_size + 5
+            else:
+                kp_top += kp_dim + 5
+
+        c_dim = 20
+        cbox1 = pygame.Rect(dicepad[5].rect.right + 20, dice_box.bottom + 10, c_dim, c_dim)
+        cbox2 = pygame.Rect(dicepad[5].rect.right + 20, dice_box.bottom + 10, c_dim, c_dim)
+        cbox1.center = (checklist[0].rect.left + int(c_dim / 2), dicepad[3].rect.centery)
+        cbox2.center = (checklist[3].rect.left + int(c_dim / 2), dicepad[3].rect.centery)
+
+        cbox_adv = CheckBox(parent=self.SCREEN, rect=cbox1, center=True, state=False)
+        cbox_dis = CheckBox(parent=self.SCREEN, rect=cbox2, center=True, state=False)
+
+        cbox1.left = cbox_adv.urect.right + 5
+        TextBox(parent=self.SCREEN, text="Advant.", t_size=16, t_font="nodesto", rect=cbox1, bind_2_rect=True)
+        cbox2.left = cbox_dis.urect.right + 5
+        TextBox(parent=self.SCREEN, text="Disadv.", t_size=16, t_font="nodesto", rect=cbox2, bind_2_rect=True)
+
 
         # ==================================
         # Mouse Events
