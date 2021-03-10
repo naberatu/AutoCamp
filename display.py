@@ -555,7 +555,6 @@ class Display:
 
                 ent_select = ENCOUNTERS[ENC_INDEX].get_entity(ent_index)
                 if ent_select is not None:
-                    print(ent_select.get_conditions())
                     ent_coors = [ent_select.get_coors()[0], ent_select.get_coors()[1]]
                     if "Unconscious" in ent_select.get_conditions():
                         if "has perished" in show_message:
@@ -565,9 +564,10 @@ class Display:
                             action_used = False
                             rem_speed = ENCOUNTERS[ENC_INDEX].get_entity(turn_index).get_stat("Speed")
                         else:
-                            action_used = True
+                            # action_used = True
                             rem_speed = 0
-                            action_text = ds_text
+                            if not action_used:
+                                action_text = ds_text
                             move_text = "Cannot Move"
                 else:
                     ent_coors = [-1, -1]
@@ -646,10 +646,10 @@ class Display:
                 target_found, ent_target = ENCOUNTERS[ENC_INDEX].enemyInRange()[0], ENCOUNTERS[ENC_INDEX].enemyInRange()[1]
 
                 if target_found and turn_index == ent_index:
-                    if not action_used:
+                    if not action_used and action_text != ds_text:
                         action_text = "Attack"
                         t_color = RED
-                    elif action_used and action_text == ds_text:
+                    elif not action_used and action_text == ds_text:
                         t_color = GOLD
                     else:
                         t_color = WHITE
@@ -742,8 +742,8 @@ class Display:
                     if pl_index is not None:
                         self.inv_prompt(ent_select, 120, pl_index)
 
-                elif b_attack is not None and b_attack.rect.collidepoint(mouse):
-                    if not action_used:
+                elif b_attack is not None and b_attack.rect.collidepoint(mouse) and not action_used:
+                    if action_text != ds_text:
                         attacker = ENCOUNTERS[ENC_INDEX].get_entity(turn_index)
                         damage = ENCOUNTERS[ENC_INDEX].attack(ent_target, False, False)
                         if damage is not None:
@@ -756,7 +756,7 @@ class Display:
                         action_used = True
                         ASK_SAVE = True
 
-                    elif action_used and action_text == ds_text:
+                    else:
                         result = ENCOUNTERS[ENC_INDEX].rollDice(1, 20)
                         show_message = "Rolled: " + str(result) + "... "
                         if result >= 10:
@@ -771,6 +771,7 @@ class Display:
                                 show_message += ent_select.death_strike(False)
 
                         ASK_SAVE = True
+                        action_used = True
 
                 elif b_stats.rect.collidepoint(mouse):
                     # load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
@@ -819,7 +820,7 @@ class Display:
         global ASK_SAVE
         menu_top = 390
         menu_left = 670
-        cwid = 120
+        cwid = 100
         offs = cwid + 10
         background = load_image(ENCOUNTERS[ENC_INDEX].get_bg(), WIDTH, HEIGHT)
         player_index = 0
@@ -845,7 +846,8 @@ class Display:
             b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=cwid)
             b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=cwid)
             b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=menu_left-(2*offs), top=menu_top, width=cwid)
-
+            b_stats = TextButton(parent=self.SCREEN, text="Stats", left=menu_left-(3*offs), top=menu_top, width=cwid)
+            b_party = TextButton(parent=self.SCREEN, text="Party", left=menu_left-(4*offs), top=menu_top, width=cwid)
 
             # ==================================
             # Player Buttons
