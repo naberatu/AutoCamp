@@ -3,7 +3,6 @@ from random import randint
 import pygame
 import pickle
 from player import Player
-from inanimate import Inanimate
 from enemy import Enemy
 from cencounter import CEncounter
 from campaign_default import load_default_camp
@@ -11,6 +10,8 @@ from items import c_items
 from copy import deepcopy
 
 from os import environ
+from os import startfile
+import platform
 import subprocess
 import sys
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
@@ -113,7 +114,10 @@ def load_image(path="./assets", x=1, y=1):
 
 
 def load_pdf(path):
-    subprocess.call(["qpdfview", path])
+    if platform.system() == "Windows":
+        startfile("C:/Users/elite/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
+    else:
+        subprocess.call(["qpdfview", path])
 
 
 def change_enc(index):
@@ -327,11 +331,11 @@ class Display:
         ENCOUNTERS_OK = True
     except:
         if not PLAYERS_OK:
-            PLAYERS.append(Player(name="Fjord", race="Orc", role="Warlock"))
-            PLAYERS.append(Player(name="Jester Lavorre", race="Tiefling", role="Cleric"))
-            PLAYERS.append(Player(name="Caleb Widowgast", race="Human", role="Wizard"))
-            PLAYERS.append(Player(name="Yasha Nyoodrin", race="Aasimar", role="Barbarian"))
-            PLAYERS.append(Player(name="Veth Brenatto", race="Goblin", role="Rogue"))
+            PLAYERS.append(Player(name="Kru'ul Kanath", race="Orc", role="Warlock"))
+            PLAYERS.append(Player(name="Kepesk", race="Tiefling", role="Cleric"))
+            PLAYERS.append(Player(name="Naybur Sturmgeist", race="Human", role="Wizard"))
+            PLAYERS.append(Player(name="Alduin Rambert", race="Aasimar", role="Barbarian"))
+            PLAYERS.append(Player(name="Vana Moore", race="Goblin", role="Rogue"))
 
             for hero in PLAYERS:
                 hero.set_stats("Strength", randint(9, 16))
@@ -368,15 +372,17 @@ class Display:
             # Graphics Generation
             # ==================================
             self.SCREEN.blit(self.BG_STARTUP, ORIGIN)
+            temp = int((B_WIDTH - 5) / 2)
             b_start = TextButton(parent=self.SCREEN, text="Start", t_font=st_font, left=B_CENTER,
                                  top=B_YPOS - (2 * B_HEIGHT) - 5, width=B_WIDTH, height=B_HEIGHT)
-            b_credits = TextButton(parent=self.SCREEN, text="Credits", t_font=st_font, left=B_CENTER,
-                                   top=B_YPOS - B_HEIGHT, width=B_WIDTH, height=B_HEIGHT)
-            b_quit = TextButton(parent=self.SCREEN, text="Exit", t_font=st_font, left=B_CENTER,
+            b_credits = TextButton(parent=self.SCREEN, text="Credits", t_font=st_font, left=b_start.rect.left,
+                                   top=B_YPOS - B_HEIGHT, width=temp, height=B_HEIGHT)
+            b_handbook = TextButton(parent=self.SCREEN, text="PHB", t_font=st_font, left=b_start.rect.right - temp,
+                                    top=B_YPOS - B_HEIGHT, width=temp, height=B_HEIGHT)
+            b_quit = TextButton(parent=self.SCREEN, text="Exit", t_font=st_font, left=b_start.rect.left,
                                 top=B_YPOS + 5, width=B_WIDTH, height=B_HEIGHT)
 
             # TODO: Integrate Character Creation Loop
-            # TODO: Add PHB button next to Credits.
             # TODO: Update credits to include game-icons.net
 
             # Button Functions
@@ -402,6 +408,8 @@ class Display:
                     sys.exit()
                 elif b_credits.rect.collidepoint(mouse):
                     self.page_credits()
+                elif b_handbook.rect.collidepoint(mouse):
+                    load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
 
             self.end_page()
 
