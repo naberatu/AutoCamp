@@ -221,6 +221,21 @@ class PlayerBox:
         self.parent.blit(title, title_box)
 
 
+class StatBox:
+    def __init__(self, parent, width, height, rect, name):
+        self.backgd = load_image("./assets/button.png", width, height)
+        self.parent = parent
+        self.rect = rect
+
+        title, title_box = text_objects(name + "'s Stats", use_font(20, "hylia"), WHITE)
+        title_box.center = self.rect.center
+        title_box.top = self.rect.top
+
+        self.parent.blit(self.backgd, self.rect)
+        self.parent.blit(title, title_box)
+        self.bottom = title_box.bottom
+
+
 class NumberBox:
     def __init__(self, parent, width, height, t_res, rect, title):
         pygame.draw.rect(parent, BLACK, rect)
@@ -280,7 +295,7 @@ class TextBox:
         self.t_size, self.t_color = t_size, t_color
         self.t_font = use_font(size=t_size, font=t_font)
         if not rect:
-            self.rect = pygame.Rect(left, top, WIDTH - (2 * left), 0)
+            self.rect = pygame.Rect(left, top, WIDTH - (2 * left), t_size)
         else:
             self.rect = rect
 
@@ -298,6 +313,8 @@ class TextBox:
             self.textbox.top = top
 
         parent.blit(self.text, self.textbox)
+        self.right = self.textbox.right
+        self.bottom = self.textbox.bottom
 
 
 class CheckBox:
@@ -774,7 +791,7 @@ class Display:
                         action_used = True
 
                 elif b_stats.rect.collidepoint(mouse):
-                    # load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
+                    self.stat_prompt(ent_select)
                     pass        # TODO: Add stats prompt.
 
                 elif b_dice.rect.collidepoint(mouse):
@@ -874,17 +891,29 @@ class Display:
                 if b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return False
+
                 elif b_save.rect.collidepoint(mouse):
                     save()
+
                 elif b_travel.rect.collidepoint(mouse):
                     self.TO_TRAVEL = True
                     return
+
                 elif b_roll.rect.collidepoint(mouse):
                     self.dice_prompt(current_player)
+
                 elif b_handbook.rect.collidepoint(mouse):
                     load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
+
                 elif b_inv.rect.collidepoint(mouse):
                     self.inv_prompt(current_player, cwid, player_index)
+
+                elif b_stats.rect.collidepoint(mouse):
+                    self.stat_prompt(current_player)
+
+                elif b_party.rect.collidepoint(mouse):
+                    pass
+
                 else:
                     for index, button in enumerate(exp_buttons):
                         if button.rect.collidepoint(mouse):
@@ -1499,6 +1528,141 @@ class Display:
                                 result = 0
                                 dice_box.update_result(str(result))
                             can_clr = True
+
+            self.end_page()
+
+    def stat_prompt(self, ent=None):
+        statblock = ent.get_stat_block()
+
+        width, height = 400, HEIGHT
+        rect = pygame.Rect(WIDTH - width, 0, width, height)
+        stat_box = StatBox(self.SCREEN, width, height, rect, ent.get_name())
+
+        b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
+                             top=rect.top, width=30, height=30)
+
+        # Text fields
+        s_left, s_top = stat_box.rect.left + 10, stat_box.bottom + 10
+
+        tb_level = TextBox(parent=self.SCREEN, text="Lv. " + str(ent.get_level()), left=s_left, top=s_top, t_font="hylia")
+
+        if type(ent) == Player:
+            tb_race = TextBox(parent=self.SCREEN, text=ent.get_race(), left=tb_level.right + 10, top=s_top, t_font="hylia")
+            tb_role = TextBox(parent=self.SCREEN, text=ent.get_role(), left=tb_race.right + 5, top=s_top, t_font="hylia")
+        else:
+            tb_race = TextBox(parent=self.SCREEN, text=ent.get_name(), left=tb_level.right + 10, top=s_top, t_font="hylia")
+
+        s_top = tb_level.bottom + 10
+        hp = str(statblock.get_stat("Current HP")) + "/" + str(statblock.get_stat("Max HP"))
+        hd = str(statblock.get_stat("Hit Dice Quantity")) + "/" + str(ent.get_level()) + "d" + str(statblock.get_stat("Hit Dice"))
+
+        # Text Fields
+        tb_ac = TextBox(parent=self.SCREEN, text="Armor Class: ", left=s_left, top=s_top)
+        tb_hp = TextBox(parent=self.SCREEN, text="Hit Points: ", left=s_left, top=tb_ac.bottom)
+        if type(ent) == Player:
+            tb_hd = TextBox(parent=self.SCREEN, text="Hit Dice: ", left=s_left, top=tb_hp.bottom)
+            s_left = max(tb_ac.right, tb_hp.right, tb_hd.right) + 10
+        else:
+            s_left = max(tb_ac.right, tb_hp.right) + 10
+
+        # Values
+        value_size = 16
+        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Armor Class")), left=s_left, top=s_top + int(0.25 * value_size), t_size=value_size)
+        TextBox(parent=self.SCREEN, text=hp, left=s_left, top=tb_ac.bottom + int(0.25 * value_size), t_size=value_size)
+        if type(ent) == Player:
+            TextBox(parent=self.SCREEN, text=hd, left=s_left, top=tb_hp.bottom + int(0.25 * value_size), t_size=value_size)
+            s_left = max(tb_ac.right, tb_hp.right, tb_hd.right) + 100
+        else:
+            s_left = max(tb_ac.right, tb_hp.right) + 100
+
+        s_top = tb_ac.rect.top
+
+        # Text Fields
+        tb_speed = TextBox(parent=self.SCREEN, text="Max Speed: ", left=s_left, top=s_top)
+        tb_init = TextBox(parent=self.SCREEN, text="Inspiration: ", left=s_left, top=tb_speed.bottom)
+        tb_profb = TextBox(parent=self.SCREEN, text="Prof. Bonus: ", left=s_left, top=tb_init.bottom)
+
+        s_left = max(tb_speed.right, tb_init.right, tb_profb.right) + 10
+
+        # Values
+        # if type(ent) == Enemy:
+        #     TextBox(parent=self.SCREEN, text=str(statblock["Speed"][0]), left=s_left, top=tb_speed.rect.top + int(0.25 * value_size), t_size=value_size)
+        # else:
+        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Speed")), left=s_left, top=tb_speed.rect.top + int(0.25 * value_size), t_size=value_size)
+        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Inspiration")), left=s_left, top=tb_init.rect.top + int(0.25 * value_size), t_size=value_size)
+        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Proficiency Bonus")), left=s_left, top=tb_profb.rect.top + int(0.25 * value_size), t_size=value_size)
+
+        s_left = stat_box.rect.left + 10
+        s_top = tb_profb.bottom + 20
+
+        statlist = list()
+        temp = list(statblock.get_dict())
+        temp = temp[8:14]
+        maxleft = [0, 0, 0, 0]
+
+        # Stat Text Loop
+        for num, stat in enumerate(temp):
+            if num > 0 and num % 2 == 0:
+                s_top = statlist[num - 1].bottom
+                s_left = stat_box.rect.left + 10
+
+            statlist.append(TextBox(parent=self.SCREEN, text=stat + ": ", left=s_left, top=s_top))
+            if num % 2 == 0:
+                maxleft[0] = max(maxleft[0], statlist[num].right)
+            else:
+                maxleft[1] = max(maxleft[1], statlist[num].right)
+
+            if num > 1:
+                s_left = statlist[1].rect.left
+            else:
+                s_left = statlist[num].right + 120
+
+        # Base Stat Loop
+        s_top = statlist[0].rect.top
+        for num, stat in enumerate(temp):
+            if num % 2 == 0:
+                if num > 0:
+                    s_top = statlist[num - 1].bottom
+                s_left = maxleft[0]
+            else:
+                s_left = maxleft[1]
+
+            val = statblock.get_stat(stat)
+            if val < 10:
+                val = " " + str(val)
+            else:
+                val = str(val)
+
+            tb_value = TextBox(parent=self.SCREEN, text=val, left=s_left, top=s_top)
+            if num % 2 == 0:
+                maxleft[2] = max(maxleft[2], tb_value.right)
+            else:
+                maxleft[3] = max(maxleft[3], tb_value.right)
+
+        # Modifier Loop
+        s_top = statlist[0].rect.top
+        for num, stat in enumerate(temp):
+            if num % 2 == 0:
+                if num > 0:
+                    s_top = statlist[num - 1].bottom
+                s_left = maxleft[2] + 5
+            else:
+                s_left = maxleft[3] + 5
+
+            val = statblock.get_mod(stat)
+            if val >= 0:
+                val = "(+" + str(val) + ")"
+            else:
+                val = "(" + str(val) + ")"
+
+            tb_value = TextBox(parent=self.SCREEN, text=val, left=s_left, top=s_top)
+
+        while True:
+            mouse = pygame.mouse.get_pos()
+            if self.CLICK:
+                self.CLICK = False
+                if b_close.rect.collidepoint(mouse):
+                    return
 
             self.end_page()
 

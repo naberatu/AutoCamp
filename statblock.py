@@ -68,7 +68,7 @@ class StatBlock:
             print("[ER] That stat is unavailable!")
 
     def get_mod(self, stat):
-        if stat in list(self.stats.keys())[8:13]:
+        if stat in list(self.stats.keys())[8:14]:
             return int(floor((self.stats[stat] - 10) / 2))
         else:
             return None
