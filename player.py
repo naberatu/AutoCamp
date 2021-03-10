@@ -413,11 +413,36 @@ class Player(Animate):
     def set_companion(self, friend):
         self.companion = friend
 
-    def set_death_strikes(self, strikes):
-       self.death_strikes = strikes
+    def death_strike(self, crit=False, fatal=False):
+        if fatal:
+            self.death_strikes += 3
+        elif crit:
+            self.death_strikes += 2
+        else:
+            self.death_strikes += 1
 
-    def set_death_evasions(self, evasions):
-       self.death_evasions = evasions
+        if self.death_strikes >= 3:
+            self.death_evasions = 0
+            self.death_strikes = 0
+            self.set_stability(False)
+            return self.name + " has perished!"
+
+        return "Death Strikes: " + str(self.death_strikes)
+
+    def death_evade(self, perfect=False):
+        if perfect:
+            self.death_evasions += 3
+        else:
+            self.death_evasions += 1
+
+        if self.death_evasions >= 3:
+            self.death_evasions = 0
+            self.death_strikes = 0
+            self.set_stability(True)
+            self.set_stats("Current HP", 1)
+            return self.name + " has stabilized!"
+
+        return "Death Evasions: " + str(self.death_evasions)
 
     def set_stability(self, stability_status):
-       self.is_stable = stability_status
+        self.is_stable = stability_status

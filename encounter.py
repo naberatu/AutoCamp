@@ -172,6 +172,7 @@ class Encounter:
 
     def performCheck(self, stat, skill, ent, advantage=False, disadvantage=False, print_results=True):
         roll = 0
+        crit_hit = False
         roll1 = self.rollDice(1, 20, False)
         roll2 = self.rollDice(1, 20, False)
         if (advantage and disadvantage) or (not advantage and not disadvantage):
@@ -180,6 +181,9 @@ class Encounter:
             roll = max(roll1, roll2)
         elif disadvantage:
             roll = min(roll1, roll2)
+
+        if roll >= 20:
+            crit_hit = True
 
         mod = self.modifier(stat, ent)
         if print_results:
@@ -190,7 +194,8 @@ class Encounter:
             roll += mod
         if print_results:
             print("Result is... {}!!".format(roll))
-        return roll
+
+        return [roll, crit_hit]
 
     def diceBranch(self):
         rolling = True
@@ -296,11 +301,11 @@ class Encounter:
                     if advOrDisadv == "cancel":
                         break
                     elif advOrDisadv == "adv":
-                        self.performCheck("Charisma", rollNeeded.capitalize(), self.currentEntity, advantage=True)
+                        self.performCheck("Charisma", rollNeeded.capitalize(), self.currentEntity, advantage=True)[0]
                     elif advOrDisadv == "dis":
-                        self.performCheck("Charisma", rollNeeded.capitalize(), self.currentEntity, disadvantage=True)
+                        self.performCheck("Charisma", rollNeeded.capitalize(), self.currentEntity, disadvantage=True)[0]
                     else:
-                        self.performCheck("Charisma", rollNeeded.capitalize(), self.currentEntity)
+                        self.performCheck("Charisma", rollNeeded.capitalize(), self.currentEntity)[0]
 
                 input("Hand the AutoCamp to your DM! (Press ENTER once handed over)")
                 DM_approve = self.prompt("Does the vendor accept this haggle? (Y/N)\n> ", "y", "n", "Y", "N")

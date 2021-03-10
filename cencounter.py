@@ -24,7 +24,6 @@ class CEncounter(Encounter):
         self.map = Map(max_x, max_y, self.animate_list, self.inanimate_list)
         self.gamerule_inv_max = max_inventory   # Gamerule that determines if there will be max inventory size.
         self.turnCounter = 0
-        # self.current_turn = 0
         self.live = False
         self.map_max_x = max_x
         self.map_max_y = max_y
@@ -50,12 +49,6 @@ class CEncounter(Encounter):
 
     def get_turn(self):
         return self.turnCounter
-
-    def get_entity(self, is_animate, index):
-        if is_animate:
-            return self.animate_list[index]
-        else:
-            return self.inanimate_list[index]
 
     def get_actor(self):
         return self.currentEntity
@@ -233,7 +226,7 @@ class CEncounter(Encounter):
     def determineSurprise(self):
         for ent in self.animate_list:
             if ent.is_stealthy:
-                stealth = self.performCheck("Stealth", None, ent)
+                stealth = self.performCheck("Stealth", None, ent)[0]
                 for ent2 in self.animate_list:
                     if type(ent) != type(ent2) and stealth > self.passiveCheck("Perception", ent2, False, False, False):
                         ent2.is_surprised = True
@@ -251,16 +244,18 @@ class CEncounter(Encounter):
         order = []
         index = 0
         for ent in self.animate_list:
-            order.append((index, self.performCheck("Dexterity", None, ent, print_results=False)))
+            order.append((index, self.performCheck("Dexterity", None, ent, print_results=False)[0]))
             index += 1
         order = sorted(order, key=lambda x: - x[1])
 
         self.animate_list[:] = [self.animate_list[i[0]] for i in order]
 
     def next_turn(self):
+        entity_list = self.animate_list
+        entity_list[self.turnCounter].condition_tick()
         self.turnCounter = (self.turnCounter + 1) % len(self.animate_list)
 
-    def dealDMG(self, damage, target):
+    def dealDMG(self, damage, target, was_crit):
         object_list = self.animate_list + self.inanimate_list
         currentEntity = object_list[self.turnCounter]
 
@@ -278,7 +273,7 @@ class CEncounter(Encounter):
             # print(target.get_name(), "has died!!")
             self.animate_list.remove(target)
 
-        elif targetHealth >= 0:  # HP is +/0, player -> DMG
+        elif targetHealth > 0:  # HP is +/0, player -> DMG
             target.set_stats("Current HP", targetHealth)
             # print(target.get_name(), "is now at", target.get_stat("Current HP"), "/",
             #       target.get_stat("Max HP"), "HP.")
@@ -292,10 +287,11 @@ class CEncounter(Encounter):
             target.set_stats("Current HP", 0)
             if type(target) == Player:
                 target.set_stability(False)
-            if "unconscious" in target.get_conditions():  # if already unconscious when hit
-                target.set_death_strikes(target.get_death_strikes() + 1)
+            if "Unconscious" in target.get_conditions():  # if already unconscious when hit
+                target.death_strike(was_crit)
+                # target.set_death_strikes(target.get_death_strikes() + 1)
             # print(target.get_name(), "is unconscious!!")
-            target.mod_conditions(True, "Unconscious")
+            target.mod_conditions("Unconscious", 6)
 
         return damage
 
@@ -315,6 +311,7 @@ class CEncounter(Encounter):
 
         toHit = target.get_stat("Armor Class")
         attempt = 0
+        crit_hit = False
         weapon = None
         atk_mod = None
         dmg_type = None
@@ -346,12 +343,15 @@ class CEncounter(Encounter):
                 atk_mod = "Dexterity"
                 # print("Dexterity chosen!")
 
+        if attempt[1]:
+            crit_hit = True
+
         if type(currentEntity) is Player and weapon.get_name() in currentEntity.weapon_prof:  # checks for proficiency
-            attempt += currentEntity.get_stat("Proficiency Bonus")
+            attempt[0] += currentEntity.get_stat("Proficiency Bonus")
             # print("You are proficient with this weapon! +{} to attempt against AC!".format(
             #     currentEntity.get_stat("Proficiency Bonus")))
 
-        if attempt >= toHit:
+        if attempt[0] >= toHit:
             if weapon is None:  # Unarmed
                 damage = self.rollDice(1, 20, print_results=False) + self.modifier("Strength", currentEntity)
             else:
@@ -373,7 +373,7 @@ class CEncounter(Encounter):
                     damage = damage * 2
                     # print("{} is vulnerable to {}!".format(target.get_name(), dmg_type))
 
-            return self.dealDMG(damage, target)
+            return self.dealDMG(damage, target, crit_hit)
         else:
             # print("Attack failed!")
             return None
