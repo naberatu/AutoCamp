@@ -740,11 +740,11 @@ class Display:
                     ASK_SAVE = True
 
                 elif b_stats.rect.collidepoint(mouse):
-                    load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
+                    # load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
                     pass        # TODO: Add stats prompt.
 
                 elif b_dice.rect.collidepoint(mouse):
-                    self.dice_prompt()
+                    self.dice_prompt(ent_select)
 
                 elif b_move is not None and b_move.rect.collidepoint(mouse) and ent_select is not None\
                         and rem_speed > 0:
@@ -845,7 +845,7 @@ class Display:
                     self.TO_TRAVEL = True
                     return
                 elif b_roll.rect.collidepoint(mouse):
-                    self.dice_prompt()
+                    self.dice_prompt(current_player)
                 elif b_handbook.rect.collidepoint(mouse):
                     load_pdf("/home/pi/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
                 elif b_inv.rect.collidepoint(mouse):
@@ -1292,10 +1292,12 @@ class Display:
 
             self.end_page()
 
-    def dice_prompt(self):
+    def dice_prompt(self, ent=None):
 
         # TODO: Add ability checks
         # TODO: Add advantage/disadvantage checkboxes.
+
+        entity = ent
 
         dice_options = ["d4", "d6", "d8", "d10", "d12", "d20"]
         width, height = 515, 320
@@ -1429,31 +1431,43 @@ class Display:
                         cbox_dis.uncheck()
                     else:
                         cbox_dis.check()
+                else:
+                    for num, key in enumerate(keypad):
+                        if key.rect.collidepoint(mouse):
+                            key_val = num + 1
 
-                for num, key in enumerate(keypad):
-                    if key.rect.collidepoint(mouse):
-                        key_val = num + 1
+                            if can_clr:
+                                result = ""
+                                can_clr = False
+                            if key_val == 10:
+                                result += "0"
+                            if key_val == 11:
+                                result = ""
+                            else:
+                                result += str(key_val)
+                            dice_box.update_result(result)
 
-                        if can_clr:
-                            result = ""
-                            can_clr = False
-                        if key_val == 10:
-                            result += "0"
-                        if key_val == 11:
-                            result = ""
-                        else:
-                            result += str(key_val)
-                        dice_box.update_result(result)
-                        self.CLICK = False
+                    for num, diceface in enumerate(dicepad):
+                        if diceface.rect.collidepoint(mouse):
+                            if can_clr:
+                                result = ""
+                                can_clr = False
+                            result += dice_options[num]
+                            dice_box.update_result(result)
 
-                for num, diceface in enumerate(dicepad):
-                    if diceface.rect.collidepoint(mouse):
-                        if can_clr:
-                            result = ""
-                            can_clr = False
-                        result += dice_options[num]
-                        dice_box.update_result(result)
-                        self.CLICK = False
+                    for num, check in enumerate(checklist):
+                        if check.rect.collidepoint(mouse):
+                            result = ENCOUNTERS[ENC_INDEX].performCheck(stat_name[num], None, entity,
+                                                                        advantage=cbox_adv.is_checked,
+                                                                        disadvantage=cbox_dis.is_checked,
+                                                                        print_results=False)
+
+                            if result >= 0:
+                                dice_box.update_result(str(result))
+                            else:
+                                result = 0
+                                dice_box.update_result(str(result))
+                            can_clr = True
 
             self.end_page()
 
