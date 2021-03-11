@@ -222,12 +222,12 @@ class PlayerBox:
 
 
 class StatBox:
-    def __init__(self, parent, width, height, rect, name):
-        self.backgd = load_image("./assets/button.png", width, height)
+    def __init__(self, parent, width, height, rect, name, color=WHITE):
+        self.backgd = load_image("./assets/backpack.jpg", width, height)
         self.parent = parent
         self.rect = rect
 
-        title, title_box = text_objects(name + "'s Stats", use_font(20, "hylia"), WHITE)
+        title, title_box = text_objects(name + "'s Stats", use_font(24, "hylia"), color)
         title_box.center = self.rect.center
         title_box.top = self.rect.top
 
@@ -385,7 +385,13 @@ class Display:
             PLAYERS.append(Player(name="Vana Moore", race="Goblin", role="Rogue"))
 
             for hero in PLAYERS:
-                hero.set_stats("Strength", randint(9, 16))
+                hero.set_stats("Strength", randint(6, 18))
+                hero.set_stats("Dexterity", randint(6, 18))
+                hero.set_stats("Constitution", randint(6, 18))
+                hero.set_stats("Intellect", randint(6, 18))
+                hero.set_stats("Wisdom", randint(6, 18))
+                hero.set_stats("Charisma", randint(6, 18))
+
                 hero.set_weapon("Shortsword")
                 hero.set_armor("Chain Mail")
                 hero.inv_add("Mana Potion", randint(1, 6))
@@ -792,7 +798,6 @@ class Display:
 
                 elif b_stats.rect.collidepoint(mouse):
                     self.stat_prompt(ent_select)
-                    pass        # TODO: Add stats prompt.
 
                 elif b_dice.rect.collidepoint(mouse):
                     self.dice_prompt(ent_select)
@@ -851,9 +856,7 @@ class Display:
 
             self.SCREEN.blit(background, ORIGIN)
 
-            # TODO: Integrate Stat viewing here.
             # TODO: Integrate Resting here.
-            # TODO: Integrate vendor interactions.
 
             TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENC_INDEX].get_name(), t_size=24, t_font="hylia",
                        left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
@@ -1520,7 +1523,7 @@ class Display:
                             result = ENCOUNTERS[ENC_INDEX].performCheck(stat_name[num], None, entity,
                                                                         advantage=cbox_adv.is_checked,
                                                                         disadvantage=cbox_dis.is_checked,
-                                                                        print_results=False)
+                                                                        print_results=False)[0]
 
                             if result >= 0:
                                 dice_box.update_result(str(result))
@@ -1537,40 +1540,48 @@ class Display:
         width, height = 400, HEIGHT
         rect = pygame.Rect(WIDTH - width, 0, width, height)
         stat_box = StatBox(self.SCREEN, width, height, rect, ent.get_name())
+        color = WHITE
 
         b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
                              top=rect.top, width=30, height=30)
 
         # Text fields
-        s_left, s_top = stat_box.rect.left + 10, stat_box.bottom + 10
+        s_left, s_top = stat_box.rect.left + 20, stat_box.bottom + 10
 
-        tb_level = TextBox(parent=self.SCREEN, text="Lv. " + str(ent.get_level()), left=s_left, top=s_top, t_font="hylia")
+        tb_level = TextBox(parent=self.SCREEN, text="Lv. " + str(ent.get_level()), left=s_left, top=s_top,
+                           t_font="hylia", t_color=color)
 
         if type(ent) == Player:
-            tb_race = TextBox(parent=self.SCREEN, text=ent.get_race(), left=tb_level.right + 10, top=s_top, t_font="hylia")
-            tb_role = TextBox(parent=self.SCREEN, text=ent.get_role(), left=tb_race.right + 5, top=s_top, t_font="hylia")
+            tb_race = TextBox(parent=self.SCREEN, text=ent.get_race(), left=tb_level.right + 10, top=s_top,
+                              t_font="hylia", t_color=color)
+            tb_role = TextBox(parent=self.SCREEN, text=ent.get_role(), left=tb_race.right + 5, top=s_top,
+                              t_font="hylia", t_color=color)
         else:
-            tb_race = TextBox(parent=self.SCREEN, text=ent.get_name(), left=tb_level.right + 10, top=s_top, t_font="hylia")
+            tb_race = TextBox(parent=self.SCREEN, text=ent.get_name(), left=tb_level.right + 10, top=s_top,
+                              t_font="hylia", t_color=color)
 
         s_top = tb_level.bottom + 10
         hp = str(statblock.get_stat("Current HP")) + "/" + str(statblock.get_stat("Max HP"))
         hd = str(statblock.get_stat("Hit Dice Quantity")) + "/" + str(ent.get_level()) + "d" + str(statblock.get_stat("Hit Dice"))
 
         # Text Fields
-        tb_ac = TextBox(parent=self.SCREEN, text="Armor Class: ", left=s_left, top=s_top)
-        tb_hp = TextBox(parent=self.SCREEN, text="Hit Points: ", left=s_left, top=tb_ac.bottom)
+        tb_ac = TextBox(parent=self.SCREEN, text="Armor Class: ", left=s_left, top=s_top, t_font="nodesto")
+        tb_hp = TextBox(parent=self.SCREEN, text="Hit Points: ", left=s_left, top=tb_ac.bottom, t_font="nodesto")
         if type(ent) == Player:
-            tb_hd = TextBox(parent=self.SCREEN, text="Hit Dice: ", left=s_left, top=tb_hp.bottom)
-            s_left = max(tb_ac.right, tb_hp.right, tb_hd.right) + 10
+            tb_hd = TextBox(parent=self.SCREEN, text="Hit Dice: ", left=s_left, top=tb_hp.bottom, t_font="nodesto")
+            s_left = max(tb_ac.right, tb_hp.right, tb_hd.right) + 20
         else:
-            s_left = max(tb_ac.right, tb_hp.right) + 10
+            s_left = max(tb_ac.right, tb_hp.right) + 20
 
         # Values
         value_size = 16
-        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Armor Class")), left=s_left, top=s_top + int(0.25 * value_size), t_size=value_size)
-        TextBox(parent=self.SCREEN, text=hp, left=s_left, top=tb_ac.bottom + int(0.25 * value_size), t_size=value_size)
+        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Armor Class")), left=s_left,
+                top=s_top + int(0.25 * value_size), t_size=value_size, t_font="nodesto")
+        TextBox(parent=self.SCREEN, text=hp, left=s_left, top=tb_ac.bottom + int(0.25 * value_size),
+                t_size=value_size, t_font="nodesto")
         if type(ent) == Player:
-            TextBox(parent=self.SCREEN, text=hd, left=s_left, top=tb_hp.bottom + int(0.25 * value_size), t_size=value_size)
+            TextBox(parent=self.SCREEN, text=hd, left=s_left, top=tb_hp.bottom + int(0.25 * value_size),
+                    t_size=value_size, t_font="nodesto")
             s_left = max(tb_ac.right, tb_hp.right, tb_hd.right) + 100
         else:
             s_left = max(tb_ac.right, tb_hp.right) + 100
@@ -1578,19 +1589,21 @@ class Display:
         s_top = tb_ac.rect.top
 
         # Text Fields
-        tb_speed = TextBox(parent=self.SCREEN, text="Max Speed: ", left=s_left, top=s_top)
-        tb_init = TextBox(parent=self.SCREEN, text="Inspiration: ", left=s_left, top=tb_speed.bottom)
-        tb_profb = TextBox(parent=self.SCREEN, text="Prof. Bonus: ", left=s_left, top=tb_init.bottom)
+        tb_speed = TextBox(parent=self.SCREEN, text="Max Speed: ", left=s_left, top=s_top, t_font="nodesto")
+        tb_init = TextBox(parent=self.SCREEN, text="Inspiration: ", left=s_left, top=tb_speed.bottom, t_font="nodesto")
+        tb_profb = TextBox(parent=self.SCREEN, text="Prof. Bonus: ", left=s_left, top=tb_init.bottom, t_font="nodesto")
 
-        s_left = max(tb_speed.right, tb_init.right, tb_profb.right) + 10
+        s_left = max(tb_speed.right, tb_init.right, tb_profb.right) + 20
 
         # Values
-        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Speed")), left=s_left, top=tb_speed.rect.top + int(0.25 * value_size), t_size=value_size)
-        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Inspiration")), left=s_left, top=tb_init.rect.top + int(0.25 * value_size), t_size=value_size)
-        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Proficiency Bonus")), left=s_left, top=tb_profb.rect.top + int(0.25 * value_size), t_size=value_size)
+        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Speed")), left=s_left,
+                top=tb_speed.rect.top + int(0.25 * value_size), t_size=value_size, t_font="nodesto")
+        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Inspiration")), left=s_left,
+                top=tb_init.rect.top + int(0.25 * value_size), t_size=value_size, t_font="nodesto")
+        TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Proficiency Bonus")), left=s_left,
+                top=tb_profb.rect.top + int(0.25 * value_size), t_size=value_size, t_font="nodesto")
 
-        s_left = stat_box.rect.left + 10
-        s_top = tb_profb.bottom + 20
+        s_top = tb_profb.bottom + 10
 
         statlist = list()
         temp = list(statblock.get_dict())
@@ -1599,11 +1612,12 @@ class Display:
 
         # Stat Text Loop
         for num, stat in enumerate(temp):
-            if num > 0 and num % 2 == 0:
-                s_top = statlist[num - 1].bottom
-                s_left = stat_box.rect.left + 10
+            if num % 2 == 0:
+                if num > 0:
+                    s_top = statlist[num - 1].bottom
+                s_left = stat_box.rect.left + 20
 
-            statlist.append(TextBox(parent=self.SCREEN, text=stat + ": ", left=s_left, top=s_top))
+            statlist.append(TextBox(parent=self.SCREEN, text=stat + ": ", left=s_left, top=s_top, t_font="nodesto"))
             if num % 2 == 0:
                 maxleft[0] = max(maxleft[0], statlist[num].right)
             else:
@@ -1630,7 +1644,7 @@ class Display:
             else:
                 val = str(val)
 
-            tb_value = TextBox(parent=self.SCREEN, text=val, left=s_left, top=s_top)
+            tb_value = TextBox(parent=self.SCREEN, text=val, left=s_left, top=s_top, t_font="nodesto")
             if num % 2 == 0:
                 maxleft[2] = max(maxleft[2], tb_value.right)
             else:
@@ -1658,21 +1672,21 @@ class Display:
         temp = list(statblock.get_dict())
         temp = temp[14:]
         maxleft = [0, 0]
-        s_top += 50
+        s_top += 40
 
         skilllist = list()
         for num, stat in enumerate(temp):
             if num % 2 == 0:
                 if num > 0:
                     s_top = skilllist[num - 1].bottom
-                s_left = stat_box.rect.left + 10
+                s_left = stat_box.rect.left + 20
             else:
                 if num > 1:
                     s_left = skilllist[1].rect.left
                 else:
                     s_left = statlist[1].rect.left - 20
 
-            skilllist.append(TextBox(parent=self.SCREEN, text=stat + ": ", left=s_left, top=s_top))
+            skilllist.append(TextBox(parent=self.SCREEN, text=stat + ": ", left=s_left, top=s_top, t_font="nodesto"))
             if num % 2 == 0:
                 maxleft[0] = max(maxleft[0], skilllist[num].right)
             else:
