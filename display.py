@@ -1585,9 +1585,6 @@ class Display:
         s_left = max(tb_speed.right, tb_init.right, tb_profb.right) + 10
 
         # Values
-        # if type(ent) == Enemy:
-        #     TextBox(parent=self.SCREEN, text=str(statblock["Speed"][0]), left=s_left, top=tb_speed.rect.top + int(0.25 * value_size), t_size=value_size)
-        # else:
         TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Speed")), left=s_left, top=tb_speed.rect.top + int(0.25 * value_size), t_size=value_size)
         TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Inspiration")), left=s_left, top=tb_init.rect.top + int(0.25 * value_size), t_size=value_size)
         TextBox(parent=self.SCREEN, text=str(statblock.get_stat("Proficiency Bonus")), left=s_left, top=tb_profb.rect.top + int(0.25 * value_size), t_size=value_size)
@@ -1656,6 +1653,61 @@ class Display:
                 val = "(" + str(val) + ")"
 
             tb_value = TextBox(parent=self.SCREEN, text=val, left=s_left, top=s_top)
+
+        # Fresh Start for skills.
+        temp = list(statblock.get_dict())
+        temp = temp[14:]
+        maxleft = [0, 0]
+        s_top += 50
+
+        skilllist = list()
+        for num, stat in enumerate(temp):
+            if num % 2 == 0:
+                if num > 0:
+                    s_top = skilllist[num - 1].bottom
+                s_left = stat_box.rect.left + 10
+            else:
+                if num > 1:
+                    s_left = skilllist[1].rect.left
+                else:
+                    s_left = statlist[1].rect.left - 20
+
+            skilllist.append(TextBox(parent=self.SCREEN, text=stat + ": ", left=s_left, top=s_top))
+            if num % 2 == 0:
+                maxleft[0] = max(maxleft[0], skilllist[num].right)
+            else:
+                maxleft[1] = max(maxleft[1], skilllist[num].right)
+
+        str_list = [17]
+        dex_list = [14, 29, 30]
+        int_list = [16, 19, 22, 24, 28]
+        wis_list = [15, 20, 23, 25, 31]
+        cha_list = [18, 21, 26, 27]
+
+        for num, stat in enumerate(temp, 14):
+            if num % 2 == 0:
+                s_top = skilllist[num-14].rect.top
+                s_left = maxleft[0] + 5
+            else:
+                s_left = maxleft[1] + 5
+
+            if num in str_list:
+                val = statblock.get_mod("Strength")
+            elif num in dex_list:
+                val = statblock.get_mod("Dexterity")
+            elif num in int_list:
+                val = statblock.get_mod("Intellect")
+            elif num in wis_list:
+                val = statblock.get_mod("Wisdom")
+            elif num in cha_list:
+                val = statblock.get_mod("Charisma")
+
+            if val > 0:
+                val = "+" + str(val)
+            else:
+                val = str(val)
+
+            skilllist.append(TextBox(parent=self.SCREEN, text=val, left=s_left, top=s_top))
 
         while True:
             mouse = pygame.mouse.get_pos()

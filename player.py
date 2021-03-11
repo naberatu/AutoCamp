@@ -440,6 +440,7 @@ class Player(Animate):
             self.death_strikes = 0
             self.set_stability(True)
             self.set_stats("Current HP", 1)
+            self.mod_conditions("Unconscious", adding=False)
             return self.name + " has stabilized!"
 
         return "Death Evasions: " + str(self.death_evasions)
