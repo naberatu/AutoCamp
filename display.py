@@ -207,6 +207,21 @@ class InvBox:
         self.parent.blit(title, title_box)
 
 
+class PartyBox:
+    def __init__(self, parent, width, height, rect):
+        self.rect = rect
+        self.bkgd = load_image("./assets/backpack.jpg", width, height)
+        self.parent = parent
+
+        title, title_box = text_objects("Party Member Actions", use_font(30, "hylia"), WHITE)
+        title_box.center = self.rect.center
+        title_box.top = self.rect.top + 10
+        self.bottom = title_box.bottom
+
+        self.parent.blit(self.bkgd, self.rect)
+        self.parent.blit(title, title_box)
+
+
 class PlayerBox:
     def __init__(self, parent, width, height, rect):
         self.rect = rect
@@ -328,7 +343,7 @@ class CheckBox:
             self.urect.left = coors[0]
             self.urect.top = coors[1]
 
-        self.crect = pygame.Rect(0, 0, int(0.8 * self.urect.width), int(0.8 * self.urect.height))
+        self.crect = pygame.Rect(0, 0, int(0.7 * self.urect.width), int(0.7 * self.urect.height))
         self.crect.center = self.urect.center
         self.is_checked = state
         if self.is_checked:
@@ -841,9 +856,10 @@ class Display:
     def page_nce(self):
         global ASK_SAVE
         menu_top = 390
-        menu_left = 670
-        cwid = 100
-        offs = cwid + 10
+        cwid = 150
+        bwid = 100
+        menu_left = WIDTH - bwid - 10
+        offs = bwid + 10
         background = load_image(ENCOUNTERS[ENC_INDEX].get_bg(), WIDTH, HEIGHT)
         player_index = 0
         current_player = PLAYERS[0]
@@ -863,11 +879,12 @@ class Display:
             b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
             b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
             b_handbook = TextButton(parent=self.SCREEN, text="PHB", left=b_save.rect.left - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
-            b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=cwid)
-            b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=cwid)
-            b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=menu_left-(2*offs), top=menu_top, width=cwid)
-            b_stats = TextButton(parent=self.SCREEN, text="Stats", left=menu_left-(3*offs), top=menu_top, width=cwid)
-            b_party = TextButton(parent=self.SCREEN, text="Party", left=menu_left-(4*offs), top=menu_top, width=cwid)
+
+            b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=bwid)
+            b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=bwid)
+            b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=menu_left-(2*offs), top=menu_top, width=bwid)
+            b_stats = TextButton(parent=self.SCREEN, text="Stats", left=menu_left-(3*offs), top=menu_top, width=bwid)
+            b_party = TextButton(parent=self.SCREEN, text="Party", left=menu_left-(4*offs), top=menu_top, width=bwid)
 
             # ==================================
             # Player Buttons
@@ -915,7 +932,7 @@ class Display:
                     self.stat_prompt(current_player)
 
                 elif b_party.rect.collidepoint(mouse):
-                    pass
+                    self.party_prompt(cwid, exp_buttons[0].rect.top)
 
                 else:
                     for index, button in enumerate(exp_buttons):
@@ -1189,8 +1206,65 @@ class Display:
 
             self.end_page()
 
-    def stats_prompt(self, entity):
-        return
+    def party_prompt(self, plbtwid, start_top):
+        width = WIDTH - plbtwid - 20
+        menu_left = plbtwid + 20
+        rect = pygame.Rect(menu_left, 0, width, HEIGHT)
+        reload = True
+        checkboxes = None
+        bt_wid = 80
+        center_left = rect.centerx - bt_wid / 2
+
+        while True:
+
+            if reload:
+                reload = False
+
+                party_box = PartyBox(self.SCREEN, width, HEIGHT, rect)
+                b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
+                                     top=rect.top, width=30, height=30)
+
+                checkboxes = list()
+                cb_top = start_top
+                cb_size = int(B_HEIGHT * 0.5)
+                for i in range(len(PLAYERS)):
+                    cb_rect = pygame.Rect(menu_left + 10, cb_top + int(cb_size / 2), cb_size, cb_size)
+                    checkboxes.append(CheckBox(self.SCREEN, cb_rect))
+                    cb_top += B_HEIGHT + 10
+
+                b_selall = TextButton(parent=self.SCREEN, text="Select All", t_size=16, left=rect.centerx - bt_wid - 5,
+                                      top=party_box.bottom + 10, width=bt_wid, height=cb_size + 10)
+                b_clrall = TextButton(parent=self.SCREEN, text="Clear All", t_size=16, left=rect.centerx + 5,
+                                      top=party_box.bottom + 10, width=bt_wid, height=cb_size + 10)
+
+                bt_wid = 2 * bt_wid + 10
+                bt_top = b_clrall.rect.bottom + 5
+
+                b_restsh = TextButton(parent=self.SCREEN, text="Short Rest", t_size=20, left=rect.centerx - int(bt_wid / 2),
+                                      top=bt_top, width=bt_wid, height=B_HEIGHT)
+                b_restlg = TextButton(parent=self.SCREEN, text="Long Rest", t_size=20, left=rect.centerx - int(bt_wid / 2),
+                                      top=bt_top + (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
+                b_memadd = TextButton(parent=self.SCREEN, text="New Member", t_size=20, left=rect.centerx - int(bt_wid / 2),
+                                      top=bt_top + 2 * (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
+                b_memrem = TextButton(parent=self.SCREEN, text="Remove Member", t_size=20, left=rect.centerx - int(bt_wid / 2),
+                                      top=bt_top + 3 * (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
+
+
+            mouse = pygame.mouse.get_pos()
+            if self.CLICK:
+                self.CLICK = False
+
+                if b_close.rect.collidepoint(mouse):
+                    return
+                else:
+                    for cb in checkboxes:
+                        if cb.urect.collidepoint(mouse):
+                            if cb.is_checked:
+                                cb.uncheck()
+                            else:
+                                cb.check()
+
+            self.end_page()
 
     def travel_prompt(self):
         self.SCREEN.blit(load_image("./assets/travel_bg.jpg", WIDTH, HEIGHT), ORIGIN)
