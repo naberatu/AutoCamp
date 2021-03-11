@@ -8,6 +8,7 @@ from cencounter import CEncounter
 from campaign_default import load_default_camp
 from items import c_items
 from copy import deepcopy
+from math import floor
 
 from os import environ
 from os import startfile
@@ -118,6 +119,29 @@ def load_pdf(path):
         startfile("C:/Users/elite/PycharmProjects/autocamp32/assets/PlayerHandbook.pdf")
     else:
         subprocess.call(["qpdfview", path])
+
+
+def rest_short(player, num_hd=1):
+    if player.get_stat("Hit Dice Quantity") < 0 or player.get_stat("Hit Dice Quantity") < num_hd:
+        return False
+
+    healed_amt = 0
+    for i in range(num_hd):
+        healed_amt += max(0, randint(1, player.get_stat("Hit Dice")) + player.get_stat_block().get_mod("Constitution"))
+
+    new_hp = min(player.get_stat("Max HP"), player.get_stat("Current HP") + healed_amt)
+    player.set_stats("Current HP", new_hp)
+    player.set_stats("Hit Dice Quantity", player.get_stat("Hit Dice Quantity") - num_hd)
+    return True
+
+
+def rest_long(player):
+    player.set_stats("Current HP", player.get_stat("Max HP"))
+    max_hd = max(1, floor(player.get_level() / 2))
+    hd_used = player.get_level() - player.get_stat("Hit Dice Quantity")
+    max_hd = min(max_hd, hd_used)
+    
+    player.set_stats("Hit Dice Quantity", player.get_stat("Hit Dice Quantity") + randint(0, max_hd))
 
 
 def change_enc(index):
@@ -352,6 +376,7 @@ class CheckBox:
             self.uncheck()
 
     def check(self):
+        self.uncheck()
         self.is_checked = True
         pygame.draw.rect(self.parent, BLACK, self.crect)
 
@@ -1212,13 +1237,15 @@ class Display:
         rect = pygame.Rect(menu_left, 0, width, HEIGHT)
         reload = True
         checkboxes = None
-        bt_wid = 80
-        center_left = rect.centerx - bt_wid / 2
+        # center_left = rect.centerx - bt_wid / 2
+        checkstates = [False] * 8
+        message = ""
 
         while True:
 
             if reload:
                 reload = False
+                bt_wid = 80
 
                 party_box = PartyBox(self.SCREEN, width, HEIGHT, rect)
                 b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
@@ -1229,7 +1256,7 @@ class Display:
                 cb_size = int(B_HEIGHT * 0.5)
                 for i in range(len(PLAYERS)):
                     cb_rect = pygame.Rect(menu_left + 10, cb_top + int(cb_size / 2), cb_size, cb_size)
-                    checkboxes.append(CheckBox(self.SCREEN, cb_rect))
+                    checkboxes.append(CheckBox(self.SCREEN, cb_rect, state=checkstates[i]))
                     cb_top += B_HEIGHT + 10
 
                 b_selall = TextButton(parent=self.SCREEN, text="Select All", t_size=16, left=rect.centerx - bt_wid - 5,
@@ -1238,31 +1265,70 @@ class Display:
                                       top=party_box.bottom + 10, width=bt_wid, height=cb_size + 10)
 
                 bt_wid = 2 * bt_wid + 10
+                t_wid = bt_wid + 40
+                bt_left = rect.centerx - int(bt_wid / 2)
+                t_left = rect.centerx - int(t_wid / 2)
                 bt_top = b_clrall.rect.bottom + 5
 
-                b_restsh = TextButton(parent=self.SCREEN, text="Short Rest", t_size=20, left=rect.centerx - int(bt_wid / 2),
-                                      top=bt_top, width=bt_wid, height=B_HEIGHT)
-                b_restlg = TextButton(parent=self.SCREEN, text="Long Rest", t_size=20, left=rect.centerx - int(bt_wid / 2),
-                                      top=bt_top + (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
-                b_memadd = TextButton(parent=self.SCREEN, text="New Member", t_size=20, left=rect.centerx - int(bt_wid / 2),
-                                      top=bt_top + 2 * (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
-                b_memrem = TextButton(parent=self.SCREEN, text="Remove Member", t_size=20, left=rect.centerx - int(bt_wid / 2),
-                                      top=bt_top + 3 * (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
+                new_rect = (t_left, bt_top, t_wid, B_HEIGHT)
+                drawText(party_box.parent, message, WHITE, new_rect, use_font(20, "scaly"))
 
+                bt_top += B_HEIGHT + 5
+
+                b_restsh = TextButton(parent=self.SCREEN, text="Short Rest", t_size=20, left=bt_left,
+                                      top=bt_top, width=bt_wid, height=B_HEIGHT)
+                b_restlg = TextButton(parent=self.SCREEN, text="Long Rest", t_size=20, left=bt_left,
+                                      top=bt_top + (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
+                b_memadd = TextButton(parent=self.SCREEN, text="New Member", t_size=20, left=bt_left,
+                                      top=bt_top + 2 * (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
+                b_memrem = TextButton(parent=self.SCREEN, text="Remove Member", t_size=20, left=bt_left,
+                                      top=bt_top + 3 * (B_HEIGHT + 5), width=bt_wid, height=B_HEIGHT)
 
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
                 self.CLICK = False
+                reload = True
+                message = ""
 
                 if b_close.rect.collidepoint(mouse):
                     return
+                elif b_selall.rect.collidepoint(mouse):
+                    for i in range(len(checkboxes)):
+                        checkstates[i] = True
+
+                elif b_clrall.rect.collidepoint(mouse):
+                    for i in range(len(checkboxes)):
+                        checkstates[i] = False
+
+                elif b_restsh.rect.collidepoint(mouse):
+                    checked = False
+                    for num, player in enumerate(PLAYERS):
+                        if checkstates[num]:
+                            checked = True
+                            rest_short(player)
+
+                    if checked:
+                        message = "Selected party members took a short rest!"
+
+                elif b_restlg.rect.collidepoint(mouse):
+                    checked = False
+                    for num, player in enumerate(PLAYERS):
+                        if checkstates[num]:
+                            checked = True
+                            rest_long(player)
+
+                    if checked:
+                        message = "Selected party members took a long rest!"
+
                 else:
-                    for cb in checkboxes:
+                    for num, cb in enumerate(checkboxes):
                         if cb.urect.collidepoint(mouse):
                             if cb.is_checked:
                                 cb.uncheck()
                             else:
                                 cb.check()
+
+                            checkstates[num] = cb.is_checked
 
             self.end_page()
 
