@@ -260,6 +260,21 @@ class PlayerBox:
         self.parent.blit(title, title_box)
 
 
+class CharBox:
+    def __init__(self, parent):
+        self.parent = parent
+        self.rect = pygame.Rect(0, 0, WIDTH, HEIGHT)
+        self.bkgd = load_image("./assets/backpack.jpg", self.rect.width, self.rect.height)
+
+        title, title_box = text_objects("New Party Member", use_font(30, "hylia"), WHITE)
+        title_box.center = self.rect.center
+        title_box.top = self.rect.top + 10
+        self.bottom = title_box.bottom
+
+        self.parent.blit(self.bkgd, self.rect)
+        self.parent.blit(title, title_box)
+
+
 class StatBox:
     def __init__(self, parent, width, height, rect, name, color=WHITE):
         self.backgd = load_image("./assets/backpack.jpg", width, height)
@@ -300,6 +315,17 @@ class NumberBox:
         self.res_rect.center = self.result_field.center
         pygame.draw.rect(self.parent, WHITE, self.result_field)
         self.parent.blit(self.results, self.res_rect)
+
+
+class DescBox:
+    def __init__(self, parent, rect, description):
+        self.rect = rect
+        parent.blit(load_image("./assets/button.png", self.rect.width, self.rect.height), self.rect)
+        self.tb_desc = TextBox(parent=parent, text="Description", t_size=13, t_font="hylia",
+                               left=self.rect.left + 10, top=self.rect.top + 1)
+
+        desc_rect = pygame.Rect(self.rect.left + 10, self.tb_desc.rect.bottom + 25, self.rect.width - 15, self.rect.height - 20)
+        drawText(parent, description, WHITE, desc_rect, use_font(17, "scaly"))
 
 
 class TextButton:
@@ -1135,16 +1161,11 @@ class Display:
 
                 desc_left = WIDTH - width + 20
 
-                desc_width = items_left - desc_left - 10
+                desc_width = items_left - desc_left - 15
                 desc_height = HEIGHT - b_scrollup.rect.top - 10
 
                 desc_rect = pygame.Rect(desc_left, b_scrollup.rect.top, desc_width, desc_height)
-                self.SCREEN.blit(load_image("./assets/button.png", desc_width, desc_height), desc_rect)
-                tb_desc = TextBox(parent=self.SCREEN, text="Description", t_size=13, t_font="hylia",
-                                  left=desc_left + 10, top=b_scrollup.rect.top + 1)
-
-                desc_rect = pygame.Rect(desc_left + 10, tb_desc.rect.bottom + 25, desc_width - 15, desc_height - 20)
-                drawText(self.SCREEN, description, WHITE, desc_rect, use_font(17, "scaly"))
+                db = DescBox(self.SCREEN, desc_rect, description)
 
                 # Money Box
                 # ==================================
@@ -1183,22 +1204,23 @@ class Display:
 
                     if b_discard.rect.collidepoint(mouse):
                         amt = self.number_prompt("Discard Item", player.inventory[items_to_show[item_sel_index]],
-                                                 desc_left, tb_desc.rect.bottom, width=desc_width, height=desc_height)
+                                                 desc_left, db.tb_desc.rect.bottom, width=desc_width, height=desc_height)
                         if amt:
                             ASK_SAVE = True
                             if item_sel_index == -1 or item_sel_index == -2:
                                 player.inv_remove(items_to_show[item_sel_index], dropping=True)
                             else:
                                 player.inv_remove(items_to_show[item_sel_index], amount=amt, discarding=True)
+
                     elif b_give.rect.collidepoint(mouse):
-                        rec_index = self.player_prompt(player_index, desc_left, tb_desc.rect.bottom, width=desc_width,
+                        rec_index = self.player_prompt(player_index, desc_left, db.tb_desc.rect.bottom, width=desc_width,
                                                        height=desc_height)
                         if rec_index >= player_index:
                             rec_index += 1
 
                         if rec_index >= 0:
                             amt = self.number_prompt("Give Item", player.inventory[items_to_show[item_sel_index]],
-                                                     desc_left, tb_desc.rect.bottom, width=desc_width, height=desc_height)
+                                                     desc_left, db.tb_desc.rect.bottom, width=desc_width, height=desc_height)
                             if amt:
                                 ASK_SAVE = True
                                 ENCOUNTERS[ENC_INDEX].inv_give(PLAYERS[player_index], PLAYERS[rec_index],
@@ -1232,6 +1254,8 @@ class Display:
             self.end_page()
 
     def party_prompt(self, plbtwid, start_top):
+        global ASK_SAVE
+
         width = WIDTH - plbtwid - 20
         menu_left = plbtwid + 20
         rect = pygame.Rect(menu_left, 0, width, HEIGHT)
@@ -1310,6 +1334,8 @@ class Display:
                     if checked:
                         message = "Selected party members took a short rest!"
 
+                    ASK_SAVE = True
+
                 elif b_restlg.rect.collidepoint(mouse):
                     checked = False
                     for num, player in enumerate(PLAYERS):
@@ -1319,6 +1345,11 @@ class Display:
 
                     if checked:
                         message = "Selected party members took a long rest!"
+
+                    ASK_SAVE = True
+
+                elif b_memadd.rect.collidepoint(mouse):
+                    self.char_add()
 
                 else:
                     for num, cb in enumerate(checkboxes):
@@ -1871,6 +1902,13 @@ class Display:
                     return
 
             self.end_page()
+
+    def char_add(self):
+        menu = CharBox(self.SCREEN)
+        rect = menu.rect
+
+
+
 
     def prompt_quit(self):
         global ASK_SAVE     # TODO: Fix bug where encounter won't reset after decline without exit.
