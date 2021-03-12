@@ -914,6 +914,8 @@ class Display:
         background = load_image(ENCOUNTERS[ENC_INDEX].get_bg(), WIDTH, HEIGHT)
         player_index = 0
         current_player = PLAYERS[0]
+        reload_party_prompt = False
+        reload = True
 
         while True:
             if ASK_SAVE:
@@ -921,45 +923,53 @@ class Display:
             else:
                 save_text = "Saved!"
 
-            self.SCREEN.blit(background, ORIGIN)
+            if reload:
+                reload = False
+                self.SCREEN.blit(background, ORIGIN)
 
-            # TODO: Integrate Resting here.
+                TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENC_INDEX].get_name(), t_size=24, t_font="hylia",
+                           left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
+                b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
+                b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
+                b_handbook = TextButton(parent=self.SCREEN, text="PHB", left=b_save.rect.left - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
 
-            TextButton(parent=self.SCREEN, text=ENCOUNTERS[ENC_INDEX].get_name(), t_size=24, t_font="hylia",
-                       left=int(WIDTH / 2) - 150, top=10, width=300, height=50)
-            b_quitgame = TextButton(parent=self.SCREEN, text="Quit", left=Q_LF, top=10, width=Q_WD, height=Q_HT)
-            b_save = TextButton(parent=self.SCREEN, text=save_text, left=Q_LF - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
-            b_handbook = TextButton(parent=self.SCREEN, text="PHB", left=b_save.rect.left - Q_WD - 10, top=10, width=Q_WD, height=Q_HT)
+                b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=bwid)
+                b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=bwid)
+                b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=menu_left-(2*offs), top=menu_top, width=bwid)
+                b_stats = TextButton(parent=self.SCREEN, text="Stats", left=menu_left-(3*offs), top=menu_top, width=bwid)
+                b_party = TextButton(parent=self.SCREEN, text="Party", left=menu_left-(4*offs), top=menu_top, width=bwid)
 
-            b_travel = TextButton(parent=self.SCREEN, text="Travel", left=menu_left, top=menu_top, width=bwid)
-            b_roll = TextButton(parent=self.SCREEN, text="Roll", left=menu_left - offs, top=menu_top, width=bwid)
-            b_inv = TextButton(parent=self.SCREEN, text="Inventory", left=menu_left-(2*offs), top=menu_top, width=bwid)
-            b_stats = TextButton(parent=self.SCREEN, text="Stats", left=menu_left-(3*offs), top=menu_top, width=bwid)
-            b_party = TextButton(parent=self.SCREEN, text="Party", left=menu_left-(4*offs), top=menu_top, width=bwid)
-
-            # ==================================
-            # Player Buttons
-            # ==================================
-            p_top = 10
-            exp_buttons = list()
-            for index, player in enumerate(PLAYERS):
-                if index == player_index:
-                    exp_buttons.append(
-                        TextButton(parent=self.SCREEN, text=player.get_name(), t_size=20, t_font="nodesto",
-                                   left=10, top=p_top, width=cwid, t_color=GOLD))
-                    current_player = PLAYERS[index]
-                else:
-                    exp_buttons.append(
-                        TextButton(parent=self.SCREEN, text=player.get_name(), t_size=16, t_font="nodesto",
-                                   left=10, top=p_top, width=cwid))
-                p_top += B_HEIGHT + 10
+                # ==================================
+                # Player Buttons
+                # ==================================
+                p_top = 10
+                exp_buttons = list()
+                for index, player in enumerate(PLAYERS):
+                    if index == player_index:
+                        exp_buttons.append(
+                            TextButton(parent=self.SCREEN, text=player.get_name(), t_size=20, t_font="nodesto",
+                                       left=10, top=p_top, width=cwid, t_color=GOLD))
+                        current_player = PLAYERS[index]
+                    else:
+                        exp_buttons.append(
+                            TextButton(parent=self.SCREEN, text=player.get_name(), t_size=16, t_font="nodesto",
+                                       left=10, top=p_top, width=cwid))
+                    p_top += B_HEIGHT + 10
 
             # ==================================
             # Mouse Monitor
             # ==================================
             mouse = pygame.mouse.get_pos()
-            if self.CLICK:
-                if b_quitgame.rect.collidepoint(mouse):
+            if self.CLICK or reload_party_prompt:
+                self.CLICK = False
+                reload = True
+
+                if b_party.rect.collidepoint(mouse) or reload_party_prompt:
+                    if reload_party_prompt:
+                        reload_party_prompt = False
+                    reload_party_prompt = self.party_prompt(cwid, exp_buttons[0].rect.top)
+
+                elif b_quitgame.rect.collidepoint(mouse):
                     if self.prompt_quit():
                         return False
 
@@ -982,8 +992,6 @@ class Display:
                 elif b_stats.rect.collidepoint(mouse):
                     self.stat_prompt(current_player)
 
-                elif b_party.rect.collidepoint(mouse):
-                    self.party_prompt(cwid, exp_buttons[0].rect.top)
 
                 else:
                     for index, button in enumerate(exp_buttons):
@@ -1315,7 +1323,7 @@ class Display:
                 message = ""
 
                 if b_close.rect.collidepoint(mouse):
-                    return
+                    return False
                 elif b_selall.rect.collidepoint(mouse):
                     for i in range(len(checkboxes)):
                         checkstates[i] = True
@@ -1350,6 +1358,7 @@ class Display:
 
                 elif b_memadd.rect.collidepoint(mouse):
                     self.char_add()
+                    return True
 
                 else:
                     for num, cb in enumerate(checkboxes):
@@ -1904,9 +1913,29 @@ class Display:
             self.end_page()
 
     def char_add(self):
-        menu = CharBox(self.SCREEN)
-        rect = menu.rect
+        reload = True
 
+        while True:
+            if reload:
+                reload = False
+                menu = CharBox(self.SCREEN)
+                rect = menu.rect
+
+                b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
+                                     top=rect.top, width=30, height=30)
+
+
+
+
+            mouse = pygame.mouse.get_pos()
+            if self.CLICK:
+                self.CLICK = False
+                reload = True
+
+                if b_close.rect.collidepoint(mouse):
+                    return
+
+            self.end_page()
 
 
 
