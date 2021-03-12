@@ -1929,6 +1929,9 @@ class Display:
         show_races = False
         show_roles = False
         show_levels = False
+        keyboard = False
+
+        pl_prev, pl_name = "", ""
 
         while True:
             if reload:
@@ -1944,6 +1947,8 @@ class Display:
 
                 name_field = pygame.Rect(tb_name.right + 5, tb_name.textbox.top, 300, tb_name.textbox.height)
                 pygame.draw.rect(self.SCREEN, WHITE, name_field)
+                tf_name = TextBox(parent=self.SCREEN, text=pl_name, t_size=20, t_font="hylia", t_color=BLACK,
+                                  left=name_field.left + 5, top=name_field.top + 2)
 
                 # Dropdown list buttons
                 # ==============================
@@ -2019,57 +2024,58 @@ class Display:
 
                 # Keyboard
                 # ==============================
-                key_rect = pygame.Rect(0, b_level.rect.bottom + 10, WIDTH, HEIGHT - b_level.rect.bottom - 10)
-                self.SCREEN.blit(load_image("./assets/button.png", WIDTH, HEIGHT - b_level.rect.bottom - 10), key_rect)
+                if keyboard:
+                    key_rect = pygame.Rect(0, b_level.rect.bottom + 10, WIDTH, HEIGHT - b_level.rect.bottom - 10)
+                    self.SCREEN.blit(load_image("./assets/button.png", WIDTH, HEIGHT - b_level.rect.bottom - 10), key_rect)
 
-                c_size = 50
-                alphabet = "abcdefghijklmnopqrstuvwxyz'"
-                a_left, a_top = key_rect.left + 20, key_rect.top + 25
-                buttons = list()
+                    c_size = 50
+                    alphabet = "abcdefghijklmnopqrstuvwxyz'"
+                    a_left, a_top = key_rect.left + 20, key_rect.top + 25
+                    buttons = list()
 
-                for i in range(len(alphabet)):
-                    if i > 0 and i % 9 == 0:
-                        a_left = key_rect.left + 20
-                        a_top += c_size + 5
-                    buttons.append(TextButton(parent=self.SCREEN, text=alphabet[i], t_font="nodesto", t_size=30,
-                                              left=a_left, top=a_top, width=c_size, height=c_size))
-                    a_left += c_size + 5
-
-                a_left, a_top = key_rect.left + 20, buttons[-1].rect.bottom + 5
-                buttons.append(TextButton(parent=self.SCREEN, text="space", t_font="nodesto", t_size=30,
-                                          left=a_left, top=a_top, width=4 * (c_size + 5) - 5, height=c_size))
-
-                a_left = buttons[-1].rect.right + 5
-                punctuation = ".,-:;"
-                for i in range(len(punctuation)):
-                    buttons.append(TextButton(parent=self.SCREEN, text=punctuation[i], t_font="hylia", t_size=30,
-                                              left=a_left, top=a_top, width=c_size, height=c_size))
-                    a_left += c_size + 5
-
-                a_left, a_top = buttons[-1].rect.right + 10, buttons[0].rect.top
-                left_rect = buttons[-1].rect
-                for num in range(1, 11):
-                    if num == 10:
-                        buttons.append(TextButton(parent=self.SCREEN, text="0", t_font="nodesto", t_size=30,
-                                                  left=a_left + c_size + 5, top=a_top, width=c_size, height=c_size))
-                    else:
-                        buttons.append(TextButton(parent=self.SCREEN, text=str(num), t_font="nodesto", t_size=30,
+                    for i in range(len(alphabet)):
+                        if i > 0 and i % 9 == 0:
+                            a_left = key_rect.left + 20
+                            a_top += c_size + 5
+                        buttons.append(TextButton(parent=self.SCREEN, text=alphabet[i], t_font="nodesto", t_size=30,
                                                   left=a_left, top=a_top, width=c_size, height=c_size))
-                    if num % 3 == 0:
-                        a_left = left_rect.right + 10
-                        a_top += c_size + 5
-                    else:
                         a_left += c_size + 5
 
-                a_left, a_top = buttons[-1].rect.right + c_size + 10, buttons[0].rect.top
-                buttons.append(TextButton(parent=self.SCREEN, text="backspace", t_font="nodesto", t_size=24,
-                                          left=a_left, top=a_top, width=key_rect.right - a_left - 20, height=c_size))
+                    a_left, a_top = key_rect.left + 20, buttons[-1].rect.bottom + 5
+                    buttons.append(TextButton(parent=self.SCREEN, text="space", t_font="nodesto", t_size=30,
+                                              left=a_left, top=a_top, width=4 * (c_size + 5) - 5, height=c_size))
 
-                buttons.append(TextButton(parent=self.SCREEN, text="enter", t_font="nodesto", t_size=24,
-                                          left=a_left, top=a_top + (c_size + 5), width=key_rect.right - a_left - 20, height=c_size))
+                    a_left = buttons[-1].rect.right + 5
+                    punctuation = ".,-:;"
+                    for i in range(len(punctuation)):
+                        buttons.append(TextButton(parent=self.SCREEN, text=punctuation[i], t_font="hylia", t_size=30,
+                                                  left=a_left, top=a_top, width=c_size, height=c_size))
+                        a_left += c_size + 5
 
-                buttons.append(TextButton(parent=self.SCREEN, text="close", t_font="nodesto", t_size=24,
-                                          left=a_left, top=a_top + 3 * (c_size + 5), width=key_rect.right - a_left - 20, height=c_size))
+                    a_left, a_top = buttons[-1].rect.right + 10, buttons[0].rect.top
+                    left_rect = buttons[-1].rect
+                    for num in range(1, 11):
+                        if num == 10:
+                            buttons.append(TextButton(parent=self.SCREEN, text="0", t_font="nodesto", t_size=30,
+                                                      left=a_left + c_size + 5, top=a_top, width=c_size, height=c_size))
+                        else:
+                            buttons.append(TextButton(parent=self.SCREEN, text=str(num), t_font="nodesto", t_size=30,
+                                                      left=a_left, top=a_top, width=c_size, height=c_size))
+                        if num % 3 == 0:
+                            a_left = left_rect.right + 10
+                            a_top += c_size + 5
+                        else:
+                            a_left += c_size + 5
+
+                    a_left, a_top = buttons[-1].rect.right + c_size + 10, buttons[0].rect.top
+                    buttons.append(TextButton(parent=self.SCREEN, text="backspace", t_font="nodesto", t_size=24,
+                                              left=a_left, top=a_top, width=key_rect.right - a_left - 20, height=c_size))
+
+                    buttons.append(TextButton(parent=self.SCREEN, text="enter", t_font="nodesto", t_size=24,
+                                              left=a_left, top=a_top + (c_size + 5), width=key_rect.right - a_left - 20, height=c_size))
+
+                    buttons.append(TextButton(parent=self.SCREEN, text="cancel", t_font="nodesto", t_size=24,
+                                              left=a_left, top=a_top + 3 * (c_size + 5), width=key_rect.right - a_left - 20, height=c_size))
 
             # Mouse Events
             # ==============================
@@ -2122,6 +2128,33 @@ class Display:
 
                 elif name_field.collidepoint(mouse):
                     keyboard = True
+
+                elif keyboard:
+                    for key in buttons:
+                        if key.rect.collidepoint(mouse):
+                            if key.textstr == "cancel":
+                                pl_name = deepcopy(pl_prev)
+                                keyboard = False
+                                break
+
+                            elif key.textstr == "enter":
+                                pl_prev = deepcopy(pl_name)
+                                keyboard = False
+                                break
+
+                            elif key.textstr == "backspace":
+                                pl_name = pl_name[:-1]
+                                break
+
+                            elif key.textstr == "space":
+                                pl_name += " "
+                                break
+
+                            else:
+                                pl_name += key.textstr
+                                break
+
+
 
             self.end_page()
 
