@@ -1919,6 +1919,8 @@ class Display:
                  "Hobogoblin", "Kenku", "Kobold", "Lizardfolk", "Tabaxi", "Triton", "Yuan-Ti", "Tortle"]
 
         buttons = list()
+        roll_results = [None] * 6
+        stat_assoc = [None] * 6
 
         reload = True
         text_race_bt = "Race"
@@ -2113,17 +2115,51 @@ class Display:
                 b_cancel = None
                 if control[4][0]:
                     wid = 60
+                    flag = False
+                    roll_to_stat = False
+                    stat_to_roll = False
+                    value = None
                     b_cancel = TextButton(parent=self.SCREEN, text="Cancel", t_font="hylia", t_size=16,
                                           left=b_roll.rect.left - wid - 5, top=b_roll.rect.top, width=wid, height=r_ht)
 
-                    buttons = list()
                     r_left, r_top = b_roll.rect.left, b_roll.rect.bottom + 10
                     c_size = 50
 
+                    if selection[0] is not None and selection[1] is not None:
+                        roll_sel = min(selection[0], selection[1])
+
+                        # Means that we are going from Roll -> Stat
+                        if roll_sel == selection[0]:
+                            source = selection[0] - 5
+                            dest = selection[1] - 11
+                            value = int(buttons[source].textstr)
+                            roll_results[source] = None
+                            stat_assoc[dest] = value
+
+                        # Means we are going from Stat -> Roll
+                        else:
+                            source = selection[0] - 11
+                            dest = selection[1] - 5
+                            value = int(buttons[source + 6].textstr[-2:])
+                            stat_assoc[source] = None
+                            roll_results[dest] = value
+
+                        flag = True
+                    else:
+                        buttons = list()
+
+                    #
+                    # Displays rolls
                     for i in range(6):
-                        buttons.append(TextButton(parent=self.SCREEN, text=str(roll_results[i]), t_font="nodesto",
+                        if roll_results[i] is not None:
+                            roll_text = str(roll_results[i])
+                        else:
+                            roll_text = ""
+
+                        buttons.append(TextButton(parent=self.SCREEN, text=roll_text, t_font="nodesto",
                                                   t_color=control[i + 5][1],
                                                   t_size=30, left=r_left, top=r_top, width=c_size, height=c_size))
+
                         r_left += c_size + 5
 
                     r_left = b_roll.rect.left
@@ -2131,15 +2167,28 @@ class Display:
                     stat_list = ["Strength", "Dexterity", "Constitution", "Wisdom", "Intellect", "Charisma"]
                     s_wid = 3 * (c_size + 5) - 5
 
+                    #
+                    # Displays Stats
                     for i in range(6):
                         if i > 0 and i % 3 == 0:
                             r_left += s_wid + 5
                             r_top = buttons[-3].rect.top
 
-                        buttons.append(TextButton(parent=self.SCREEN, text=stat_list[i] + ": ", t_font="nodesto",
-                                                  t_size=20, t_color=control[i + 11][1],
+                        if stat_assoc[i] is not None:
+                            stat_text = str(stat_assoc[i])
+                        else:
+                            stat_text = ""
+
+                        buttons.append(TextButton(parent=self.SCREEN, text=stat_list[i] + ": " + stat_text,
+                                                  t_font="nodesto", t_size=20, t_color=control[i + 11][1],
                                                   left=r_left, top=r_top, width=s_wid, height=c_size))
                         r_top += c_size + 5
+
+                    if flag:
+                        selection = [None, None]
+
+
+
 
             # Mouse Events
             # ==============================
@@ -2186,7 +2235,7 @@ class Display:
                     if b_cancel is not None and b_cancel.rect.collidepoint(mouse):
                         control[4] = [False, WHITE]
 
-                    # Permits rerolls
+                    # Permits re-rolls
                     elif b_roll.rect.collidepoint(mouse):
                         selection = [None, None]
                         roll_results = list()
@@ -2203,27 +2252,30 @@ class Display:
                         # Selects Rolled value
                         for i, bt_roll in enumerate(buttons[:6], 5):
                             if bt_roll.rect.collidepoint(mouse):
-                                control[i] = [True, GREEN]
-                                if selection[0] is None:
-                                    selection[0] = bt_roll
-                                else:
-                                    selection[1] = bt_roll
-                            else:
-                                if selection[0] != bt_roll and selection[1] != bt_roll:
-                                    control[i] = [False, WHITE]
+                                if selection[0] is None or 5 <= selection[0] < 11:
+                                    control[i] = [True, GREEN]
+                                    selection[0] = i
+                                elif selection[1] is None or 5 <= selection[1] < 11:
+                                    selection[1] = i
+                                break
+
+                        for i, bt_roll in enumerate(buttons[:6], 5):
+                            if selection[0] != i and selection[1] != i:
+                                control[i] = [False, WHITE]
 
                         # Selects Stat
-                        for i, bt_stat in enumerate(buttons[6:], 11):
+                        for i, bt_stat in enumerate(buttons[6:12], 11):
                             if bt_stat.rect.collidepoint(mouse):
-                                control[i] = [True, RED]
-                                if selection[0] is None:
-                                    selection[0] = bt_stat
-                                else:
-                                    selection[1] = bt_stat
-                            else:
-                                if selection[0] != bt_stat and selection[1] != bt_stat:
-                                    control[i] = [False, WHITE]
+                                if selection[0] is None or selection[0] >= 11:
+                                    control[i] = [True, RED]
+                                    selection[0] = i
+                                elif selection[1] is None or selection[1] >= 11:
+                                    selection[1] = i
+                                break
 
+                        for i, bt_stat in enumerate(buttons[6:12], 11):
+                            if selection[0] != i and selection[1] != i:
+                                control[i] = [False, WHITE]
 
 
                 # For keyboard
