@@ -1924,12 +1924,34 @@ class Display:
         text_race_bt = "Race"
         text_role_bt = "Role"
         text_level = "Lv. "
-        BASE_COLORS = [WHITE] * 10
-        color_list = deepcopy(BASE_COLORS)
-        show_races = False
-        show_roles = False
-        show_levels = False
-        keyboard = False
+        # BASE_COLORS = [WHITE] * 10
+        # color_list = deepcopy(BASE_COLORS)
+
+        BASE_VALS = [[False, WHITE]] * 20
+        # 0:    Keyboard
+        # 1:    Level
+        # 2:    Race
+        # 3:    Role
+        # 4:    Roll for Stats
+        # 5:    Roll 1
+        # 6:    Roll 2
+        # 7:    Roll 3
+        # 8:    Roll 4
+        # 9:    Roll 5
+        # 10:   Roll 6
+        # 11:   Strength
+        # 12:   Dexterity
+        # 13:   Constitution
+        # 14:   Intellect
+        # 15:   Wisdom
+        # 16:   Charisma
+        control = deepcopy(BASE_VALS)
+
+        # show_races = False
+        # show_roles = False
+        # show_levels = False
+        # roll_stats = False
+        # keyboard = False
 
         pl_prev, pl_name = "", ""
 
@@ -1947,27 +1969,31 @@ class Display:
 
                 name_field = pygame.Rect(tb_name.right + 5, tb_name.textbox.top, 300, tb_name.textbox.height)
                 pygame.draw.rect(self.SCREEN, WHITE, name_field)
+
                 tf_name = TextBox(parent=self.SCREEN, text=pl_name, t_size=20, t_font="hylia", t_color=BLACK,
                                   left=name_field.left + 5, top=name_field.top + 2)
 
+                #
                 # Dropdown list buttons
                 # ==============================
                 bwid, bht = 150, 50
 
                 b_level = TextButton(parent=self.SCREEN, text=text_level, t_font="hylia", t_size=20,
-                                    t_color=color_list[0],
-                                    left=tb_name.rect.left, top=tb_name.rect.bottom + 30, width=int(bwid / 2), height=bht)
-
+                                     t_color=control[1][1],
+                                     left=tb_name.rect.left, top=tb_name.rect.bottom + 30, width=int(bwid / 2), height=bht)
                 b_race = TextButton(parent=self.SCREEN, text=text_race_bt, t_font="hylia", t_size=20,
-                                    t_color=color_list[1],
+                                    t_color=control[2][1],
                                     left=b_level.rect.right + 5, top=b_level.rect.top, width=bwid, height=bht)
                 b_role = TextButton(parent=self.SCREEN, text=text_role_bt, t_font="hylia", t_size=20,
-                                    t_color=color_list[2],
+                                    t_color=control[3][1],
                                     left=b_race.rect.right + 5, top=b_race.rect.top, width=bwid, height=bht)
 
-                # Shows level options
+                #
+                # Shows Player Options
                 # ==============================
-                if show_levels:
+
+                # Shows level options
+                if control[1][0]:
                     buttons = list()
                     disp_rect = pygame.Rect(b_level.rect.left, b_level.rect.bottom,
                                             b_role.rect.right - b_level.rect.left, HEIGHT - b_level.rect.bottom - 10)
@@ -1985,8 +2011,7 @@ class Display:
                             c_top += new_bht
 
                 # Shows race options
-                # ==============================
-                if show_races:
+                if control[2][0]:
                     buttons = list()
                     disp_rect = pygame.Rect(b_level.rect.left, b_level.rect.bottom,
                                             b_role.rect.right - b_level.rect.left, HEIGHT - b_level.rect.bottom - 10)
@@ -2004,8 +2029,7 @@ class Display:
                         c_top += new_bht
 
                 # Shows role options
-                # ==============================
-                if show_roles:
+                if control[3][0]:
                     buttons = list()
                     disp_rect = pygame.Rect(b_race.rect.left, b_race.rect.bottom,
                                             b_role.rect.right - b_race.rect.left, HEIGHT - b_race.rect.bottom - 10)
@@ -2022,9 +2046,10 @@ class Display:
                                                   left=c_left, top=c_top, width=new_bwid, height=new_bht))
                         c_top += new_bht
 
+                #
                 # Keyboard
                 # ==============================
-                if keyboard:
+                if control[0][0]:
                     key_rect = pygame.Rect(0, b_level.rect.bottom + 10, WIDTH, HEIGHT - b_level.rect.bottom - 10)
                     self.SCREEN.blit(load_image("./assets/button.png", WIDTH, HEIGHT - b_level.rect.bottom - 10), key_rect)
 
@@ -2077,6 +2102,14 @@ class Display:
                     buttons.append(TextButton(parent=self.SCREEN, text="cancel", t_font="nodesto", t_size=24,
                                               left=a_left, top=a_top + 3 * (c_size + 5), width=key_rect.right - a_left - 20, height=c_size))
 
+                #
+                # Stat Roll Buttons
+                # ==============================
+                r_wid, r_ht = 325, b_level.rect.height
+                b_roll = TextButton(parent=self.SCREEN, text="Roll for Stats", t_font="hylia", t_size=20,
+                                    t_color=control[4][1],
+                                    left=rect.right - r_wid - 10, top=tb_name.rect.top, width=r_wid, height=r_ht)
+
             # Mouse Events
             # ==============================
             mouse = pygame.mouse.get_pos()
@@ -2087,59 +2120,48 @@ class Display:
                 if b_close.rect.collidepoint(mouse):
                     return
 
-                elif b_level.rect.collidepoint(mouse):
-                    color_list = deepcopy(BASE_COLORS)
-                    color_list[0] = GOLD
-                    show_levels = True
-                    show_races = False
-                    show_roles = False
+                # For level
+                elif control[1][0]:
+                    if b_level.rect.collidepoint(mouse):
+                        control[1] = [False, WHITE]
+                    else:
+                        for bt_level in buttons:
+                            if bt_level.rect.collidepoint(mouse):
+                                control[1] = [False, WHITE]
+                                text_level = bt_level.textstr
 
-                elif b_race.rect.collidepoint(mouse):
-                    color_list = deepcopy(BASE_COLORS)
-                    color_list[1] = GOLD
-                    show_levels = False
-                    show_races = True
-                    show_roles = False
+                # For races
+                elif control[2][0]:
+                    if b_race.rect.collidepoint(mouse):
+                        control[2] = [False, WHITE]
+                    else:
+                        for bt_race in buttons:
+                            if bt_race.rect.collidepoint(mouse):
+                                control[2] = [False, WHITE]
+                                text_race_bt = bt_race.textstr
 
-                elif b_role.rect.collidepoint(mouse):
-                    color_list = deepcopy(BASE_COLORS)
-                    color_list[2] = GOLD
-                    show_levels = False
-                    show_races = False
-                    show_roles = True
+                # For roles
+                elif control[3][0]:
+                    if b_role.rect.collidepoint(mouse):
+                        control[3] = [False, WHITE]
+                    else:
+                        for bt_role in buttons:
+                            if bt_role.rect.collidepoint(mouse):
+                                control[3] = [False, WHITE]
+                                text_role_bt = bt_role.textstr
 
-                elif show_levels:
-                    for bt_level in buttons:
-                        if bt_level.rect.collidepoint(mouse):
-                            show_levels = False
-                            text_level = bt_level.textstr
-
-                elif show_races:
-                    for bt_race in buttons:
-                        if bt_race.rect.collidepoint(mouse):
-                            show_races = False
-                            text_race_bt = bt_race.textstr
-
-                elif show_roles:
-                    for bt_role in buttons:
-                        if bt_role.rect.collidepoint(mouse):
-                            show_roles = False
-                            text_role_bt = bt_role.textstr
-
-                elif name_field.collidepoint(mouse):
-                    keyboard = True
-
-                elif keyboard:
+                # For keyboard
+                elif control[0][0]:
                     for key in buttons:
                         if key.rect.collidepoint(mouse):
                             if key.textstr == "cancel":
                                 pl_name = deepcopy(pl_prev)
-                                keyboard = False
+                                control[0] = [False, WHITE]
                                 break
 
                             elif key.textstr == "enter":
                                 pl_prev = deepcopy(pl_name)
-                                keyboard = False
+                                control[0] = [False, WHITE]
                                 break
 
                             elif key.textstr == "backspace":
@@ -2154,7 +2176,25 @@ class Display:
                                 pl_name += key.textstr
                                 break
 
+                elif name_field.collidepoint(mouse):
+                    control = deepcopy(BASE_VALS)
+                    control[0] = [True, GOLD]
 
+                elif b_level.rect.collidepoint(mouse):
+                    control = deepcopy(BASE_VALS)
+                    control[1] = [True, GOLD]
+
+                elif b_race.rect.collidepoint(mouse):
+                    control = deepcopy(BASE_VALS)
+                    control[2] = [True, GOLD]
+
+                elif b_role.rect.collidepoint(mouse):
+                    control = deepcopy(BASE_VALS)
+                    control[3] = [True, GOLD]
+
+                elif b_roll.rect.collidepoint(mouse):
+                    control = deepcopy(BASE_VALS)
+                    control[4] = [True, GOLD]
 
             self.end_page()
 
