@@ -23,20 +23,20 @@ role_dict = {
 }
 
 icon_dict = {
-    "Barbarian": "./assets/barbarian.png",
-    "Bard": "./assets/bard.png",
-    "Cleric": "./assets/cleric.png",
-    "Druid": 8,
-    "Fighter": 10,
-    "Monk": 8,
-    "Paladin": 10,
-    "Ranger": 10,
-    "Rogue": "./assets/rogue.png",
-    "Sorcerer": 6,
-    "Warlock": "./assets/warlock.png",
-    "Wizard": "./assets/wizard.png",
-    "Artificer": 8,
-    "Blood Hunter": 10
+    "Barbarian": "./assets/roles/barbarian.png",
+    "Bard": "./assets/roles/bard.png",
+    "Cleric": "./assets/roles/cleric.png",
+    "Druid": "./assets/roles/druid.png",
+    "Fighter": "./assets/roles/fighter.png",
+    "Monk": "./assets/roles/monk.png",
+    "Paladin": "./assets/roles/paladin.png",
+    "Ranger": "./assets/roles/ranger.png",
+    "Rogue": "./assets/roles/rogue.png",
+    "Sorcerer": "./assets/roles/sorcerer.png",
+    "Warlock": "./assets/roles/warlock.png",
+    "Wizard": "./assets/roles/wizard.png",
+    # "Artificer": "./assets/roles/artificer.png",
+    # "Blood Hunter": "./assets/roles/bloodhunter.png"
 }
 
 class Player(Animate):
