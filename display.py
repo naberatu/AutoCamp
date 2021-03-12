@@ -3,6 +3,8 @@ from random import randint
 import pygame
 import pickle
 from player import Player
+from player import role_dict
+from player import icon_dict
 from enemy import Enemy
 from cencounter import CEncounter
 from campaign_default import load_default_camp
@@ -992,7 +994,6 @@ class Display:
                 elif b_stats.rect.collidepoint(mouse):
                     self.stat_prompt(current_player)
 
-
                 else:
                     for index, button in enumerate(exp_buttons):
                         if button.rect.collidepoint(mouse):
@@ -1896,7 +1897,7 @@ class Display:
             elif num in cha_list:
                 val = statblock.get_mod("Charisma")
 
-            if val > 0:
+            if val >= 0:
                 val = "+" + str(val)
             else:
                 val = str(val)
@@ -1913,7 +1914,20 @@ class Display:
             self.end_page()
 
     def char_add(self):
+        races = ["Dragonborn", "Dwarf", "Elf", "Gnome", "Half-Elf", "Halfling", "Half-Orc", "Human", "Tiefling",
+                 "Orc", "Leonin", "Satyr", "Aarakocra", "Genasi", "Goliath", "Aasimar", "Bugbear", "Firbolg", "Goblin",
+                 "Hobogoblin", "Kenku", "Kobold", "Lizardfolk", "Tabaxi", "Triton", "Yuan-Ti", "Tortle"]
+
+        race_bts = list()
+        role_bts = list()
+
         reload = True
+        text_race_bt = "Race"
+        text_role_bt = "Role"
+        BASE_COLORS = [WHITE] * 10
+        color_list = deepcopy(BASE_COLORS)
+        show_races = False
+        show_roles = False
 
         while True:
             if reload:
@@ -1924,8 +1938,59 @@ class Display:
                 b_close = TextButton(parent=self.SCREEN, text="X", t_font="hylia", t_size=24, left=rect.right - 30,
                                      top=rect.top, width=30, height=30)
 
+                tb_name = TextBox(parent=self.SCREEN, text="Name: ", t_size=24, t_font="hylia", left=rect.left + 10,
+                                  top=menu.bottom + 10)
 
+                name_field = pygame.Rect(tb_name.right + 5, tb_name.textbox.top, 300, tb_name.textbox.height)
+                pygame.draw.rect(self.SCREEN, WHITE, name_field)
 
+                bwid, bht = 150, 50
+                b_race = TextButton(parent=self.SCREEN, text=text_race_bt, t_font="hylia", t_size=20,
+                                    t_color=color_list[0],
+                                    left=tb_name.rect.left, top=tb_name.rect.bottom + 30, width=bwid, height=bht)
+                b_role = TextButton(parent=self.SCREEN, text=text_role_bt, t_font="hylia", t_size=20,
+                                    t_color=color_list[1],
+                                    left=b_race.rect.right + 5, top=b_race.rect.top, width=bwid, height=bht)
+
+                # Shows race options
+                # ==============================
+                if show_races:
+                    race_bts = list()
+                    disp_rect = pygame.Rect(b_race.rect.left, b_race.rect.bottom,
+                                            b_role.rect.right - b_race.rect.left, HEIGHT - b_race.rect.bottom - 10)
+                    pygame.draw.rect(self.SCREEN, BLACK, disp_rect)
+
+                    new_bwid, new_bht = int(disp_rect.width / 3), int(disp_rect.height / 9)
+                    c_left, c_top = disp_rect.left, b_race.rect.bottom
+
+                    for num, race in enumerate(races):
+                        if num > 0 and num % 9 == 0:
+                            c_left += new_bwid
+                            c_top = b_race.rect.bottom
+
+                        race_bts.append(TextButton(parent=self.SCREEN, text=race, t_font="scaly", t_size=12,
+                                                   left=c_left, top=c_top, width=new_bwid, height=new_bht))
+                        c_top += new_bht
+
+                # Shows role options
+                # ==============================
+                if show_roles:
+                    role_bts = list()
+                    disp_rect = pygame.Rect(b_race.rect.left, b_race.rect.bottom,
+                                            b_role.rect.right - b_race.rect.left, HEIGHT - b_race.rect.bottom - 10)
+                    pygame.draw.rect(self.SCREEN, BLACK, disp_rect)
+
+                    new_bwid, new_bht = int(disp_rect.width / 2), int(disp_rect.height / 6)
+                    c_left, c_top = disp_rect.left, b_race.rect.bottom
+
+                    for num, role in enumerate(list(role_dict)):
+                        if num > 0 and num % 6 == 0:
+                            c_left += new_bwid
+                            c_top = b_race.rect.bottom
+
+                        role_bts.append(TextButton(parent=self.SCREEN, text=role, t_font="scaly", t_size=20,
+                                                   left=c_left, top=c_top, width=new_bwid, height=new_bht))
+                        c_top += new_bht
 
             mouse = pygame.mouse.get_pos()
             if self.CLICK:
@@ -1935,9 +2000,32 @@ class Display:
                 if b_close.rect.collidepoint(mouse):
                     return
 
+                elif b_race.rect.collidepoint(mouse):
+                    color_list = deepcopy(BASE_COLORS)
+                    color_list[0] = GOLD
+                    show_roles = False
+                    show_races = True
+
+                elif b_role.rect.collidepoint(mouse):
+                    color_list = deepcopy(BASE_COLORS)
+                    color_list[1] = GOLD
+                    show_races = False
+                    show_roles = True
+
+                elif show_races:
+                    for bt_race in race_bts:
+                        if bt_race.rect.collidepoint(mouse):
+                            show_races = False
+                            text_race_bt = bt_race.textstr
+
+                elif show_roles:
+                    for bt_role in role_bts:
+                        if bt_role.rect.collidepoint(mouse):
+                            show_roles = False
+                            text_role_bt = bt_role.textstr
+
+
             self.end_page()
-
-
 
     def prompt_quit(self):
         global ASK_SAVE     # TODO: Fix bug where encounter won't reset after decline without exit.

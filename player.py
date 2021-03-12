@@ -18,8 +18,8 @@ role_dict = {
     "Sorcerer": 6,
     "Warlock": 8,
     "Wizard": 6,
-    "Artificer": 8,
-    "Blood Hunter": 10
+    # "Artificer": 8,
+    # "Blood Hunter": 10
 }
 
 icon_dict = {
