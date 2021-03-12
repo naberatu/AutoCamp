@@ -1159,6 +1159,7 @@ class Display:
                 # Description Box
                 # ==================================
                 if 0 <= item_sel_index < list_len:
+                    # TODO: Let the last item be removed without description issues.
                     description = c_items[items_to_show[item_sel_index]].get_details()
                 elif item_sel_index == -1 and player.get_weapon():
                     description = c_items[player.get_weapon()].get_details()
@@ -1358,6 +1359,22 @@ class Display:
 
                 elif b_memadd.rect.collidepoint(mouse):
                     self.char_add()
+                    return True
+
+                elif b_memrem.rect.collidepoint(mouse):
+                    to_remove = list()
+
+                    for num, player in enumerate(PLAYERS):
+                        checked = False
+                        if checkstates[num]:
+                            checked = True
+                            to_remove.append(player)
+
+                    for player in to_remove:
+                        PLAYERS.remove(player)
+                        ENCOUNTERS[ENC_INDEX].rem_player(player.entity_id)
+
+                    ASK_SAVE = True
                     return True
 
                 else:

@@ -61,11 +61,14 @@ class Encounter:
     def new_player(self, np):
         self.animate_list.append(np)
 
-    def rem_player(self, np):
-        try:
-            self.animate_list.remove(np)
-        except:
-            print("[ER] Could not find player!")
+    def rem_player(self, e_id):
+        to_remove = None
+        for pl in self.animate_list:
+            if pl.entity_id == e_id:
+                to_remove = pl
+                break
+        if to_remove is not None:
+            self.animate_list.remove(to_remove)
 
     # ===============================================================================
     # Misc Helper Methods
