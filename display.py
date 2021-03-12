@@ -1358,11 +1358,15 @@ class Display:
                     ASK_SAVE = True
 
                 elif b_memadd.rect.collidepoint(mouse):
-                    self.char_add()
-                    return True
+                    if len(PLAYERS) == 7:
+                        message = "Sorry, your party is full!"
+                    else:
+                        self.char_add()
+                        return True
 
                 elif b_memrem.rect.collidepoint(mouse):
                     to_remove = list()
+                    big_str = ""
 
                     for num, player in enumerate(PLAYERS):
                         checked = False
@@ -1370,12 +1374,21 @@ class Display:
                             checked = True
                             to_remove.append(player)
 
-                    for player in to_remove:
-                        PLAYERS.remove(player)
-                        ENCOUNTERS[ENC_INDEX].rem_player(player.entity_id)
+                    if checked:
+                        for num, player in enumerate(to_remove):
+                            big_str += player.get_name()
+                            if num < len(to_remove) - 1:
+                                big_str += ", "
 
-                    ASK_SAVE = True
-                    return True
+                            PLAYERS.remove(player)
+                            ENCOUNTERS[ENC_INDEX].rem_player(player.entity_id)
+
+                        message = big_str + " left the party!"
+
+                        ASK_SAVE = True
+                        return True
+                    else:
+                        message = "Please select who will leave the party."
 
                 else:
                     for num, cb in enumerate(checkboxes):
