@@ -447,19 +447,17 @@ class Display:
         ENCOUNTERS_OK = True
     except:
         if not PLAYERS_OK:
-            PLAYERS.append(Player(name="Kru'ul Kanath", race="Orc", role="Warlock"))
-            PLAYERS.append(Player(name="Kepesk", race="Tiefling", role="Cleric"))
-            PLAYERS.append(Player(name="Naybur Sturmgeist", race="Human", role="Wizard"))
-            PLAYERS.append(Player(name="Alduin Rambert", race="Aasimar", role="Barbarian"))
-            PLAYERS.append(Player(name="Vana Moore", race="Goblin", role="Rogue"))
+            PLAYERS.append(Player(name="Kru'ul Kanath", race="Orc", role="Warlock", level=randint(4, 6)))
+            PLAYERS.append(Player(name="Kepesk", race="Tiefling", role="Cleric", level=randint(4, 6)))
+            PLAYERS.append(Player(name="Naybur Sturmgeist", race="Human", role="Wizard", level=randint(4, 6)))
+            PLAYERS.append(Player(name="Alduin Rambert", race="Aasimar", role="Barbarian", level=randint(4, 6)))
+            PLAYERS.append(Player(name="Vana Moore", race="Goblin", role="Rogue", level=randint(4, 6)))
 
             for hero in PLAYERS:
-                hero.set_stats("Strength", randint(6, 18))
-                hero.set_stats("Dexterity", randint(6, 18))
-                hero.set_stats("Constitution", randint(6, 18))
-                hero.set_stats("Intellect", randint(6, 18))
-                hero.set_stats("Wisdom", randint(6, 18))
-                hero.set_stats("Charisma", randint(6, 18))
+                hero.get_stat_block().autofill_scores(randint(6, 18), randint(6, 18), randint(6, 18),
+                                                      randint(6, 18), randint(6, 18), randint(6, 18))
+
+                hero.money_add(copper=randint(1, 300))
 
                 hero.set_weapon("Shortsword")
                 hero.set_armor("Chain Mail")
@@ -1887,16 +1885,7 @@ class Display:
             else:
                 s_left = maxleft[1] + 5
 
-            if num in str_list:
-                val = statblock.get_mod("Strength")
-            elif num in dex_list:
-                val = statblock.get_mod("Dexterity")
-            elif num in int_list:
-                val = statblock.get_mod("Intellect")
-            elif num in wis_list:
-                val = statblock.get_mod("Wisdom")
-            elif num in cha_list:
-                val = statblock.get_mod("Charisma")
+            val = statblock.get_stat(stat)
 
             if val >= 0:
                 val = "+" + str(val)
@@ -2382,8 +2371,10 @@ class Display:
                     sb = StatBlock()
                     sb.autofill_scores(stat_assoc[0], stat_assoc[1], stat_assoc[2],
                                        stat_assoc[3], stat_assoc[4], stat_assoc[5])
+
+                    pl_name = pl_name[0].upper() + pl_name[1:]
                     new_player = Player(name=pl_name, race=text_race_bt, role=text_role_bt, level=int(text_level[-2:]),
-                                        stat_block=sb, money=randint(0, 999))
+                                        stat_block=sb, money=randint(0, 300))
 
                     # TODO: Resolve how NCE uses PLAYERS, but everything else uses AnimList
                     ENCOUNTERS[ENC_INDEX].new_player(new_player)

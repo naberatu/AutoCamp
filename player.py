@@ -62,8 +62,14 @@ class Player(Animate):
         self.set_stats("Hit Dice", role_dict[role])
         if self.level == 1:
             self.set_stats("Max HP", role_dict[role])
-            self.set_stats("Current HP", role_dict[role])
-            self.set_stats("Hit Dice Quantity", self.level)
+        else:
+            sum = 0
+            for i in range(self.level - 1):
+                sum += random.randint(1, role_dict[role])
+            self.set_stats("Max HP", role_dict[role] + sum)
+
+        self.set_stats("Current HP", self.get_stat("Max HP"))
+        self.set_stats("Hit Dice Quantity", self.level)
 
         if icon == "./assets/item_drop.png":
             self.icon = icon_dict[self.role]
