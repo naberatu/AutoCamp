@@ -1918,16 +1918,20 @@ class Display:
                  "Orc", "Leonin", "Satyr", "Aarakocra", "Genasi", "Goliath", "Aasimar", "Bugbear", "Firbolg", "Goblin",
                  "Hobogoblin", "Kenku", "Kobold", "Lizardfolk", "Tabaxi", "Triton", "Yuan-Ti", "Tortle"]
 
-        race_bts = list()
-        role_bts = list()
+        # race_bts = list()
+        # role_bts = list()
+        # level_bts = list()
+        buttons = list()
 
         reload = True
         text_race_bt = "Race"
         text_role_bt = "Role"
+        text_level = "Lv. "
         BASE_COLORS = [WHITE] * 10
         color_list = deepcopy(BASE_COLORS)
         show_races = False
         show_roles = False
+        show_levels = False
 
         while True:
             if reload:
@@ -1939,57 +1943,81 @@ class Display:
                                      top=rect.top, width=30, height=30)
 
                 tb_name = TextBox(parent=self.SCREEN, text="Name: ", t_size=24, t_font="hylia", left=rect.left + 10,
-                                  top=menu.bottom + 10)
+                                  top=menu.bottom + 20)
 
                 name_field = pygame.Rect(tb_name.right + 5, tb_name.textbox.top, 300, tb_name.textbox.height)
                 pygame.draw.rect(self.SCREEN, WHITE, name_field)
 
+                # Dropdown list buttons
+                # ==============================
                 bwid, bht = 150, 50
-                b_race = TextButton(parent=self.SCREEN, text=text_race_bt, t_font="hylia", t_size=20,
+
+                b_level = TextButton(parent=self.SCREEN, text=text_level, t_font="hylia", t_size=20,
                                     t_color=color_list[0],
-                                    left=tb_name.rect.left, top=tb_name.rect.bottom + 30, width=bwid, height=bht)
-                b_role = TextButton(parent=self.SCREEN, text=text_role_bt, t_font="hylia", t_size=20,
+                                    left=tb_name.rect.left, top=tb_name.rect.bottom + 30, width=int(bwid / 2), height=bht)
+
+                b_race = TextButton(parent=self.SCREEN, text=text_race_bt, t_font="hylia", t_size=20,
                                     t_color=color_list[1],
+                                    left=b_level.rect.right + 5, top=b_level.rect.top, width=bwid, height=bht)
+                b_role = TextButton(parent=self.SCREEN, text=text_role_bt, t_font="hylia", t_size=20,
+                                    t_color=color_list[2],
                                     left=b_race.rect.right + 5, top=b_race.rect.top, width=bwid, height=bht)
+
+                # Shows level options
+                # ==============================
+                if show_levels:
+                    buttons = list()
+                    disp_rect = pygame.Rect(b_level.rect.left, b_level.rect.bottom,
+                                            b_role.rect.right - b_level.rect.left, HEIGHT - b_level.rect.bottom - 10)
+
+                    new_bwid, new_bht = int(disp_rect.width / 5),  int(disp_rect.height / 4)
+                    c_left, c_top = disp_rect.left, b_level.rect.bottom + 5
+
+                    for num in range(1, 21):
+                        buttons.append(TextButton(parent=self.SCREEN, text="Lv. " + str(num), t_font="nodesto",
+                                                  t_size=18, left=c_left, top=c_top, width=new_bwid, height=new_bht))
+                        if num % 4 == 0:
+                            c_left += new_bwid
+                            c_top = b_level.rect.bottom + 5
+                        else:
+                            c_top += new_bht
 
                 # Shows race options
                 # ==============================
                 if show_races:
-                    race_bts = list()
-                    disp_rect = pygame.Rect(b_race.rect.left, b_race.rect.bottom,
-                                            b_role.rect.right - b_race.rect.left, HEIGHT - b_race.rect.bottom - 10)
-                    pygame.draw.rect(self.SCREEN, BLACK, disp_rect)
+                    buttons = list()
+                    disp_rect = pygame.Rect(b_level.rect.left, b_level.rect.bottom,
+                                            b_role.rect.right - b_level.rect.left, HEIGHT - b_level.rect.bottom - 10)
 
-                    new_bwid, new_bht = int(disp_rect.width / 3), int(disp_rect.height / 9)
-                    c_left, c_top = disp_rect.left, b_race.rect.bottom
+                    new_bwid, new_bht = int(disp_rect.width / 4), int(disp_rect.height / 8)
+                    c_left, c_top = disp_rect.left, b_race.rect.bottom + 5
 
                     for num, race in enumerate(races):
-                        if num > 0 and num % 9 == 0:
+                        if num > 0 and num % 8 == 0:
                             c_left += new_bwid
-                            c_top = b_race.rect.bottom
+                            c_top = b_race.rect.bottom + 5
 
-                        race_bts.append(TextButton(parent=self.SCREEN, text=race, t_font="scaly", t_size=12,
-                                                   left=c_left, top=c_top, width=new_bwid, height=new_bht))
+                        buttons.append(TextButton(parent=self.SCREEN, text=race, t_font="nodesto", t_size=16,
+                                                  left=c_left, top=c_top, width=new_bwid, height=new_bht))
                         c_top += new_bht
 
                 # Shows role options
                 # ==============================
                 if show_roles:
-                    role_bts = list()
+                    buttons = list()
                     disp_rect = pygame.Rect(b_race.rect.left, b_race.rect.bottom,
                                             b_role.rect.right - b_race.rect.left, HEIGHT - b_race.rect.bottom - 10)
-                    pygame.draw.rect(self.SCREEN, BLACK, disp_rect)
 
                     new_bwid, new_bht = int(disp_rect.width / 2), int(disp_rect.height / 6)
-                    c_left, c_top = disp_rect.left, b_race.rect.bottom
+                    c_left, c_top = disp_rect.left, b_race.rect.bottom + 5
 
                     for num, role in enumerate(list(role_dict)):
                         if num > 0 and num % 6 == 0:
                             c_left += new_bwid
-                            c_top = b_race.rect.bottom
+                            c_top = b_race.rect.bottom + 5
 
-                        role_bts.append(TextButton(parent=self.SCREEN, text=role, t_font="scaly", t_size=20,
-                                                   left=c_left, top=c_top, width=new_bwid, height=new_bht))
+                        buttons.append(TextButton(parent=self.SCREEN, text=role, t_font="nodesto", t_size=20,
+                                                  left=c_left, top=c_top, width=new_bwid, height=new_bht))
                         c_top += new_bht
 
             mouse = pygame.mouse.get_pos()
@@ -2000,26 +2028,41 @@ class Display:
                 if b_close.rect.collidepoint(mouse):
                     return
 
-                elif b_race.rect.collidepoint(mouse):
+                elif b_level.rect.collidepoint(mouse):
                     color_list = deepcopy(BASE_COLORS)
                     color_list[0] = GOLD
+                    show_levels = True
+                    show_races = False
                     show_roles = False
+
+                elif b_race.rect.collidepoint(mouse):
+                    color_list = deepcopy(BASE_COLORS)
+                    color_list[1] = GOLD
+                    show_levels = False
                     show_races = True
+                    show_roles = False
 
                 elif b_role.rect.collidepoint(mouse):
                     color_list = deepcopy(BASE_COLORS)
-                    color_list[1] = GOLD
+                    color_list[2] = GOLD
+                    show_levels = False
                     show_races = False
                     show_roles = True
 
+                elif show_levels:
+                    for bt_level in buttons:
+                        if bt_level.rect.collidepoint(mouse):
+                            show_levels = False
+                            text_level = bt_level.textstr
+
                 elif show_races:
-                    for bt_race in race_bts:
+                    for bt_race in buttons:
                         if bt_race.rect.collidepoint(mouse):
                             show_races = False
                             text_race_bt = bt_race.textstr
 
                 elif show_roles:
-                    for bt_role in role_bts:
+                    for bt_role in buttons:
                         if bt_role.rect.collidepoint(mouse):
                             show_roles = False
                             text_role_bt = bt_role.textstr
