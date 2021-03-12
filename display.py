@@ -2093,7 +2093,6 @@ class Display:
                     a_left, a_top = key_rect.left + 20, key_rect.top + 25
                     buttons = list()
 
-                    # TODO: Let's speed this up more.
                     # TODO: Add Caps-lock support.
 
                     for i in range(len(alphabet)):
@@ -2339,27 +2338,33 @@ class Display:
                 elif control[0][0]:
                     for key in buttons:
                         if key.rect.collidepoint(mouse):
+                            reload = False
+                            name_field = pygame.Rect(tb_name.right + 5, tb_name.textbox.top, 300,
+                                                     tb_name.textbox.height)
+                            pygame.draw.rect(self.SCREEN, WHITE, name_field)
+
                             if key.textstr == "cancel":
                                 pl_name = deepcopy(pl_prev)
                                 control[0] = [False, WHITE]
-                                break
+                                reload = True
 
                             elif key.textstr == "enter":
                                 pl_prev = deepcopy(pl_name)
                                 control[0] = [False, WHITE]
-                                break
+                                reload = True
 
                             elif key.textstr == "backspace":
                                 pl_name = pl_name[:-1]
-                                break
 
                             elif key.textstr == "space":
                                 pl_name += " "
-                                break
 
                             else:
                                 pl_name += key.textstr
-                                break
+
+                            TextBox(parent=self.SCREEN, text=pl_name, t_size=20, t_font="hylia", t_color=BLACK,
+                                    left=name_field.left + 5, top=name_field.top + 2)
+                            break
 
                 elif name_field.collidepoint(mouse):
                     control = deepcopy(BASE_VALS)
