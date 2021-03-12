@@ -21,33 +21,6 @@ class Encounter:
         self.vendor = vendor
         self.is_combat = is_combat
         self.running_loop = True
-        # self.commands = {
-        #     "roll": "Roll di(ce)",
-        #     "move": "Change your current location",
-        #     "inv": "View more options regarding the party's inventory",
-        #     "stats": "View a party member's stats",
-        #     "rest": "Allow party members a moment of rest to recover",
-        #     "exit": "save and quit."
-        # }
-        # self.inv_commands = {
-        #     "use": "Use an item in this member's inventory",
-        #     "equip": "Arrange this member's equipment",
-        #     "dequip": "Remove this member's current equipment",
-        #     "discard": "Discard an item from this member's inventory",
-        #     "give": "Give an item from this member's inventory to another member",
-        #     "sell": "Sell an item in exchange for currency",
-        #     "cancel": "return to command menu",
-        # }
-        # self.vend_commands = {
-        #     "buy": "Purchase something from the vendor",
-        #     "haggle": "Attempt to haggle with the vendor",
-        #     "roll": "Roll di(ce)",
-        #     "move": "Change your current location",
-        #     "inv": "View more options regarding the party's inventory",
-        #     "stats": "View a party member's stats",
-        #     "rest": "Allow party members a moment of rest to recover",
-        #     "exit": "save and quit."
-        # }
 
     def get_name(self):
         return self.name
@@ -84,6 +57,15 @@ class Encounter:
 
     def get_anim(self):
         return self.animate_list
+
+    def new_player(self, np):
+        self.animate_list.append(np)
+
+    def rem_player(self, np):
+        try:
+            self.animate_list.remove(np)
+        except:
+            print("[ER] Could not find player!")
 
     # ===============================================================================
     # Misc Helper Methods
@@ -196,31 +178,6 @@ class Encounter:
             print("Result is... {}!!".format(roll))
 
         return [roll, crit_hit]
-
-    # def diceBranch(self):
-    #     rolling = True
-    #     while rolling:
-    #         rolls = input("\nInput dice throw (\"num dice\"d\"num faces\"):\n> ")
-    #         if rolls == "cancel":
-    #             break
-    #         try:
-    #             rolls, faces = rolls.lower().split("d")
-    #             self.rollDice(int(rolls), int(faces))
-    #             print()
-    #             rolling = False
-    #         except ValueError:
-    #             print("[ER] Please use the format \"num dice\"d\"num faces\")")
-
-    # ===============================================================================
-    # Stat-Relevant Method(s)
-    # ===============================================================================
-    # def statsBranch(self):
-    #     print("Whose stats would you like to view?")
-    #     choice = self.choosePC()
-    #     if choice == "cancel":
-    #         pass
-    #     else:
-    #         self.currentEntity.showStats()
 
     def print_wares(self):
         print(("=" * 77) + "\n" + self.vendor.name + "'s Wares\n" + ("=" * 77))
@@ -399,173 +356,71 @@ class Encounter:
             self.hag_sell()
 
     # ===============================================================================
-    # Resting Methods
-    # ===============================================================================
-    # def shortRest(self, dreamer):
-    #     sResting = True
-    #     while sResting:
-    #         if dreamer.get_stat("Hit Dice Quantity") <= 0:
-    #             print("[ER] {} has no more hit dice!".format(dreamer.name))
-    #             break
-    #         roll = randint(1, dreamer.get_stat("Hit Dice")) + self.modifier("Constitution", dreamer)
-    #         if roll < 0:
-    #             roll = 0
-    #         dreamer.set_stats("Current HP", dreamer.get_stat("Current HP") + roll)
-    #         print("{} has gained {} HP! Their HP is now {} /{}!".format(dreamer.name, roll,
-    #                                                                     dreamer.get_stat("Current HP"),
-    #                                                                     dreamer.get_stat("Max HP")))
-    #         dreamer.set_stats("Hit Dice Quantity", dreamer.get_stat("Hit Dice Quantity") - 1)
-    #         again = self.prompt("Would you like to take another short rest? (Y/N)\n> ", "y", "n", "Y", "N").lower()
-    #         if again == "n":
-    #             break
-    #
-    # def longRest(self, dreamer):
-    #     if dreamer.get_stat("Current HP") < 1:
-    #         print("[ER] A character must have at least 1 HP to benefit from a long rest!")
-    #     else:
-    #         dreamer.set_stats("Current HP", dreamer.get_stat("Max HP"))
-    #         print("{} is now at full HP!".format(dreamer.name))
-    #         if dreamer.get_stat("Hit Dice Quantity") < dreamer.level:
-    #             recover = floor(dreamer.level / 2)
-    #             dreamer.set_stats("Hit Dice Quantity", dreamer.get_stat("Hit Dice Quantity") + recover)
-    #             if dreamer.get_stat("Hit Dice Quantity") > dreamer.level:
-    #                 dreamer.set_stats("Hit Dice Quantity", dreamer.level)
-    #
-    # def restBranch(self):
-    #     resting = True
-    #     deciding = True
-    #     while resting:
-    #         print("Who would like to rest?")
-    #         response = self.choosePC()
-    #         dreamer = self.currentEntity
-    #         if response == "cancel":
-    #             break
-    #         while deciding:
-    #             restLen = self.prompt("Would you like to take a [short] rest or a [long] rest?\n>", "cancel", "short",
-    #                                   "long")
-    #             if restLen == "cancel":
-    #                 break
-    #             elif restLen == "short":
-    #                 self.shortRest(dreamer)
-    #             elif restLen == "long":
-    #                 self.longRest(dreamer)
-
-    # ===============================================================================
     # The Loops
     # ===============================================================================
-    def genLoop(self):
-        self.running_loop = True
-        while self.running_loop:
-            print("Current Location: {}\nWhat would you like to do?".format(self.name))
-            self.displayCmds(self.commands)
-            action = input("> ")
-            action = action.lower().strip()
-
-            if action not in self.commands.keys():
-                print("[ER] Invalid command! Please enter one of the commands above!")
-
-            elif action == "roll":
-                self.diceBranch()
-
-            elif action == "stats":
-                self.statsBranch()
-
-            elif action == "inv":
-                self.invBranch()
-
-            elif action == "move":
-                break
-
-            elif action == "rest":
-                self.restBranch()
-
-            elif action == "exit":
-                print("Thank you for playing!")
-                exit()
-
-    def vendLoop(self):
-        self.running_loop = True
-        while self.running_loop:
-            self.print_wares()
-            print("Current Location: {}\nWhat would you like to do?".format(self.name))
-            self.displayCmds(self.vend_commands)
-            action = input("> ")
-            action = action.lower().strip()
-
-            if action not in self.vend_commands.keys():
-                print("[ER] Invalid command! Please enter one of the commands above!")
-
-            elif action == "buy":
-                self.buyBranch()
-
-            elif action == "haggle":
-                self.haggleBranch()
-
-            elif action == "roll":
-                self.diceBranch()
-
-            elif action == "stats":
-                self.statsBranch()
-
-            elif action == "inv":
-                self.invBranch()
-
-            elif action == "move":
-                break
-
-            elif action == "rest":
-                self.restBranch()
-
-            elif action == "exit":
-                print("Thank you for playing!")
-                exit()
-
-
-# if __name__ == "__main__":
-#
-#     nce1 = Encounter("Town")
-#     nce2 = Encounter("Mountains")
-#     nce3 = Encounter("Forest")
-#     nce4 = Encounter("Caves")
-#     nce5 = Encounter("Temmie's", is_shop=True)
-#
-#     encounters = [nce1, nce2, nce3, nce4, nce5]
-#
-#     sBlocks = [StatBlock(), StatBlock(), StatBlock(), StatBlock(), StatBlock()]
-#
-#     players = [
-#         Player("Fjord", "Orc", "Warlock", stat_block=sBlocks[0]),
-#         Player("Jester Lavorre", "Tiefling", "Cleric", stat_block=sBlocks[1]),
-#         Player("Caleb Widowgast", "Human", "Wizard", stat_block=sBlocks[2]),
-#         Player("Yasha Nyoodrin", "Aasimar", "Barbarian", stat_block=sBlocks[3]),
-#         Player("Veth Brenatto", "Goblin", "Rogue", stat_block=sBlocks[4])]
-#
-#     for p in players:
-#         p.inv_add("Shortsword")
-#         p.inv_add("Dagger")
-#         p.inv_add("Chain Mail")
-#         p.inv_add("Padded Armor")
-#         p.inv_add("Mana Potion", randint(1, 6))
-#         p.inv_equip("Chain Mail")
-#         p.level_up()
-#         p.level_up()
-#         p.level_up()
-#         p.set_stats("Current HP", 1)
-#         p.set_stats("Constitution", randint(1, 17))
-#         p.money_add(5, 7, 300)
-#
-#     for enc in encounters:
-#         enc.animate_list = players
-#
-#     # (self, name, race=None, role=None, level=1, stat_block=StatBlock())
-#     merchant = Animate("Tem", "Temmie", "Vendor")
-#
-#     merchant.inventory["Spear"] = 3
-#     merchant.inventory["Padded Armor"] = 3
-#     merchant.inventory["Mana Potion"] = 10
-#     merchant.inventory["Scale Mail"] = 2
-#
-#     nce5.vendor = merchant
-#
-#     # nce1.genLoop()
-#     nce5.vendLoop()
+    # def genLoop(self):
+    #     self.running_loop = True
+    #     while self.running_loop:
+    #         print("Current Location: {}\nWhat would you like to do?".format(self.name))
+    #         self.displayCmds(self.commands)
+    #         action = input("> ")
+    #         action = action.lower().strip()
+    #
+    #         if action not in self.commands.keys():
+    #             print("[ER] Invalid command! Please enter one of the commands above!")
+    #
+    #         elif action == "roll":
+    #             self.diceBranch()
+    #
+    #         elif action == "stats":
+    #             self.statsBranch()
+    #
+    #         elif action == "inv":
+    #             self.invBranch()
+    #
+    #         elif action == "move":
+    #             break
+    #
+    #         elif action == "rest":
+    #             self.restBranch()
+    #
+    #         elif action == "exit":
+    #             print("Thank you for playing!")
+    #             exit()
+    #
+    # def vendLoop(self):
+    #     self.running_loop = True
+    #     while self.running_loop:
+    #         self.print_wares()
+    #         print("Current Location: {}\nWhat would you like to do?".format(self.name))
+    #         self.displayCmds(self.vend_commands)
+    #         action = input("> ")
+    #         action = action.lower().strip()
+    #
+    #         if action not in self.vend_commands.keys():
+    #             print("[ER] Invalid command! Please enter one of the commands above!")
+    #
+    #         elif action == "buy":
+    #             self.buyBranch()
+    #
+    #         elif action == "haggle":
+    #             self.haggleBranch()
+    #
+    #         elif action == "roll":
+    #             self.diceBranch()
+    #
+    #         elif action == "stats":
+    #             self.statsBranch()
+    #
+    #         elif action == "inv":
+    #             self.invBranch()
+    #
+    #         elif action == "move":
+    #             break
+    #
+    #         elif action == "rest":
+    #             self.restBranch()
+    #
+    #         elif action == "exit":
+    #             print("Thank you for playing!")
+    #             exit()

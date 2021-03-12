@@ -5,6 +5,7 @@ import pickle
 from player import Player
 from player import role_dict
 from player import icon_dict
+from statblock import StatBlock
 from enemy import Enemy
 from cencounter import CEncounter
 from campaign_default import load_default_camp
@@ -270,7 +271,7 @@ class CharBox:
 
         title, title_box = text_objects("New Party Member", use_font(30, "hylia"), WHITE)
         title_box.center = self.rect.center
-        title_box.top = self.rect.top + 10
+        title_box.top = self.rect.top
         self.bottom = title_box.bottom
 
         self.parent.blit(self.bkgd, self.rect)
@@ -1919,10 +1920,13 @@ class Display:
                  "Hobogoblin", "Kenku", "Kobold", "Lizardfolk", "Tabaxi", "Triton", "Yuan-Ti", "Tortle"]
 
         buttons = list()
+        locked_in_sbts = list()
         roll_results = [None] * 6
         stat_assoc = [None] * 6
 
         reload = True
+        confirm_prompt = False
+        lockin_stats = False
         text_race_bt = "Race"
         text_role_bt = "Role"
         text_level = "Lv. "
@@ -1949,6 +1953,7 @@ class Display:
         selection = [None, None]
 
         pl_prev, pl_name = "", ""
+        roll_bottom = 0
 
         while True:
             if reload:
@@ -1960,13 +1965,19 @@ class Display:
                                      top=rect.top, width=30, height=30)
 
                 tb_name = TextBox(parent=self.SCREEN, text="Name: ", t_size=24, t_font="hylia", left=rect.left + 10,
-                                  top=menu.bottom + 20)
+                                  top=menu.bottom + 10)
 
                 name_field = pygame.Rect(tb_name.right + 5, tb_name.textbox.top, 300, tb_name.textbox.height)
                 pygame.draw.rect(self.SCREEN, WHITE, name_field)
 
                 tf_name = TextBox(parent=self.SCREEN, text=pl_name, t_size=20, t_font="hylia", t_color=BLACK,
                                   left=name_field.left + 5, top=name_field.top + 2)
+
+                if lockin_stats:
+                    for bt in locked_in_sbts:
+                        buttons.append(TextButton(parent=self.SCREEN, text=bt.textstr, t_font="nodesto", t_size=20,
+                                                  left=bt.rect.left, top=bt.rect.top, width=bt.rect.width,
+                                                  height=bt.rect.height))
 
                 #
                 # Dropdown list buttons
@@ -2042,16 +2053,32 @@ class Display:
                         c_top += new_bht
 
                 #
+                # Stat Roll Buttons
+                # ==============================
+                r_wid, r_ht = 325, b_level.rect.height
+                b_roll = TextButton(parent=self.SCREEN, text="Roll for Stats", t_font="hylia", t_size=20,
+                                    t_color=control[4][1],
+                                    left=rect.right - r_wid - 10, top=tb_name.rect.top, width=r_wid, height=r_ht)
+
+                b_create = TextButton(parent=self.SCREEN, text="Create Hero", t_font="hylia", t_size=20,
+                                      left=b_roll.rect.left, top=HEIGHT - b_roll.rect.height - 10,
+                                      width=b_roll.rect.width, height=b_roll.rect.height)
+
+                #
                 # Keyboard
                 # ==============================
                 if control[0][0]:
                     key_rect = pygame.Rect(0, b_level.rect.bottom + 10, WIDTH, HEIGHT - b_level.rect.bottom - 10)
-                    self.SCREEN.blit(load_image("./assets/button.png", WIDTH, HEIGHT - b_level.rect.bottom - 10), key_rect)
+                    self.SCREEN.blit(load_image("./assets/parchment.jpg", WIDTH, HEIGHT - b_level.rect.bottom - 10),
+                                     key_rect)
 
                     c_size = 50
                     alphabet = "abcdefghijklmnopqrstuvwxyz'"
                     a_left, a_top = key_rect.left + 20, key_rect.top + 25
                     buttons = list()
+
+                    # TODO: Let's speed this up more.
+                    # TODO: Add Caps-lock support.
 
                     for i in range(len(alphabet)):
                         if i > 0 and i % 9 == 0:
@@ -2089,25 +2116,16 @@ class Display:
 
                     a_left, a_top = buttons[-1].rect.right + c_size + 10, buttons[0].rect.top
                     buttons.append(TextButton(parent=self.SCREEN, text="backspace", t_font="nodesto", t_size=24,
-                                              left=a_left, top=a_top, width=key_rect.right - a_left - 20, height=c_size))
+                                              left=a_left, top=a_top, width=key_rect.right - a_left - 20,
+                                              height=c_size))
 
                     buttons.append(TextButton(parent=self.SCREEN, text="enter", t_font="nodesto", t_size=24,
-                                              left=a_left, top=a_top + (c_size + 5), width=key_rect.right - a_left - 20, height=c_size))
+                                              left=a_left, top=a_top + (c_size + 5), width=key_rect.right - a_left - 20,
+                                              height=c_size))
 
                     buttons.append(TextButton(parent=self.SCREEN, text="cancel", t_font="nodesto", t_size=24,
-                                              left=a_left, top=a_top + 3 * (c_size + 5), width=key_rect.right - a_left - 20, height=c_size))
-
-                #
-                # Stat Roll Buttons
-                # ==============================
-                r_wid, r_ht = 325, b_level.rect.height
-                b_roll = TextButton(parent=self.SCREEN, text="Roll for Stats", t_font="hylia", t_size=20,
-                                    t_color=control[4][1],
-                                    left=rect.right - r_wid - 10, top=tb_name.rect.top, width=r_wid, height=r_ht)
-
-                b_create = TextButton(parent=self.SCREEN, text="Create Hero", t_font="hylia", t_size=20,
-                                      left=b_roll.rect.left, top=HEIGHT - b_roll.rect.height - 10,
-                                      width=b_roll.rect.width, height=b_roll.rect.height)
+                                              left=a_left, top=a_top + 3 * (c_size + 5),
+                                              width=key_rect.right - a_left - 20, height=c_size))
 
                 #
                 # Stat Roll Controls
@@ -2145,6 +2163,8 @@ class Display:
                             roll_results[dest] = value
 
                         flag = True
+                        control[selection[0]] = [False, WHITE]
+                        control[selection[1]] = [False, WHITE]
                     else:
                         buttons = list()
 
@@ -2184,11 +2204,22 @@ class Display:
                                                   left=r_left, top=r_top, width=s_wid, height=c_size))
                         r_top += c_size + 5
 
+                    if roll_bottom == 0:
+                        roll_bottom = r_top
+
                     if flag:
                         selection = [None, None]
+                        for i in range(6):
+                            if roll_results[i] is not None or stat_assoc[i] is None:
+                                confirm_prompt = False
+                                break
+                            confirm_prompt = True
 
-
-
+                    b_confirm = None
+                    if confirm_prompt:
+                        wid = 120
+                        b_confirm = TextButton(parent=self.SCREEN, text="> Confirm <", t_font="hylia", t_size=20, t_color=GREEN,
+                                               left=b_roll.rect.centerx - int(wid / 2), top=roll_bottom, width=wid, height=B_HEIGHT)
 
             # Mouse Events
             # ==============================
@@ -2209,6 +2240,7 @@ class Display:
                             if bt_level.rect.collidepoint(mouse):
                                 control[1] = [False, WHITE]
                                 text_level = bt_level.textstr
+                                break
 
                 # For races
                 elif control[2][0]:
@@ -2234,6 +2266,16 @@ class Display:
                 elif control[4][0]:
                     if b_cancel is not None and b_cancel.rect.collidepoint(mouse):
                         control[4] = [False, WHITE]
+
+                    elif b_confirm is not None and b_confirm.rect.collidepoint(mouse):
+                        control[4] = [False, WHITE]
+                        confirm_prompt = False
+                        lockin_stats = True
+
+                        # TODO: Figure out why the button list is so messed up here
+                        for bt in buttons[18:]:
+                            locked_in_sbts.append(bt)
+                        buttons = list()
 
                     # Permits re-rolls
                     elif b_roll.rect.collidepoint(mouse):
@@ -2276,7 +2318,6 @@ class Display:
                         for i, bt_stat in enumerate(buttons[6:12], 11):
                             if selection[0] != i and selection[1] != i:
                                 control[i] = [False, WHITE]
-
 
                 # For keyboard
                 elif control[0][0]:
@@ -2335,8 +2376,21 @@ class Display:
                             sum += num
                         roll_results.append(sum)
 
-                    
-                    
+                elif b_create.rect.collidepoint(mouse) and lockin_stats and text_race_bt != "Race" \
+                        and text_role_bt != "Role" and text_level != "Lv. " and pl_name != "":
+
+                    sb = StatBlock()
+                    sb.autofill_scores(stat_assoc[0], stat_assoc[1], stat_assoc[2],
+                                       stat_assoc[3], stat_assoc[4], stat_assoc[5])
+                    new_player = Player(name=pl_name, race=text_race_bt, role=text_role_bt, level=int(text_level[-2:]),
+                                        stat_block=sb, money=randint(0, 999))
+
+                    # TODO: Resolve how NCE uses PLAYERS, but everything else uses AnimList
+                    ENCOUNTERS[ENC_INDEX].new_player(new_player)
+                    PLAYERS.append(new_player)
+                    global ASK_SAVE
+                    ASK_SAVE = True
+                    return
 
             self.end_page()
 

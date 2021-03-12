@@ -75,3 +75,36 @@ class StatBlock:
 
     def get_dict(self):
         return self.stats
+
+    def autofill_scores(self, stre, dext, cons, wisd, intl, cha):
+        self.modify_stat("Strength", stre)
+        self.modify_stat("Dexterity", dext)
+        self.modify_stat("Constitution", cons)
+        self.modify_stat("Wisdom", wisd)
+        self.modify_stat("Intellect", intl)
+        self.modify_stat("Charisma", cha)
+
+        self.modify_stat("Charisma", cha)
+
+        str_list = [17]
+        dex_list = [14, 29, 30]
+        int_list = [16, 19, 22, 24, 28]
+        wis_list = [15, 20, 23, 25, 31]
+        cha_list = [18, 21, 26, 27]
+
+        names = list(self.stats)
+        names = names[14:32]
+
+        for num, name in enumerate(names, 14):
+            if num in str_list:
+                self.modify_stat(name, self.get_mod("Strength"))
+            elif num in dex_list:
+                self.modify_stat(name, self.get_mod("Dexterity"))
+            elif num in int_list:
+                self.modify_stat(name, self.get_mod("Intellect"))
+            elif num in wis_list:
+                self.modify_stat(name, self.get_mod("Wisdom"))
+            elif num in cha_list:
+                self.modify_stat(name, self.get_mod("Charisma"))
+
+
