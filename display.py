@@ -1374,21 +1374,18 @@ class Display:
                             checked = True
                             to_remove.append(player)
 
-                    if checked:
-                        for num, player in enumerate(to_remove):
-                            big_str += player.get_name()
-                            if num < len(to_remove) - 1:
-                                big_str += ", "
+                    for num, player in enumerate(to_remove):
+                        big_str += player.get_name()
+                        if num < len(to_remove) - 1:
+                            big_str += ", "
 
-                            PLAYERS.remove(player)
-                            ENCOUNTERS[ENC_INDEX].rem_player(player.entity_id)
+                        PLAYERS.remove(player)
+                        ENCOUNTERS[ENC_INDEX].rem_player(player.entity_id)
 
-                        message = big_str + " left the party!"
+                    message = big_str + " left the party!"
 
-                        ASK_SAVE = True
-                        return True
-                    else:
-                        message = "Please select who will leave the party."
+                    ASK_SAVE = True
+                    return True
 
                 else:
                     for num, cb in enumerate(checkboxes):
