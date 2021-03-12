@@ -1924,8 +1924,6 @@ class Display:
         text_race_bt = "Race"
         text_role_bt = "Role"
         text_level = "Lv. "
-        # BASE_COLORS = [WHITE] * 10
-        # color_list = deepcopy(BASE_COLORS)
 
         BASE_VALS = [[False, WHITE]] * 20
         # 0:    Keyboard
@@ -1946,12 +1944,7 @@ class Display:
         # 15:   Wisdom
         # 16:   Charisma
         control = deepcopy(BASE_VALS)
-
-        # show_races = False
-        # show_roles = False
-        # show_levels = False
-        # roll_stats = False
-        # keyboard = False
+        selection = [None, None]
 
         pl_prev, pl_name = "", ""
 
@@ -2110,6 +2103,44 @@ class Display:
                                     t_color=control[4][1],
                                     left=rect.right - r_wid - 10, top=tb_name.rect.top, width=r_wid, height=r_ht)
 
+                b_create = TextButton(parent=self.SCREEN, text="Create Hero", t_font="hylia", t_size=20,
+                                      left=b_roll.rect.left, top=HEIGHT - b_roll.rect.height - 10,
+                                      width=b_roll.rect.width, height=b_roll.rect.height)
+
+                #
+                # Stat Roll Controls
+                # ==============================
+                b_cancel = None
+                if control[4][0]:
+                    wid = 60
+                    b_cancel = TextButton(parent=self.SCREEN, text="Cancel", t_font="hylia", t_size=16,
+                                          left=b_roll.rect.left - wid - 5, top=b_roll.rect.top, width=wid, height=r_ht)
+
+                    buttons = list()
+                    r_left, r_top = b_roll.rect.left, b_roll.rect.bottom + 10
+                    c_size = 50
+
+                    for i in range(6):
+                        buttons.append(TextButton(parent=self.SCREEN, text=str(roll_results[i]), t_font="nodesto",
+                                                  t_color=control[i + 5][1],
+                                                  t_size=30, left=r_left, top=r_top, width=c_size, height=c_size))
+                        r_left += c_size + 5
+
+                    r_left = b_roll.rect.left
+                    r_top += c_size + 10
+                    stat_list = ["Strength", "Dexterity", "Constitution", "Wisdom", "Intellect", "Charisma"]
+                    s_wid = 3 * (c_size + 5) - 5
+
+                    for i in range(6):
+                        if i > 0 and i % 3 == 0:
+                            r_left += s_wid + 5
+                            r_top = buttons[-3].rect.top
+
+                        buttons.append(TextButton(parent=self.SCREEN, text=stat_list[i] + ": ", t_font="nodesto",
+                                                  t_size=20, t_color=control[i + 11][1],
+                                                  left=r_left, top=r_top, width=s_wid, height=c_size))
+                        r_top += c_size + 5
+
             # Mouse Events
             # ==============================
             mouse = pygame.mouse.get_pos()
@@ -2149,6 +2180,51 @@ class Display:
                             if bt_role.rect.collidepoint(mouse):
                                 control[3] = [False, WHITE]
                                 text_role_bt = bt_role.textstr
+
+                # When rolling for stats
+                elif control[4][0]:
+                    if b_cancel is not None and b_cancel.rect.collidepoint(mouse):
+                        control[4] = [False, WHITE]
+
+                    # Permits rerolls
+                    elif b_roll.rect.collidepoint(mouse):
+                        selection = [None, None]
+                        roll_results = list()
+
+                        for i in range(6):
+                            temp = ENCOUNTERS[ENC_INDEX].rollDice(4, 6, print_results=False, set_form=True)
+                            temp.remove(min(temp[0], temp[1], temp[2], temp[3]))
+                            sum = 0
+                            for num in temp:
+                                sum += num
+                            roll_results.append(sum)
+
+                    else:
+                        # Selects Rolled value
+                        for i, bt_roll in enumerate(buttons[:6], 5):
+                            if bt_roll.rect.collidepoint(mouse):
+                                control[i] = [True, GREEN]
+                                if selection[0] is None:
+                                    selection[0] = bt_roll
+                                else:
+                                    selection[1] = bt_roll
+                            else:
+                                if selection[0] != bt_roll and selection[1] != bt_roll:
+                                    control[i] = [False, WHITE]
+
+                        # Selects Stat
+                        for i, bt_stat in enumerate(buttons[6:], 11):
+                            if bt_stat.rect.collidepoint(mouse):
+                                control[i] = [True, RED]
+                                if selection[0] is None:
+                                    selection[0] = bt_stat
+                                else:
+                                    selection[1] = bt_stat
+                            else:
+                                if selection[0] != bt_stat and selection[1] != bt_stat:
+                                    control[i] = [False, WHITE]
+
+
 
                 # For keyboard
                 elif control[0][0]:
@@ -2195,6 +2271,20 @@ class Display:
                 elif b_roll.rect.collidepoint(mouse):
                     control = deepcopy(BASE_VALS)
                     control[4] = [True, GOLD]
+                    selection = [None, None]
+
+                    roll_results = list()
+
+                    for i in range(6):
+                        temp = ENCOUNTERS[ENC_INDEX].rollDice(4, 6, print_results=False, set_form=True)
+                        temp.remove(min(temp[0], temp[1], temp[2], temp[3]))
+                        sum = 0
+                        for num in temp:
+                            sum += num
+                        roll_results.append(sum)
+
+                    
+                    
 
             self.end_page()
 

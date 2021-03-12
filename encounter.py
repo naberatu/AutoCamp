@@ -197,30 +197,30 @@ class Encounter:
 
         return [roll, crit_hit]
 
-    def diceBranch(self):
-        rolling = True
-        while rolling:
-            rolls = input("\nInput dice throw (\"num dice\"d\"num faces\"):\n> ")
-            if rolls == "cancel":
-                break
-            try:
-                rolls, faces = rolls.lower().split("d")
-                self.rollDice(int(rolls), int(faces))
-                print()
-                rolling = False
-            except ValueError:
-                print("[ER] Please use the format \"num dice\"d\"num faces\")")
+    # def diceBranch(self):
+    #     rolling = True
+    #     while rolling:
+    #         rolls = input("\nInput dice throw (\"num dice\"d\"num faces\"):\n> ")
+    #         if rolls == "cancel":
+    #             break
+    #         try:
+    #             rolls, faces = rolls.lower().split("d")
+    #             self.rollDice(int(rolls), int(faces))
+    #             print()
+    #             rolling = False
+    #         except ValueError:
+    #             print("[ER] Please use the format \"num dice\"d\"num faces\")")
 
     # ===============================================================================
     # Stat-Relevant Method(s)
     # ===============================================================================
-    def statsBranch(self):
-        print("Whose stats would you like to view?")
-        choice = self.choosePC()
-        if choice == "cancel":
-            pass
-        else:
-            self.currentEntity.showStats()
+    # def statsBranch(self):
+    #     print("Whose stats would you like to view?")
+    #     choice = self.choosePC()
+    #     if choice == "cancel":
+    #         pass
+    #     else:
+    #         self.currentEntity.showStats()
 
     def print_wares(self):
         print(("=" * 77) + "\n" + self.vendor.name + "'s Wares\n" + ("=" * 77))
@@ -401,54 +401,54 @@ class Encounter:
     # ===============================================================================
     # Resting Methods
     # ===============================================================================
-    def shortRest(self, dreamer):
-        sResting = True
-        while sResting:
-            if dreamer.get_stat("Hit Dice Quantity") <= 0:
-                print("[ER] {} has no more hit dice!".format(dreamer.name))
-                break
-            roll = randint(1, dreamer.get_stat("Hit Dice")) + self.modifier("Constitution", dreamer)
-            if roll < 0:
-                roll = 0
-            dreamer.set_stats("Current HP", dreamer.get_stat("Current HP") + roll)
-            print("{} has gained {} HP! Their HP is now {} /{}!".format(dreamer.name, roll,
-                                                                        dreamer.get_stat("Current HP"),
-                                                                        dreamer.get_stat("Max HP")))
-            dreamer.set_stats("Hit Dice Quantity", dreamer.get_stat("Hit Dice Quantity") - 1)
-            again = self.prompt("Would you like to take another short rest? (Y/N)\n> ", "y", "n", "Y", "N").lower()
-            if again == "n":
-                break
-
-    def longRest(self, dreamer):
-        if dreamer.get_stat("Current HP") < 1:
-            print("[ER] A character must have at least 1 HP to benefit from a long rest!")
-        else:
-            dreamer.set_stats("Current HP", dreamer.get_stat("Max HP"))
-            print("{} is now at full HP!".format(dreamer.name))
-            if dreamer.get_stat("Hit Dice Quantity") < dreamer.level:
-                recover = floor(dreamer.level / 2)
-                dreamer.set_stats("Hit Dice Quantity", dreamer.get_stat("Hit Dice Quantity") + recover)
-                if dreamer.get_stat("Hit Dice Quantity") > dreamer.level:
-                    dreamer.set_stats("Hit Dice Quantity", dreamer.level)
-
-    def restBranch(self):
-        resting = True
-        deciding = True
-        while resting:
-            print("Who would like to rest?")
-            response = self.choosePC()
-            dreamer = self.currentEntity
-            if response == "cancel":
-                break
-            while deciding:
-                restLen = self.prompt("Would you like to take a [short] rest or a [long] rest?\n>", "cancel", "short",
-                                      "long")
-                if restLen == "cancel":
-                    break
-                elif restLen == "short":
-                    self.shortRest(dreamer)
-                elif restLen == "long":
-                    self.longRest(dreamer)
+    # def shortRest(self, dreamer):
+    #     sResting = True
+    #     while sResting:
+    #         if dreamer.get_stat("Hit Dice Quantity") <= 0:
+    #             print("[ER] {} has no more hit dice!".format(dreamer.name))
+    #             break
+    #         roll = randint(1, dreamer.get_stat("Hit Dice")) + self.modifier("Constitution", dreamer)
+    #         if roll < 0:
+    #             roll = 0
+    #         dreamer.set_stats("Current HP", dreamer.get_stat("Current HP") + roll)
+    #         print("{} has gained {} HP! Their HP is now {} /{}!".format(dreamer.name, roll,
+    #                                                                     dreamer.get_stat("Current HP"),
+    #                                                                     dreamer.get_stat("Max HP")))
+    #         dreamer.set_stats("Hit Dice Quantity", dreamer.get_stat("Hit Dice Quantity") - 1)
+    #         again = self.prompt("Would you like to take another short rest? (Y/N)\n> ", "y", "n", "Y", "N").lower()
+    #         if again == "n":
+    #             break
+    #
+    # def longRest(self, dreamer):
+    #     if dreamer.get_stat("Current HP") < 1:
+    #         print("[ER] A character must have at least 1 HP to benefit from a long rest!")
+    #     else:
+    #         dreamer.set_stats("Current HP", dreamer.get_stat("Max HP"))
+    #         print("{} is now at full HP!".format(dreamer.name))
+    #         if dreamer.get_stat("Hit Dice Quantity") < dreamer.level:
+    #             recover = floor(dreamer.level / 2)
+    #             dreamer.set_stats("Hit Dice Quantity", dreamer.get_stat("Hit Dice Quantity") + recover)
+    #             if dreamer.get_stat("Hit Dice Quantity") > dreamer.level:
+    #                 dreamer.set_stats("Hit Dice Quantity", dreamer.level)
+    #
+    # def restBranch(self):
+    #     resting = True
+    #     deciding = True
+    #     while resting:
+    #         print("Who would like to rest?")
+    #         response = self.choosePC()
+    #         dreamer = self.currentEntity
+    #         if response == "cancel":
+    #             break
+    #         while deciding:
+    #             restLen = self.prompt("Would you like to take a [short] rest or a [long] rest?\n>", "cancel", "short",
+    #                                   "long")
+    #             if restLen == "cancel":
+    #                 break
+    #             elif restLen == "short":
+    #                 self.shortRest(dreamer)
+    #             elif restLen == "long":
+    #                 self.longRest(dreamer)
 
     # ===============================================================================
     # The Loops
